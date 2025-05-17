@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "workflow-manager": {
+      "command": "node",
+      "args": [
+        "D://projects/cursor-workflow/workflow-mcp-source/workflow-mcp-server.bundle.js"
+      ]
+    }
+  }
+}

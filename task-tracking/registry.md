@@ -1,0 +1,5 @@
+# Task Registry
+
+| Task ID | Task Name                                                                      | Status    | Dependencies | Start Date | Completion Date | Redelegations | Research Report |
+|---------|--------------------------------------------------------------------------------|-----------|--------------|------------|-----------------|---------------|-----------------|
+| TSK-001 | Update Memory Bank with NestJS, Prisma, MCP-Nest, and New Best Practices | Completed | None         | 2024-07-27 | 2024-07-28      | 0             | [Link](./TSK-001-Update_Memory_Bank_with_NestJS_Prisma_MCP-Nest_and_New_Best_Practices/research-report.md) | 

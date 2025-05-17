@@ -1,0 +1,35 @@
+{
+  "name": "workflow-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for implementing RooCode-like workflow in Cursor",
+  "type": "module",
+  "main": "dist/workflow-mcp-server.js",
+  "scripts": {
+    "start": "node dist/workflow-mcp-server.js",
+    "dev": "npx tsx workflow-mcp-server.ts",
+    "rebuild": "npm run build && npm run start",
+    "build": "esbuild src/workflow-mcp-server.ts --bundle --platform=node --format=esm --outfile=dist/workflow-mcp-server.bundle.js "
+  },
+  "keywords": [
+    "cursor",
+    "mcp",
+    "workflow",
+    "ai",
+    "agent"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.0",
+    "@types/express": "^5.0.1",
+    "express": "^5.1.0",
+    "fastmcp": "^1.27.6",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.18",
+    "esbuild": "^0.25.4",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
