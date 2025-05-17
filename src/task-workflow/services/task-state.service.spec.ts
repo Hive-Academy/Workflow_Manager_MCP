@@ -13,6 +13,7 @@ import {
   GetTaskStatusSchema,
   DelegateTaskSchema,
   CompleteTaskSchema,
+  GetCurrentModeForTaskSchema,
 } from '../schemas';
 import { z } from 'zod';
 
@@ -410,6 +411,65 @@ describe('TaskStateService', () => {
       );
 
       await expect(service.completeTask(params)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+  });
+
+  describe('getCurrentModeForTask', () => {
+    const params: z.infer<typeof GetCurrentModeForTaskSchema> = {
+      taskId: 'MODE-001',
+    };
+
+    it('should return task with current mode information', async () => {
+      const mockTask = {
+        taskId: 'MODE-001',
+        name: 'Mode Test Task',
+        currentMode: 'architect',
+      };
+      mockPrismaService.task.findUnique.mockResolvedValue(mockTask);
+
+      const result = await service.getCurrentModeForTask(params);
+
+      expect(prisma.task.findUnique).toHaveBeenCalledWith({
+        where: { taskId: params.taskId },
+        select: {
+          taskId: true,
+          name: true,
+          currentMode: true,
+        },
+      });
+
+      expect(result).toEqual(mockTask);
+    });
+
+    it('should handle tasks with no current mode', async () => {
+      const mockTask = {
+        taskId: 'MODE-001',
+        name: 'Mode Test Task',
+        currentMode: null,
+      };
+      mockPrismaService.task.findUnique.mockResolvedValue(mockTask);
+
+      const result = await service.getCurrentModeForTask(params);
+
+      expect(result.currentMode).toBeNull();
+    });
+
+    it('should throw NotFoundException if task does not exist', async () => {
+      mockPrismaService.task.findUnique.mockResolvedValue(null);
+
+      await expect(service.getCurrentModeForTask(params)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw InternalServerErrorException for other errors', async () => {
+      mockPrismaService.task.findUnique.mockRejectedValue(
+        new Error('Database error'),
+      );
+
+      await expect(service.getCurrentModeForTask(params)).rejects.toThrow(
         InternalServerErrorException,
       );
     });

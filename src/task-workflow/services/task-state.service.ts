@@ -11,7 +11,8 @@ import {
   GetTaskStatusSchema,
   DelegateTaskSchema,
   CompleteTaskSchema,
-} from '../schemas'; // Added CompleteTaskSchema
+  GetCurrentModeForTaskSchema,
+} from '../schemas';
 
 @Injectable()
 export class TaskStateService {
@@ -233,6 +234,44 @@ export class TaskStateService {
       );
       throw new InternalServerErrorException(
         `Could not complete task '${params.taskId}' with status '${params.status}'.`,
+      );
+    }
+  }
+
+  async getCurrentModeForTask(
+    params: z.infer<typeof GetCurrentModeForTaskSchema>,
+  ) {
+    try {
+      const task = await this.prisma.task.findUnique({
+        where: { taskId: params.taskId },
+        select: {
+          taskId: true,
+          name: true,
+          currentMode: true,
+        },
+      });
+
+      if (!task) {
+        throw new NotFoundException(
+          `Task with ID '${params.taskId}' not found.`,
+        );
+      }
+
+      return {
+        taskId: task.taskId,
+        name: task.name,
+        currentMode: task.currentMode,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error(
+        `Error in TaskStateService.getCurrentModeForTask for ${params.taskId}:`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        `Could not get current mode for task '${params.taskId}'.`,
       );
     }
   }

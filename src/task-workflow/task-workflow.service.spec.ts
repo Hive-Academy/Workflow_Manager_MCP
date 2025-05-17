@@ -14,7 +14,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CompleteTaskSchema, DelegateTaskSchema } from './schemas';
+import { 
+  CompleteTaskSchema, 
+  DelegateTaskSchema, 
+  GetCurrentModeForTaskSchema,
+} from './schemas';
 import { z } from 'zod';
 
 // Mocks for the specialized services
@@ -31,6 +35,7 @@ const mockTaskStateService = {
   getTaskStatus: jest.fn(),
   delegateTask: jest.fn(),
   completeTask: jest.fn(),
+  getCurrentModeForTask: jest.fn(),
 };
 const mockTaskCommentService = {
   addTaskNote: jest.fn(),
@@ -461,6 +466,68 @@ describe('TaskWorkflowService (Facade)', () => {
       );
 
       await expect(service.completeTask(params)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+  });
+
+  describe('getCurrentModeForTask', () => {
+    const params: z.infer<typeof GetCurrentModeForTaskSchema> = {
+      taskId: 'TSK-F-MODE-001',
+    };
+
+    const mockTaskModeInfo = {
+      taskId: 'TSK-F-MODE-001',
+      name: 'Mode Query Test Task',
+      currentMode: 'architect',
+    };
+
+    it('should call taskStateService.getCurrentModeForTask and format response', async () => {
+      mockTaskStateService.getCurrentModeForTask.mockResolvedValue(
+        mockTaskModeInfo,
+      );
+
+      const result = await service.getCurrentModeForTask(params);
+
+      expect(taskStateService.getCurrentModeForTask).toHaveBeenCalledWith(
+        params,
+      );
+      expect(result.content[0].text).toContain(
+        `is currently owned by ${mockTaskModeInfo.currentMode}`,
+      );
+      expect(result.content[1].json).toEqual(mockTaskModeInfo);
+    });
+
+    it('should handle tasks with no current mode', async () => {
+      const mockTaskWithoutMode = {
+        ...mockTaskModeInfo,
+        currentMode: null,
+      };
+      mockTaskStateService.getCurrentModeForTask.mockResolvedValue(
+        mockTaskWithoutMode,
+      );
+
+      const result = await service.getCurrentModeForTask(params);
+
+      expect(result.content[0].text).toContain('owned by no one');
+    });
+
+    it('should handle NotFoundException from taskStateService', async () => {
+      mockTaskStateService.getCurrentModeForTask.mockRejectedValue(
+        new NotFoundException(`Task with ID '${params.taskId}' not found.`),
+      );
+
+      await expect(service.getCurrentModeForTask(params)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should wrap other errors in InternalServerErrorException', async () => {
+      mockTaskStateService.getCurrentModeForTask.mockRejectedValue(
+        new Error('Unexpected error'),
+      );
+
+      await expect(service.getCurrentModeForTask(params)).rejects.toThrow(
         InternalServerErrorException,
       );
     });

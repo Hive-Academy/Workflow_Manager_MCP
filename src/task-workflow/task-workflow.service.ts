@@ -15,6 +15,7 @@ import {
   CreateTaskSchema,
   DeleteTaskSchema,
   DelegateTaskSchema,
+  GetCurrentModeForTaskSchema,
   GetTaskContextSchema,
   GetTaskStatusSchema,
   ListTasksSchema,
@@ -398,6 +399,47 @@ export class TaskWorkflowService {
       );
       throw new InternalServerErrorException(
         `Facade: Could not complete task '${params.taskId}'.`,
+      );
+    }
+  }
+
+  @Tool({
+    name: 'get_current_mode_for_task',
+    description: 'Gets the current mode/role that owns a specific task.',
+    parameters: GetCurrentModeForTaskSchema,
+  })
+  async getCurrentModeForTask(
+    params: z.infer<typeof GetCurrentModeForTaskSchema>,
+  ) {
+    try {
+      const taskModeInfo =
+        await this.taskStateService.getCurrentModeForTask(params);
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Task '${taskModeInfo.name}' (ID: ${taskModeInfo.taskId}) is currently owned by ${taskModeInfo.currentMode || 'no one'}.`,
+          },
+          {
+            type: 'json',
+            json: taskModeInfo,
+          },
+        ],
+      };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof InternalServerErrorException
+      ) {
+        throw error;
+      }
+      console.error(
+        `Facade Error in getCurrentModeForTask for ${params.taskId}:`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        `Facade: Could not get current mode for task '${params.taskId}'.`,
       );
     }
   }

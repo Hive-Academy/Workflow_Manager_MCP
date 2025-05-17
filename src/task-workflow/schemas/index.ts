@@ -8,3 +8,4 @@ export * from './update-task-description.schema';
 export * from './get-task-status.schema';
 export * from './delegate-task.schema';
 export * from './complete-task.schema';
+export * from './get-current-mode-for-task.schema';
