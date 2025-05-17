@@ -101,7 +101,8 @@ This phase will involve rewriting each rule file. Each subtask below represents 
     - **Input**: `.cursor/rules/mcp-nest-integration.mdc`, `.cursor/rules/nestjs-best-practices.mdc`, `.cursor/rules/prisma-best-practices.mdc`, `phrasing-guidelines.md`
     - **Output**: Corresponding `.md` files in `enhanced-workflow-rules/` if changes are made, or a note confirming they don't require changes.
     - **Assigned to**: Senior Developer
-    - **Status**: Not Started
+    - **Status**: Skipped
+    - **Note**: User directed to skip this subtask as non-critical for current objectives.
 
 ### Phase 3: Verification and Documentation
 
