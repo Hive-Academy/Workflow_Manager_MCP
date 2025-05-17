@@ -77,7 +77,8 @@ This phase will involve rewriting each rule file. Each subtask below represents 
     - **Input**: `.cursor/rules/300-architect-role.mdc`, `phrasing-guidelines.md`
     - **Output**: `enhanced-workflow-rules/300-architect-role.md`
     - **Assigned to**: Senior Developer
-    - **Status**: Not Started
+    - **Status**: Completed
+    - **Note**: `enhanced-workflow-rules/300-architect-role.md` created.
 
 **Subtask 2.5: Rewrite `400-senior-developer-role.mdc`**
     - **Description**: Convert `400-senior-developer-role.mdc` to `enhanced-workflow-rules/400-senior-developer-role.md`. Apply new phrasing standards.
