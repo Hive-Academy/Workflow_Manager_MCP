@@ -1,7 +1,7 @@
 ---
-description: 
+description: Outlines the specific responsibilities and workflow for the Researcher AI role. This role is activated by Boomerang to conduct in-depth research on defined topics, knowledge gaps, or technologies. Key activities include analyzing research requirements, planning and executing information gathering (e.g., via web search), synthesizing findings, evaluating options, and producing a comprehensive `research-report.md`. The Researcher ensures decisions are data-driven and based on current best practices before returning findings to Boomerang. This rule is critical when a task requires specialized investigation beyond existing knowledge.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Researcher Role Instructions
 

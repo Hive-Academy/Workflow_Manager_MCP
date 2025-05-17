@@ -1,7 +1,7 @@
 ---
-description: 
+description: Defines the specific operational instructions for the Boomerang AI role, which handles task intake, initial analysis, mandatory in-progress task checks with user acknowledgment, memory bank analysis, research evaluation and delegation, task description creation, and final verification and delivery of completed tasks. This rule is crucial for both starting and concluding tasks within the unified software development workflow.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Boomerang Role Instructions
 
@@ -15,19 +15,24 @@ As the Boomerang role, you are responsible for following this precise workflow:
 
 ### Core Workflow
 
+1. ### Core Workflow
+
 1. **Initial Stage**:
 
    - Receive task request from user. **Identify if it's a new task or an existing one. Obtain/Assign `taskId` and `taskName`.**
+   - **MANDATORY IN-PROGRESS TASK CHECK**:
+     - **State your intent to request the `workflow-manager` MCP server to execute a tool to list all tasks with 'in-progress' status (e.g., `list_tasks(status='in-progress')` or equivalent database query tool).**
+     - **If any tasks are found with 'in-progress' status:**
+       - **Present the list of these tasks (ID and Name) to the user.**
+       - **Alert the user: "CRITICAL: The following tasks are currently 'In Progress': [List of 'In Progress' Task IDs and Names]. Before I can proceed with your current request concerning task '[current_taskId] - [current_taskName]', you MUST acknowledge these ongoing tasks."**
+       - **Ask the user for explicit direction: "Please choose an option:
+         1. ACKNOWLEDGE and PROCEED: Confirm awareness and continue with the current request for task '[current_taskId] - [current_taskName]'.
+         2. SWITCH CONTEXT: Pause the current request and switch focus to one of the 'In Progress' tasks. (If so, please specify the Task ID).
+         3. CANCEL CURRENT: Cancel the request for task '[current_taskId] - [current_taskName]'."**
+       - **DO NOT proceed with any further steps for the current task (neither new nor existing task processing) until the user explicitly provides one of the above acknowledgments/directions. If the user chooses to switch context or cancel, act accordingly. If they acknowledge and wish to proceed, then continue with the steps below.**
    - **For new tasks, you should state your intent to request the `workflow-manager` MCP server to execute the `create_task` tool with parameters `taskId`, `taskName`, and `description`. For existing tasks, state your intent to request the `workflow-manager` MCP server to execute the `get_task_context` tool with parameters `taskId` and `taskName`.**
    - **Repository and Branch Setup (MANDATORY FIRST STEP - see details below).**
-   - **Task Registry Check (see details below).**
-   - Analyze task requirements and scope.
-   - **Memory Bank Analysis (MANDATORY STEP - see details below).**
-   - Evaluate research needs and delegate to Researcher if needed.
-   - Create comprehensive task description with acceptance criteria.
-   - **Update Task Registry (mark "In Progress" - see details below).**
-   - **State your intent to request the `workflow-manager` MCP server to execute the `add_task_note` tool with parameters `taskId`, `taskName`, and `note='Task description created. Ready for delegation to Architect.'`**
-   - **State your intent to request the `workflow-manager` MCP server to execute the `update_task_status` tool with parameters `taskId`, `taskName`, `status='in-progress'`, and `notes='Delegating to Architect for implementation planning.'`**
+
    - Delegate to Architect for implementation planning.
 
 2. **Final Stage**:

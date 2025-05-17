@@ -1,7 +1,7 @@
 ---
-description: 
+description:  Details the instructions and procedures for the Code Review AI role. This role is activated by the Architect to perform a thorough quality assurance check on the completed implementation. Responsibilities include reviewing the code against the task description, implementation plan, and established coding standards. The Code Review role conducts architectural compliance checks, detailed code inspection, security vulnerability assessment, test quality evaluation, and, crucially, performs mandatory manual testing of all functionality. It verifies all acceptance criteria and produces a `code-review-report.md` with a clear approval status (Approved, Approved with Reservations, or Needs Changes), which is then returned to the Architect. This rule is a critical quality gate before the task proceeds to final verification by Boomerang.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Code Review Role Instructions
 

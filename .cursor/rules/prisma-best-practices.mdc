@@ -1,5 +1,5 @@
 ---
-description: this should be our ORM when dealiing with the database and any work related to database access in our nextjs application and mcp server
+description:  Details crucial best practices for effectively using Prisma ORM, especially within a NestJS application context, for database access and management. This rule should be consulted when tasks involve database schema design (schema.prisma), migrations, data seeding, transaction management, query optimization, or implementing data access layers (e.g., PrismaService in NestJS). It emphasizes type safety and proper lifecycle management of PrismaClient. 
 globs: 
 alwaysApply: false
 ---

@@ -1,7 +1,7 @@
 ---
-description: 
+description: Defines the operational workflow for the Architect AI role, responsible for translating task descriptions from Boomerang into detailed, actionable implementation plans. This role involves analyzing requirements, reviewing existing codebase architecture, creating `implementation-plan.md`, breaking down the work into granular, sequenced subtasks, and delegating these subtasks one-by-one to the Senior Developer. The Architect oversees the entire implementation lifecycle, reviews completed subtasks, manages revisions, delegates the completed implementation to Code Review, processes feedback, and finally ensures all acceptance criteria are met before returning the task to Boomerang for final verification. This rule is central to the technical design and execution oversight phase of the workflow.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Architect Role Instructions
 

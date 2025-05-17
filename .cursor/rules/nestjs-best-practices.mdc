@@ -1,5 +1,5 @@
 ---
-description: This should be loaded whever the agent tries to work on our nestjs application inside the source folder 
+description: Outlines key best practices for developing scalable, maintainable, and robust applications using the NestJS framework. This rule is foundational for any work within a NestJS project, covering modularity, dependency injection, DTOs and validation, configuration management, asynchronous operations, error handling, logging, and testing strategies. Adherence to these practices is critical for building high-quality NestJS applications.
 globs: 
 alwaysApply: false
 ---
