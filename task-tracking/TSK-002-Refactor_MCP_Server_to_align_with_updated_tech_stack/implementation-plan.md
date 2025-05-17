@@ -52,7 +52,7 @@ This plan will be broken down into the following subtasks, which will be delegat
 | **SETUP & CORE** |                                                                                                            |             |                    |
 | ST-001     | Initialize NestJS application structure within the existing project. Install NestJS CLI and core dependencies. | Completed   | NestJS app at root. Build success. Dev server started. |
 | ST-002     | Set up `@nestjs/config` for environment variable management (e.g., for `DATABASE_URL`, `MCP_SERVER_NAME`).     | Completed   | `@nestjs/config` installed and configured. `.env` set up. |
-| ST-003     | Initialize Prisma with SQLite provider for development. Create initial `schema.prisma` for core Task entity.   | Not Started |                    |
+| ST-003     | Initialize Prisma with SQLite provider for development. Create initial `schema.prisma` for core Task entity.   | Completed   | Prisma initialized, Task model defined. .env DATABASE_URL needs user verification. |
 | ST-004     | Implement `PrismaModule` and `PrismaService`. Generate initial Prisma client. Run initial migration.           | Not Started |                    |
 | ST-005     | Install `@rekog/mcp-nest` and its dependencies. Set up `McpModule` in `AppModule` with basic configuration.    | Not Started |                    |
 | **TOOL MIGRATION (Example: Create Task)** |                                                                                                            |             |                    |
