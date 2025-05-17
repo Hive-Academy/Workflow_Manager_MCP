@@ -1,184 +1,98 @@
-# Cursor Workflow System
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+</p>
 
-This project implements a RooCode-inspired workflow system for Cursor, enabling collaborative AI development with specialized roles.
+[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+[circleci-url]: https://circleci.com/gh/nestjs/nest
 
-## Overview
+  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+    <p align="center">
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
+<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
+<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
+<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
+<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
+  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
+    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
+  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+</p>
+  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
+  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-The system creates a structured workflow between different AI agent modes in Cursor:
+## Description
 
-- **Boomerang**: Task intake, project analysis, memory bank generation, and final verification
-- **Architect**: Planning and coordination
-- **Senior Developer**: Implementation and delegation
-- **Junior Coder**: Specific code implementation
-- **Junior Tester**: Test creation and implementation
-- **Code Review**: Quality assurance
-- **Researcher Expert**: Research and knowledge gathering
+[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Key Features
-
-- **Project Analysis**: Boomerang can analyze existing projects to generate memory bank files
-- **New Project Initialization**: Guide the creation of new projects from scratch
-- **Task Workflow**: Structured approach to development with specialized AI roles
-- **Inter-Mode Communication**: Communication between modes via FastMCP server
-- **Memory Bank**: Project knowledge documentation for context
-
-## Setup Instructions
-
-### 1. Install Dependencies
-
-```bash
-npm install
-```
-
-### 2. Start the MCP Server
+## Project setup
 
 ```bash
-npm run dev
+$ npm install
 ```
 
-For production use:
+## Compile and run the project
+
 ```bash
-npm run build
-npm start
+# development
+$ npm run start
+
+# watch mode
+$ npm run start:dev
+
+# production mode
+$ npm run start:prod
 ```
 
-### 3. Configure Cursor
+## Run tests
 
-1. Make sure the MCP server configuration in `.cursor/mcp.json` is correct
-2. Configure Custom Modes in Cursor settings using the JSON files in the `custom-modes` directory
+```bash
+# unit tests
+$ npm run test
 
-## Project Structure
+# e2e tests
+$ npm run test:e2e
 
-```
-cursor-workflow/
-│
-├── .cursor/               # Cursor configuration files
-│   └── mcp.json           # MCP server configuration
-│
-├── custom-modes/          # Custom mode definitions for Cursor
-│   ├── boomerang-mode.json
-│   ├── architect-mode.json
-│   └── ...
-│
-├── memory-bank/           # Project knowledge documentation
-│   ├── ProjectOverview.md # Overview of the project
-│   ├── TechnicalArchitecture.md # Architecture details
-│   └── DeveloperGuide.md  # Developer guidelines
-│
-├── task-tracking/         # Task repository
-│   └── [taskID]-[taskName]/ # Task-specific directories
-│
-├── workflow-mcp-server.ts # FastMCP server implementation
-├── package.json           # Project dependencies
-├── PROJECT_GUIDE.md       # Guide for project analysis and initialization
-├── USAGE_GUIDE.md         # Detailed usage instructions
-└── README.md              # This file
+# test coverage
+$ npm run test:cov
 ```
 
-## Using With Existing Projects
+## Deployment
 
-1. Copy the workflow system to your project directory or add it as a subdirectory
-2. Start the MCP server
-3. Configure Cursor with the custom modes
-4. Switch to Boomerang mode and ask it to analyze your project and generate memory bank files
-5. Start creating tasks following the workflow
+When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
-## Starting New Projects
+If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
 
-1. Set up the workflow system in a new directory
-2. Start the MCP server
-3. Configure Cursor with the custom modes
-4. Switch to Boomerang mode and ask it to initialize a new project with your requirements
-5. Boomerang will guide you through the process and create appropriate memory bank files
+```bash
+$ npm install -g @nestjs/mau
+$ mau deploy
+```
 
-## Guide Documents
+With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
 
-- **PROJECT_GUIDE.md**: How to analyze existing projects or start new ones
-- **USAGE_GUIDE.md**: Detailed guide on using the workflow for tasks
+## Resources
 
-## MCP Server Tools
+Check out a few resources that may come in handy when working with NestJS:
 
-- `get_task_context`: Retrieve the context of a specific task
-- `update_task_status`: Update the status of a task
-- `delegate_task`: Delegate a task to another mode
-- `get_delegated_tasks`: Get tasks delegated to a specific mode
-- `complete_task`: Mark a delegated task as completed
-- `create_or_update_file`: Create or update a file in the task repository
-- `read_file`: Read a file from the task repository
-- `update_memory_bank`: Update a memory bank file with new content
-- `get_memory_bank_content`: Get the content of a memory bank file
-- `list_tasks`: List all tasks in the task repository
+- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
+- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
+- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
+- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
+- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
+- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
+- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
+- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
 
-## Technology Stack
+## Support
 
-- **TypeScript**: Modern, typed JavaScript
-- **FastMCP**: TypeScript framework for building MCP servers
-- **Zod**: Schema validation for MCP tools
-- **Cursor AI**: AI-powered code editor with custom modes support
+Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-## Best Practices
+## Stay in touch
 
-- Always switch to the correct mode before working on a task
-- Check for delegated tasks after switching modes
-- Use the MCP server tools for all task management
-- Follow the workflow sequence precisely
-- Document your work thoroughly for the next person in the chain
-- Update memory bank files as your project evolves
+- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
+- Website - [https://nestjs.com](https://nestjs.com/)
+- Twitter - [@nestframework](https://twitter.com/nestframework)
 
 ## License
 
-MIT
-
-## Docker Usage
-
-The recommended way to run the MCP server is with Docker Compose:
-
-### 1. Build and Start with Docker Compose
-
-```sh
-docker-compose up --build -d
-```
-
-This will build the image (if needed) and start the server in a container named `workflow-mcp-server` on port 3000.
-
-### 2. Stopping and Restarting the Server
-
-To stop the server:
-
-```sh
-docker-compose down
-```
-
-To rebuild the image and restart (after code changes):
-
-```sh
-docker-compose down
-# Rebuild and start
-docker-compose up --build -d
-```
-
-### 3. Logs
-
-To view logs:
-
-```sh
-docker-compose logs -f
-```
-
----
-
-You can also use plain Docker if you prefer:
-
-```sh
-docker build -t workflow-mcp .
-docker run -p 3000:3000 workflow-mcp
-```
-
-But Docker Compose is recommended for easier management.
-
-## Development Usage
-
-1. Place your TypeScript source files in the `src/` directory.
-2. Build with `npm run build`.
-3. Start the server with `npm start`.
-
+Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
