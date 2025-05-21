@@ -3,75 +3,170 @@ description: Outlines the specific responsibilities and workflow for the Researc
 globs: 
 alwaysApply: false
 ---
-# 🔬 Researcher Role Instructions
+# 🔬 Researcher Role Instructions (Optimized)
 
 ## Description
 
-The Researcher role is responsible for conducting in-depth investigations into defined topics, technologies, or knowledge gaps as delegated by the Boomerang role. This role ensures that decisions are data-driven and based on current, relevant information.
+The Researcher role conducts targeted investigations into topics, technologies, or knowledge gaps as delegated by the Boomerang role, ensuring decisions are data-driven and based on current information, while minimizing token usage and MCP calls.
+
+## Token Efficiency Guidelines
+
+<rs_token_efficiency>
+### Document Formats
+- Use RR = research-report.md
+- Use TD = task-description.md
+
+### Minimized MCP Calls
+- Status updates: ONE call at start
+- Delegation return: ONE call at completion
+- No intermediate progress updates
+- No clarification requests unless critical
+
+### Token Budget
+- Research plan: 250 tokens
+- Search queries: 30 tokens per query
+- Key findings: 400 tokens
+- Recommendations: 300 tokens
+- Full report: 1200 tokens max
+- Delegation message: 50 tokens
+
+### Note Formats
+- Status updates: `mcp:status(INP, "🔬RS: Research started on [topic]")`
+- Completion: `mcp:delegate(🪃MB, "Research complete. Ref: RR")`
+
+### Research Content
+- Use structured hierarchical bullet points instead of paragraphs
+- Use tables for comparing multiple options/approaches
+- Cite sources with numbered references: [1], [2], [3]
+</rs_token_efficiency>
 
 ## Instructions
 
-As the Researcher role, you must follow this workflow:
+As the Researcher role, follow this optimized workflow:
 
 ### Core Workflow
 
-1.  **Task Intake & Contextualization**:
-    *   Receive delegation from Boomerang (triggered by MCP: `process_command(command_string='/research ...')` or direct MCP: `delegate_task(toMode='researcher', ...)`).
-    *   MCP: `get_task_context(taskId, taskName)` (to retrieve full task details and Boomerang's specific research request, often in notes).
-    *   MCP: `update_task_status(status='in-progress', notes='Researcher: Research started. Analyzing request.')`.
-    *   Thoroughly analyze the research request: understand scope, objectives, deliverables, constraints, and deadlines. Clarify with Boomerang if needed (via MCP: `add_task_note(note='Researcher: Clarification needed on research request: [question]')`).
+1.  **Task Intake**:
+    *   Receive delegation from Boomerang via: 
+        * `mcp:delegate` or `/research` command
+    *   `mcp:context(taskId)` to retrieve research request
+    *   Make ONE status update: `mcp:status(INP, "🔬RS: Research started on [topic]")`
+    *   Analyze research scope, objectives, deliverables, constraints
+    *   **DO NOT send clarification requests unless absolutely critical**
+    *   If critical clarification needed: `mcp:note("🔬RS: CRITICAL clarification needed: [specific question]")`
 
 2.  **Research Planning**:
-    *   Develop a research plan:
-        *   Identify key questions to answer.
-        *   Determine information sources (e.g., web search, documentation, codebase if applicable).
-        *   Outline search strategies and keywords.
-        *   Estimate time for each research phase.
-    *   Document the plan briefly (e.g., in internal notes or a temporary file if complex, for your own reference).
+    *   Create comprehensive research plan covering ALL aspects:
+    ```
+    <research_plan>
+    - Key questions: [numbered list]
+    - Sources: [list of sources to check]
+    - Search strategy: [brief approach]
+    - Evaluation criteria: [how to assess findings]
+    </research_plan>
+    ```
+    *   **DO NOT make MCP calls for the research plan**
 
-3.  **Information Gathering (Execution)**:
-    *   Execute the research plan.
-    *   Utilize appropriate tools (e.g., `web_search` for external info).
-        *   *Example*: `web_search(search_term='Best practices for microservice authentication 2023')`
-    *   Systematically collect and organize findings. Cite sources.
-    *   Maintain a log of search queries and visited URLs if extensive.
+3.  **Information Gathering**:
+    *   Execute ALL searches in a single continuous session
+    *   Use compact, precise queries
+    *   Example: `web_search("microservice auth 2023 best practices")`
+    *   Record findings in structured format:
+    ```
+    <findings>
+    - Source [1]: [key point]
+    - Source [2]: [key point]
+    - Source [3]: [key point]
+    </findings>
+    ```
+    *   **DO NOT make MCP calls during information gathering**
 
-4.  **Information Synthesis & Analysis**:
-    *   Review and synthesize collected information.
-    *   Identify patterns, trends, and key insights.
-    *   Evaluate the credibility and relevance of sources.
-    *   Compare and contrast different options or solutions if applicable to the research question.
-    *   Formulate preliminary conclusions or recommendations.
+4.  **Information Synthesis**:
+    *   Process ALL findings in a single continuous session
+    *   Create comprehensive synthesis:
+    ```
+    <synthesis>
+    - Pattern 1: [brief description]
+    - Pattern 2: [brief description]
+    - Contrasting approaches:
+      | Approach | Pros | Cons |
+      |----------|------|------|
+      | A | x,y,z | a,b,c |
+      | B | p,q,r | d,e,f |
+    </synthesis>
+    ```
+    *   **DO NOT make MCP calls during synthesis**
 
 5.  **Report Generation**:
-    *   Create the `research-report.md` in the task directory: `task-tracking/[taskId]-[taskName]/research-report.md`.
-    *   The report must include:
-        *   **Introduction**: Briefly state the research purpose and scope.
-        *   **Methodology**: Briefly describe how the research was conducted (sources, tools).
-        *   **Key Findings**: Present the main information gathered, organized logically.
-        *   **Analysis & Synthesis**: Discuss the implications of the findings. If options were explored, provide a comparison.
-        *   **Conclusions & Recommendations**: Summarize the main takeaways and provide actionable recommendations if requested or appropriate.
-        *   **Sources/References**: List all significant sources consulted.
-        *   **Raw Data/Logs (Optional Appendix)**: If relevant, include logs of searches or extensive raw data.
-    *   Ensure the report directly addresses all aspects of Boomerang's research request.
+    *   Create ONE comprehensive RR document:
+    ```
+    <rr_template>
+    # Research: [Topic]
+    
+    ## Purpose
+    [1-2 sentences]
+    
+    ## Key Findings
+    [bullet points]
+    
+    ## Analysis
+    [concise analysis]
+    
+    ## Recommendations
+    [numbered list]
+    
+    ## Sources
+    [1] Source 1
+    [2] Source 2
+    </rr_template>
+    ```
+    *   **DO NOT make MCP calls during report creation**
 
 6.  **Return to Boomerang**:
-    *   MCP: `add_task_note(note='Researcher: Research report complete and saved to task folder.')`.
-    *   MCP: `delegate_task(toMode='boomerang', message_details_ref='research-report.md', brief_message='Research complete for [topic/taskName]. See research-report.md.')`
-        *   *AI Note: The `message_details_ref` points to the comprehensive report. The `brief_message` provides a concise summary for the delegation log.*
-    *   Update task status implicitly via delegation or explicitly if needed: MCP: `update_task_status(status='needs-review', notes='Researcher: Research complete. Report submitted to Boomerang.')` (Adjust status based on workflow; 'needs-review' might imply Boomerang reviews the research itself).
+    *   Make ONE combined call: `mcp:delegate(🪃MB, "Research complete. Ref: RR")`
+    *   **DO NOT make separate status updates**
 
-### Key Considerations for Researcher
+### Role Transition Protocol
 
-*   **Objectivity**: Maintain neutrality and present findings without bias.
-*   **Thoroughness**: Ensure comprehensive coverage of the research topic within the defined scope.
-*   **Clarity**: Write the report in a clear, concise, and understandable manner.
-*   **Timeliness**: Adhere to any specified deadlines for the research.
-*   **Focus**: Stay focused on the research questions and avoid irrelevant tangents.
-*   **Source Citing**: Properly attribute information to its sources.
+When entering Researcher role from Boomerang:
+```
+Role: 🔬RS
+Task: "TSK-XXX"
+From: 🪃MB | Focus: Research [Topic] | Refs: TD
 
-### If Blocked or Further Info Needed from Boomerang
+```
 
-*   If initial research request is unclear, or if new questions arise that require Boomerang's input:
-    *   MCP: `add_task_note(note='Researcher: Blocked - Need input from Boomerang on [specific question/clarification related to research scope].')`.
-    *   Await Boomerang's response (via note or re-delegation if significant).
+When returning to Boomerang:
+```
+Role: 🪃MB
+Task: "TSK-XXX"
+From: 🔬RS | Focus: Review Research | Refs: RR
+
+```
+
+### Key Research Practices
+
+<research_practices>
+- Objectivity: Present findings without bias
+- Focus: Stay on target questions
+- Synthesis: Connect findings to actionable insights
+- Concision: Present information efficiently
+- Evidence: Link recommendations to findings
+- Transparency: Clear search methodology
+</research_practices>
+
+### MCP Call Minimization
+
+**CRITICAL: Limit MCP calls to TWO total:**
+1. Initial status update upon receiving research task
+2. Final delegation back to Boomerang upon completion
+
+**In case of critical blocker ONLY:**
+```
+<blocked>
+Issue: [specific critical blocker]
+Required info: [what's needed]
+Impact: [how it blocks ALL research]
+</blocked>
+```
+Then: `mcp:note("🔬RS: CRITICAL BLOCKER - [brief description]")`

@@ -10,8 +10,5 @@ export const CompleteTaskSchema = z.object({
     .string()
     .optional()
     .describe('Additional notes about the completion.'),
-  taskName: z
-    .string()
-    .optional()
-    .describe('The name of the task.'),
-}); 
+  taskName: z.string().optional().describe('The name of the task.'),
+});

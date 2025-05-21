@@ -20,6 +20,12 @@ import {
   GetTaskStatusSchema,
   ListTasksSchema,
   UpdateTaskStatusSchema,
+  ContinueTaskSchema,
+  TaskDashboardParamsSchema,
+  WorkflowMapSchema,
+  TransitionRoleSchema,
+  WorkflowStatusSchema,
+  ProcessCommandSchema,
 } from './schemas';
 import {
   TaskCommentService,
@@ -412,18 +418,16 @@ export class TaskWorkflowService {
     params: z.infer<typeof GetCurrentModeForTaskSchema>,
   ) {
     try {
-      const taskModeInfo =
-        await this.taskStateService.getCurrentModeForTask(params);
-
+      const result = await this.taskStateService.getCurrentModeForTask(params);
       return {
         content: [
           {
             type: 'text',
-            text: `Task '${taskModeInfo.name}' (ID: ${taskModeInfo.taskId}) is currently owned by ${taskModeInfo.currentMode || 'no one'}.`,
+            text: `Current mode for task '${params.taskId}' is '${result.currentMode}'.`,
           },
           {
             type: 'json',
-            json: taskModeInfo,
+            json: result,
           },
         ],
       };
@@ -441,6 +445,192 @@ export class TaskWorkflowService {
       throw new InternalServerErrorException(
         `Facade: Could not get current mode for task '${params.taskId}'.`,
       );
+    }
+  }
+
+  @Tool({
+    name: 'continue_task',
+    description:
+      'Retrieves context for continuing a task, including status and recent notes.',
+    parameters: ContinueTaskSchema,
+  })
+  async continueTask(params: z.infer<typeof ContinueTaskSchema>) {
+    try {
+      const taskContext = await this.taskQueryService.continueTask(params);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Context for continuing task '${params.taskId}' retrieved. Status: ${taskContext.status}, Mode: ${taskContext.currentMode}.`,
+          },
+          {
+            type: 'json',
+            json: taskContext,
+          },
+        ],
+      };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof InternalServerErrorException
+      ) {
+        throw error;
+      }
+      console.error(
+        `Facade Error in continueTask for ${params.taskId}:`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        `Facade: Could not get continuation context for task '${params.taskId}'.`,
+      );
+    }
+  }
+
+  @Tool({
+    name: 'task_dashboard',
+    description:
+      'Provides a summary of all current tasks, aggregated by status and mode.',
+    parameters: TaskDashboardParamsSchema,
+  })
+  async taskDashboard(/* params: z.infer<typeof TaskDashboardParamsSchema> */) {
+    // No params used yet
+    try {
+      const dashboardData = await this.taskQueryService.getTaskDashboardData();
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Dashboard: ${dashboardData.totalTasks} total tasks. Status breakdown: ${JSON.stringify(dashboardData.tasksByStatus)}. Mode breakdown: ${JSON.stringify(dashboardData.tasksByMode)}`,
+          },
+          {
+            type: 'json',
+            json: dashboardData,
+          },
+        ],
+      };
+    } catch (error) {
+      if (error instanceof InternalServerErrorException) {
+        throw error;
+      }
+      console.error('Facade Error in taskDashboard:', error);
+      throw new InternalServerErrorException(
+        'Facade: Could not fetch dashboard data.',
+      );
+    }
+  }
+
+  @Tool({
+    name: 'workflow_map',
+    description:
+      'Displays a Mermaid diagram of the workflow, optionally highlighting the current task\'s mode.',
+    parameters: WorkflowMapSchema,
+  })
+  async workflowMap(params: z.infer<typeof WorkflowMapSchema>) {
+    try {
+      return await this.taskQueryService.getWorkflowMap(params);
+    } catch (error) {
+      if (error instanceof InternalServerErrorException) {
+        throw error;
+      }
+      console.error('Facade Error in workflowMap:', error);
+      throw new InternalServerErrorException(
+        'Facade: Could not generate workflow map.',
+      );
+    }
+  }
+  @Tool({
+    name: 'transition_role',
+    description: 'Transitions a task between different roles/modes in the workflow.',
+    parameters: TransitionRoleSchema,
+  })
+  async transitionRole(params: z.infer<typeof TransitionRoleSchema>) {
+    try {
+      const result = await this.taskStateService.transitionRole(params);
+      // Format the response as in the legacy tool
+      const fromEmoji = '';
+      const toEmoji = '';
+      const displayTaskName = result.name || params.taskId;
+      const textContent = `# ✈️ Role Transition: ${fromEmoji} ${params.fromRole.replace('-role','')} -> ${toEmoji} ${params.toRole.replace('-role','')}
+\nTask '${displayTaskName}' (ID: ${result.taskId}) has transitioned from **${params.fromRole.replace('-role','')}** to **${params.toRole.replace('-role','')}**.\n\n${params.summary ? `## Summary from ${params.fromRole.replace('-role','')}:
+${params.summary}
+\n` : ''}The task is now with ${toEmoji} ${params.toRole.replace('-role','')}. The new role should now take over.`;
+      return {
+        content: [
+          {
+            type: 'text',
+            text: textContent,
+          },
+          {
+            type: 'json',
+            json: result,
+          },
+        ],
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof InternalServerErrorException) {
+        throw error;
+      }
+      console.error('Facade Error in transitionRole:', error);
+      throw new InternalServerErrorException('Facade: Could not transition role.');
+    }
+  }
+  @Tool({
+    name: 'workflow_status',
+    description: 'Gets the detailed workflow status for a specific task.',
+    parameters: WorkflowStatusSchema,
+  })
+  async workflowStatus(params: z.infer<typeof WorkflowStatusSchema>) {
+    try {
+      return await this.taskQueryService.getWorkflowStatus(params);
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof InternalServerErrorException) {
+        throw error;
+      }
+      console.error('Facade Error in workflowStatus:', error);
+      throw new InternalServerErrorException('Facade: Could not get workflow status.');
+    }
+  }
+  @Tool({
+    name: 'process_command',
+    description: 'Processes slash commands for workflow management.',
+    parameters: ProcessCommandSchema,
+  })
+  async processCommand(params: z.infer<typeof ProcessCommandSchema>) {
+    const { command_string } = params;
+    if (!command_string.startsWith('/')) {
+      return { content: [{ type: 'text', text: 'Invalid command format. Commands must start with /' }] };
+    }
+    const parts = command_string.substring(1).split(' ');
+    const command = parts[0].toLowerCase();
+    const cmdArgs = parts.slice(1);
+    try {
+      switch (command) {
+        case 'next-role':
+          // Example: /next-role TSK-001
+          if (cmdArgs.length < 1) return { content: [{ type: 'text', text: 'Usage: /next-role [task-id]' }] };
+          // You may want to implement next-role logic or call transitionRole
+          return { content: [{ type: 'text', text: 'Not implemented: next-role' }] };
+        case 'role':
+          // Example: /role architect TSK-002
+          if (cmdArgs.length < 2) return { content: [{ type: 'text', text: 'Usage: /role [role-name] [task-id]' }] };
+          return await this.transitionRole({
+            taskId: cmdArgs[1],
+            fromRole: 'unknown', // You may want to fetch the current role
+            toRole: cmdArgs[0] + '-role',
+            summary: `Manual transition to ${cmdArgs[0]}-role`,
+          });
+        case 'workflow-status':
+          // Example: /workflow-status TSK-003
+          if (cmdArgs.length < 1) return { content: [{ type: 'text', text: 'Usage: /workflow-status [task-id]' }] };
+          return await this.workflowStatus({ taskId: cmdArgs[0] });
+        case 'research':
+          // Example: /research topic TSK-004
+          return { content: [{ type: 'text', text: 'Not implemented: research' }] };
+        default:
+          return { content: [{ type: 'text', text: `Unknown command: ${command}. Available commands: /next-role, /role, /workflow-status, /research` }] };
+      }
+    } catch (error) {
+      return { content: [{ type: 'text', text: `Error processing command: ${error instanceof Error ? error.message : String(error)}` }] };
     }
   }
   // Other tool methods (those not yet refactored into specialized services) would remain here for now.

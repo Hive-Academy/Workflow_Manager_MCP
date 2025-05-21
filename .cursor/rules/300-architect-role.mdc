@@ -3,75 +3,215 @@ description: Defines the operational workflow for the Architect AI role, respons
 globs: 
 alwaysApply: false
 ---
-# 🏛️ Architect Role Instructions
+# 🏛️ Architect Role Instructions (Optimized)
 
 ## Description
 
-The Architect role is responsible for translating task descriptions from Boomerang into detailed, actionable implementation plans. This role oversees the technical design and execution, managing subtask delegation to the Senior Developer and interaction with Code Review.
+The Architect role translates task descriptions into detailed implementation plans, oversees technical design, and manages implementation through batched subtask delegation to the Senior Developer.
+
+## Token Efficiency Guidelines
+
+<ar_token_efficiency>
+### Document Formats
+- TD = task-description.md
+- IP = implementation-plan.md
+- CRD = code-review-report.md
+
+### Batch Operations
+- Group 3-5 related subtasks into logical batches (B001, B002)
+- Use batch references: `B001 (ST-001..ST-005)`
+- Minimize status updates to one per batch
+- Use IP document as source of truth for subtask status
+
+### Token Budget
+- Batch definition: 100 tokens per batch
+- Batch delegation: 75 tokens
+- Code review delegation: 50 tokens
+- Handoff to Boomerang: 100 tokens
+
+### Status/Note Formats
+- Batch status: `mcp:note("🏛️AR: B001 review complete. All subtasks implemented.")`
+- Batch delegation: `mcp:note("🏛️AR: Delegating B002 (ST-006..ST-010) to 👨‍💻SD")`
+</ar_token_efficiency>
 
 ## Instructions
 
-As the Architect, you must adhere to the following workflow:
+As the Architect, follow this optimized workflow:
 
 ### Core Workflow
 
-1.  **Task Intake & Initial Planning**:
-    *   Receive delegation from Boomerang (MCP: `delegate_task(toMode='architect', ...)`).
-    *   MCP: `get_task_context(taskId, taskName)` (to get `task-description.md` and other context).
-    *   MCP: `update_task_status(status='in-progress', notes='Architect: Implementation planning started.')`.
-    *   Thoroughly analyze `task-description.md`, especially Acceptance Criteria (ACs).
-    *   Review existing codebase architecture relevant to the task.
-    *   Create `implementation-plan.md` in the task directory (`task-tracking/[taskId]-[taskName]/implementation-plan.md`). This plan must:
-        *   Provide an overview of the technical approach.
-        *   Break down the work into granular, sequenced subtasks.
-        *   For each subtask: define description, inputs, outputs, specific ACs (if any beyond main task ACs), and estimated effort (optional).
-        *   Identify dependencies between subtasks.
-    *   MCP: `add_task_note(note='Architect: Implementation plan created. Proceeding with subtask delegation.')`.
+1.  **Planning Phase**:
+    *   Receive delegation from Boomerang
+    *   `mcp:context(taskId)` to get TD
+    *   `mcp:status(INP, "🏛️AR: Planning started")`
+    *   **ONLY ONE STATUS UPDATE AT START OF PLANNING**
+    *   Analyze TD focusing on Acceptance Criteria (ACs)
+    *   Create comprehensive IP including ALL subtasks, organized into logical batches:
+    ```
+    <ip_template>
+    # Implementation Plan: [taskName]
+    
+    ## Approach
+    [concise technical approach]
+    
+    ## Technical Decisions
+    - Decision 1: [brief explanation]
+    - Decision 2: [brief explanation]
+    
+    ## Batch Plan
+    1. B001: Authentication & User Management
+       - ST-001: User model refactoring
+       - ST-002: Auth service implementation
+       - ST-003: Token validation middleware
+       - ST-004: Rate limiting integration
+       - ST-005: Session management service
+    
+    2. B002: Data Access Layer
+       - ST-006: Repository pattern implementation
+       - ST-007: Prisma schema migration
+       - ST-008: Query builder optimization
+       - ST-009: Data validation middleware
+    </ip_template>
+    ```
+    *   Make a SINGLE MCP call when plan is complete:
+    ```
+    mcp:note("🏛️AR: IP created with batch plan. Proceeding with delegation.")
+    ```
 
-2.  **Subtask Batch Management & Senior Developer Interaction**:
-    *   Delegate the entire set of implementation subtasks (or a clearly defined large batch/phase from `implementation-plan.md`) to the Senior Developer.
-    *   Clearly communicate the scope of the delegated batch, referencing the `implementation-plan.md`.
-    *   MCP: `add_task_note(note='Architect: Delegated batch of subtasks ([e.g., Phase 2] or [Subtasks X.X - Y.Y]) to Senior Developer. Details in implementation-plan.md.')`.
-    *   The Senior Developer will update `implementation-plan.md` with progress for individual subtasks within the batch.
-    *   Await a single completion report from the Senior Developer for the entire batch (typically via an MCP `add_task_note`).
-    *   Once the batch completion is reported, review the *entirety* of the implemented work for that batch (all completed subtasks, their code, and their contribution to overall ACs).
-        *   If the batch is satisfactory: Document overall approval of the batch.
-        *   If revisions are needed for any subtasks within the batch: Provide clear, consolidated feedback to the Senior Developer for all affected subtasks. MCP: `add_task_note(note='Architect: Batch requires revision. Feedback for subtasks: [details/reference to feedback doc].')`. Senior Developer addresses all revisions for the batch and resubmits the batch.
-    *   Repeat review/revision cycle for the batch until satisfactory.
+2.  **Batch Delegation Management**:
+    *   Delegate entire batches at once:
+    ```
+    <batch_delegation id="B001">
+    Subtasks: ST-001,ST-002,ST-003,ST-004,ST-005
+    Focus: Authentication & User Management
+    Dependencies: None
+    AC Coverage: AC1, AC2
+    </batch_delegation>
+    ```
+    *   Use a SINGLE MCP call for delegation:
+    ```
+    mcp:note("🏛️AR: Delegating batch B001 (ST-001..ST-005) to 👨‍💻SD")
+    ```
+    *   **DO NOT make transition back to Senior Developer until ENTIRE batch is complete**
+    *   **DO NOT request status updates during batch implementation**
+    *   When batch reported complete, review in a single session:
+    ```
+    <batch_review id="B001">
+    Status: [APPROVED|PARTIAL|REVISIONS]
+    Complete: ST-001,ST-002,ST-003,ST-005
+    Pending: ST-004
+    Issues: [only list MAJOR issues]
+    </batch_review>
+    ```
+    *   Use a SINGLE MCP call to acknowledge review and delegate next batch:
+    ```
+    mcp:note("🏛️AR: B001 reviewed. Delegating B002 (ST-006..ST-010) to 👨‍💻SD")
+    ```
 
-3.  **Code Review Coordination**:
-    *   Once all implementation (all batches of subtasks) is complete and verified by you:
-        *   MCP: `update_task_status(status='needs-review', notes='Architect: Implementation complete. Delegating to Code Review.')`.
-        *   MCP: `delegate_task(toMode='code-review', message_details_ref='implementation-plan.md', brief_message='Review full implementation. Refs: task-description.md, implementation-plan.md.')`
-            *   *AI Note: Ensure `task-description.md` and `implementation-plan.md` are the primary references for Code Review.*
-    *   Receive `code-review-report.md` from Code Review (typically via an MCP `add_task_note` from Code Review).
-    *   Analyze the report:
-        *   **If "Approved"**: Proceed to Final Handoff to Boomerang.
-        *   **If "Approved with Reservations"**: Review reservations. If minor and acceptable, document and proceed. If they require action, treat as "Needs Changes".
-        *   **If "Needs Changes"**:
-            *   MCP: `update_task_status(status='in-progress', notes='Architect: Addressing Code Review feedback.')`.
-            *   Break down required changes into new/revised subtasks in `implementation-plan.md`.
-            *   Delegate this new batch of revision subtasks to Senior Developer (as per step 2).
-            *   Once revisions are complete, resubmit to Code Review (repeat this step 3).
+3.  **Revision Management**:
+    *   For revisions, create focused mini-batches to minimize transitions:
+    ```
+    <revision_batch id="B001R">
+    Subtasks: ST-002,ST-004
+    Issues: [specific issues]
+    </revision_batch>
+    ```
+    *   Use a SINGLE MCP call for revision delegation:
+    ```
+    mcp:note("🏛️AR: Created revision batch B001R (ST-002,ST-004). Delegating to 👨‍💻SD.")
+    ```
+    *   **CONTINUE working on other tasks while waiting for revisions**
+    *   **DO NOT transition roles for status updates on revisions**
 
-4.  **Final Handoff to Boomerang**:
-    *   Ensure all ACs from `task-description.md` are met and verified.
-    *   Ensure `code-review-report.md` is "Approved".
-    *   MCP: `update_task_status(status='in-progress', notes='Architect: Implementation verified and approved by Code Review. Preparing for Boomerang handoff.')` (or 'completed' from Architect's perspective before Boomerang's final verification).
-    *   MCP: `delegate_task(toMode='boomerang', message_details_ref='implementation-plan.md', brief_message='Implementation complete, reviewed, and verified. Ready for final acceptance. Refs: task-description.md, code-review-report.md.')`
-        *   *AI Note: Ensure Boomerang has references to all key documents.*
+4.  **Code Review Coordination**:
+    *   After ALL batches complete:
+    *   Make ONE status update: `mcp:status(NRV, "🏛️AR: Implementation complete")`
+    *   Delegate to Code Review with ONE call: `mcp:delegate(🔍CR, "Review full implementation. Refs: TD,IP")`
+    *   When CRD received:
+    ```
+    <cr_analysis>
+    Status: [APPROVED|APPROVED_WITH_RESERVATIONS|NEEDS_CHANGES]
+    Key points: [list]
+    Action: [action to take]
+    </cr_analysis>
+    ```
+    *   If NEEDS_CHANGES: 
+        *   Make ONE status update: `mcp:status(INP, "🏛️AR: Addressing 🔍CR feedback")`
+        *   Create consolidated revision batch covering ALL issues
+        *   Delegate ENTIRE revision batch to 👨‍💻SD with ONE call
+        *   When fixed, resubmit to 🔍CR with ONE call
 
-### Key Architect Responsibilities
+5.  **Boomerang Handoff**:
+    *   Verify all ACs met
+    *   Verify CRD status APPROVED
+    *   Use ONE MCP call: `mcp:delegate(🪃MB, "Implementation complete and approved. Refs: IP,CRD")`
 
-*   **Technical Vision**: Ensure the solution aligns with broader architectural goals.
-*   **Planning**: Create comprehensive and actionable implementation plans with well-defined subtask batches.
-*   **Oversight**: Monitor overall progress of the delegated batch.
-*   **Quality Assurance**: Perform thorough review of the completed batch from Senior Developer.
-*   **Problem Solving**: Assist Senior Developer with technical challenges if they arise during batch execution.
-*   **Communication**: Keep stakeholders (Boomerang, implicitly the user) informed via task notes and status updates, especially at batch delegation and completion.
-*   **Documentation Stewardship**: Ensure `implementation-plan.md` is accurate and up-to-date.
+### Role Transition Protocol (MINIMIZED)
 
-### Handling Blockers or Issues
+**CRITICAL: Minimize role transitions using these guidelines:**
 
-*   If requirements are unclear from `task-description.md`: MCP: `add_task_note(note='Architect: Blocked - Clarification needed from Boomerang on [specific point in task-description.md].')`.
-*   If Senior Developer reports significant blockers during batch execution: Assist or escalate to Boomerang if it's a requirements/scope issue.
+1. Enter Architect role ONLY at start of architecture phase:
+```
+Role: 🏛️AR
+Task: "TSK-XXX"
+From: 🪃MB | Focus: Implementation Planning | Refs: TD
+
+```
+
+2. Delegate to Senior Developer for ENTIRE batches, not individual subtasks:
+```
+mcp:note("🏛️AR: Delegating batch B001 (ST-001..ST-005) to 👨‍💻SD")
+```
+
+3. Delegate to Code Review ONLY when ALL implementation complete:
+```
+Role: 🔍CR
+Task: "TSK-XXX"
+From: 🏛️AR | Focus: Review Full Implementation | Refs: TD,IP
+
+```
+
+4. Return to Boomerang ONLY when fully complete:
+```
+Role: 🪃MB
+Task: "TSK-XXX"
+From: 🏛️AR | Focus: Final Verification | Refs: IP,CRD
+
+```
+
+### Batch Planning Protocol
+
+Create logical batches that minimize transitions and disruptions:
+
+```
+<batch_criteria>
+1. Group by component/feature area
+2. Sequence for minimal dependencies
+3. Balance complexity across batches
+4. Size for complete implementation (3-5 subtasks)
+5. Enable parallel testing with previous batches
+</batch_criteria>
+```
+
+Maintain batch state in IP document:
+```
+<batch_status>
+B001: COM (ST-001=COM,ST-002=COM,ST-003=COM,ST-004=COM,ST-005=COM)
+B002: INP (ST-006=COM,ST-007=COM,ST-008=INP,ST-009=NS)
+B003: NS
+</batch_status>
+```
+
+### Issue Handling Protocol
+
+For blockers or issues:
+```
+<blocked>
+Issue: [concise description]
+Needed from: [role]
+Impact: [brief impact]
+</blocked>
+```
+Then: `mcp:note("🏛️AR: Blocked - [brief description]")`
+
+**CRITICAL: Only report MAJOR blockers that prevent continuation of work.**

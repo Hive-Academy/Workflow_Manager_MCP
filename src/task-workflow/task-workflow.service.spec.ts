@@ -14,9 +14,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { 
-  CompleteTaskSchema, 
-  DelegateTaskSchema, 
+import {
+  CompleteTaskSchema,
+  DelegateTaskSchema,
   GetCurrentModeForTaskSchema,
 } from './schemas';
 import { z } from 'zod';
@@ -29,6 +29,8 @@ const mockTaskCrudService = {
 const mockTaskQueryService = {
   getTaskContext: jest.fn(),
   listTasks: jest.fn(),
+  continueTask: jest.fn(),
+  getTaskDashboardData: jest.fn(),
 };
 const mockTaskStateService = {
   updateTaskStatus: jest.fn(),
@@ -532,4 +534,109 @@ describe('TaskWorkflowService (Facade)', () => {
       );
     });
   });
+
+  describe('continueTask', () => {
+    const taskId = 'TSK-WF-CONT';
+    const mockContinueContext = {
+      taskId,
+      name: 'Workflow Continue Task',
+      status: 'in-progress',
+      currentMode: 'developer-mode',
+      description: 'This is a task to be continued via workflow.',
+      acceptanceCriteria: ['ACWF1'],
+      recentNotes: [
+        { mode: 'system', content: 'Note 1', createdAt: new Date() },
+      ],
+    };
+
+    it('should call taskQueryService.continueTask and return formatted context', async () => {
+      mockTaskQueryService.continueTask.mockResolvedValue(mockContinueContext);
+
+      const result = await service.continueTask({ taskId });
+
+      expect(mockTaskQueryService.continueTask).toHaveBeenCalledWith({
+        taskId,
+      });
+      expect(result).toEqual({
+        content: [
+          {
+            type: 'text',
+            text: `Context for continuing task '${taskId}' retrieved. Status: ${mockContinueContext.status}, Mode: ${mockContinueContext.currentMode}.`,
+          },
+          {
+            type: 'json',
+            json: mockContinueContext,
+          },
+        ],
+      });
+    });
+
+    it('should re-throw NotFoundException from taskQueryService', async () => {
+      const error = new NotFoundException(`Task '${taskId}' not found.`);
+      mockTaskQueryService.continueTask.mockRejectedValue(error);
+
+      await expect(service.continueTask({ taskId })).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.continueTask({ taskId })).rejects.toThrow(
+        error.message,
+      );
+    });
+
+    it('should re-throw InternalServerErrorException from taskQueryService', async () => {
+      const error = new InternalServerErrorException('DB error on continue');
+      mockTaskQueryService.continueTask.mockRejectedValue(error);
+
+      await expect(service.continueTask({ taskId })).rejects.toThrow(
+        InternalServerErrorException,
+      );
+      await expect(service.continueTask({ taskId })).rejects.toThrow(
+        error.message,
+      );
+    });
+
+    it('should throw InternalServerErrorException for unexpected errors', async () => {
+      const error = new Error('Some unexpected error');
+      mockTaskQueryService.continueTask.mockRejectedValue(error);
+
+      await expect(service.continueTask({ taskId })).rejects.toThrow(
+        InternalServerErrorException,
+      );
+      // Check for the specific facade error message
+      await expect(service.continueTask({ taskId })).rejects.toThrow(
+        `Facade: Could not get continuation context for task '${taskId}'.`,
+      );
+    });
+  });
+
+  describe('taskDashboard', () => {
+    const mockDashboardData = {
+      totalTasks: 5,
+      tasksByStatus: { InProgress: 2, Completed: 3 },
+      tasksByMode: { architect: 1, developer: 4 },
+    };
+
+    it('should call taskQueryService.getTaskDashboardData and return formatted MCP response', async () => {
+      mockTaskQueryService.getTaskDashboardData.mockResolvedValue(
+        mockDashboardData,
+      );
+      const result = await service.taskDashboard();
+      expect(taskQueryService.getTaskDashboardData).toHaveBeenCalled();
+      expect(result.content[1].json).toEqual(mockDashboardData);
+      expect(result.content[0].text).toContain('Dashboard: 5 total tasks');
+      expect(result.content[0].text).toContain('Status breakdown');
+      expect(result.content[0].text).toContain('Mode breakdown');
+    });
+
+    it('should throw InternalServerErrorException if service throws', async () => {
+      mockTaskQueryService.getTaskDashboardData.mockRejectedValue(
+        new InternalServerErrorException('DB error'),
+      );
+      await expect(service.taskDashboard()).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+  });
+
+  // describe('processCommand', () => { ... });
 });

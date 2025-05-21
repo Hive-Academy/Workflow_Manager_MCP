@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { TaskQueryService } from './task-query.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -124,6 +125,91 @@ describe('TaskQueryService', () => {
       mockPrismaService.task.findMany.mockRejectedValue(new Error('DB Error'));
       await expect(service.listTasks({})).rejects.toThrow(
         InternalServerErrorException,
+      );
+    });
+  });
+
+  describe('continueTask', () => {
+    const taskId = 'TSK-CONT';
+    const mockTask = {
+      taskId,
+      name: 'Continue Me Task',
+      status: 'in-progress',
+      currentMode: 'architect-mode',
+      taskDescription: {
+        description: 'This is a task to be continued.',
+        acceptanceCriteria: ['AC1', 'AC2'],
+      },
+      comments: [
+        { mode: 'user', content: 'Started task', createdAt: new Date() },
+      ],
+    };
+
+    const mockFullTaskFromPrisma = {
+      ...mockTask,
+      creationDate: new Date(),
+      completionDate: null,
+      owner: 'testUser',
+      priority: 'Medium',
+      dependencies: null,
+      redelegationCount: 0,
+      gitBranch: null,
+    };
+
+    it('should retrieve context for continuing a task', async () => {
+      prisma.task.findUnique.mockResolvedValue(mockFullTaskFromPrisma as any);
+
+      const result = await service.continueTask({ taskId });
+
+      expect(prisma.task.findUnique).toHaveBeenCalledWith({
+        where: { taskId },
+        include: {
+          taskDescription: {
+            select: {
+              description: true,
+              acceptanceCriteria: true,
+            },
+          },
+          comments: {
+            orderBy: { createdAt: 'desc' },
+            take: 5,
+            select: {
+              mode: true,
+              content: true,
+              createdAt: true,
+            },
+          },
+        },
+      });
+      expect(result).toEqual({
+        taskId: mockTask.taskId,
+        name: mockTask.name,
+        status: mockTask.status,
+        currentMode: mockTask.currentMode,
+        description: mockTask.taskDescription.description,
+        acceptanceCriteria: mockTask.taskDescription.acceptanceCriteria,
+        recentNotes: mockTask.comments,
+      });
+    });
+
+    it('should throw NotFoundException if task not found for continuation', async () => {
+      prisma.task.findUnique.mockResolvedValue(null);
+      await expect(service.continueTask({ taskId })).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.continueTask({ taskId })).rejects.toThrow(
+        `Task with ID '${taskId}' not found for continuation.`,
+      );
+    });
+
+    it('should throw InternalServerErrorException for other errors', async () => {
+      const error = new Error('Some other DB error');
+      prisma.task.findUnique.mockRejectedValue(error);
+      await expect(service.continueTask({ taskId })).rejects.toThrow(
+        InternalServerErrorException,
+      );
+      await expect(service.continueTask({ taskId })).rejects.toThrow(
+        `Could not fetch continuation context for task '${taskId}'.`,
       );
     });
   });

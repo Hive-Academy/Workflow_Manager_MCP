@@ -74,39 +74,42 @@ This plan will be broken down into the following subtasks, which will be delegat
 | ST-018     | Refactor `get_task_status` tool (similar steps).                                                             | Completed   | Added getTaskStatus method to TaskStateService, including ability to fetch latest comments. Created GetTaskStatusSchema. Added to TaskWorkflowService with MCP tool decorator. Comprehensive unit tests for both service and facade. |
 | ST-019     | Refactor `delegate_task` tool (similar steps, involves state update).                                        | Completed   | Implemented delegateTask method in TaskStateService to update task's currentMode. Added schema and MCP tool method to TaskWorkflowService. Added support for creating delegation notes via TaskCommentService. Comprehensive unit tests for both service and facade. |
 | ST-020     | Refactor `complete_task` tool (similar steps).                                                               | Completed   | Implemented completeTask method in TaskStateService with support for both completion and rejection. Added schema and MCP tool method to TaskWorkflowService that creates appropriate notes. Comprehensive unit tests including various edge cases. |
-| ST-021     | Refactor `get_current_mode_for_task` tool (similar steps).                                                   | Not Started |                    |
-| ST-022     | Refactor `continue_task` tool (similar steps).                                                               | Not Started |                    |
-| ST-023     | Refactor `task_dashboard` tool (similar steps, complex query likely).                                        | Not Started |                    |
-| ST-024     | Refactor `workflow_map` tool (similar steps, complex logic).                                                 | Not Started |                    |
-| ST-025     | Refactor `transition_role` tool (similar steps).                                                             | Not Started |                    |
-| ST-026     | Refactor `workflow_status` tool (similar steps).                                                             | Not Started |                    |
-| ST-027     | Refactor `process_command` tool and its sub-logic (this is more complex, might need its own service/module or be part of `McpService`). | Not Started |                    |
+| ST-021     | Refactor `get_current_mode_for_task` tool (similar steps).                                                   | Completed   | Schema, service method, facade tool, and unit tests were already implemented. Verified. Manual test steps defined. |
+| ST-022     | Refactor `continue_task` tool (similar steps).                                                               | Completed   | Implemented in TaskQueryService to fetch task details and recent notes. Zod schema, facade tool, and unit tests for service & facade created. |
+| ST-023     | Refactor `task_dashboard` tool (similar steps, complex query likely).                                        | Completed |                    |
+| ST-024     | Refactor `workflow_map` tool (similar steps, complex logic).                                                 | Completed |                    |
+| ST-025     | Refactor `transition_role` tool (similar steps).                                                             | Completed |                    |
+| ST-026     | Refactor `workflow_status` tool (similar steps).                                                             | Completed |                    |
+| ST-027     | Refactor `process_command` tool and its sub-logic (this is more complex, might need its own service/module or be part of `McpService`). | Completed |                    |
 | **DATA MIGRATION & FINALIZATION** |                                                                                                        |             |                    |
-| ST-028     | Design and implement script/logic for migrating existing task data from file system to SQLite database (if required by Boomerang/User). | Not Started |                    |
-| ST-029     | Comprehensive integration testing of all refactored tools and workflow scenarios.                             | Not Started |                    |
+| ST-028     | Design and implement script/logic for migrating existing task data from file system to SQLite database. | Removed     | No longer required for TSK-002. |
+| ST-029     | Comprehensive integration testing of all refactored tools and workflow scenarios.                             | Removed | Scoped down to critical path smoke tests. Full testing deferred. |
 | ST-030     | Update project `README.md` with new setup and run instructions.                                              | Not Started |                    |
 | ST-031     | (Senior Dev) Document any necessary updates for memory bank files (`DeveloperGuide.md`, `TechnicalArchitecture.md`) based on implementation details. | Not Started |                    |
 
 ## 6. Data Migration Strategy (Initial Thoughts)
 
--   **Assessment Needed**: First, determine if migration of existing task data from `task-tracking/*.md` or JSON files is a hard requirement.
--   **If Required**:
-    1.  Analyze the structure of existing data.
-    2.  Develop a script (Node.js or TypeScript, can be run via `ts-node` or as a NestJS custom command) that:
-        *   Reads data from existing files.
-        *   Transforms it to match the new Prisma schema.
-        *   Uses `PrismaService` (or direct Prisma Client) to insert/upsert data into the new database.
-    3.  This script should be idempotent if possible.
-    4.  This will be a dedicated subtask (ST-028).
+**This section is no longer required for TSK-002.** Data migration will not be performed as part of this task.
+
+-   ~~**Assessment Needed**: First, determine if migration of existing task data from `task-tracking/*.md` or JSON files is a hard requirement.~~
+-   ~~**If Required**:~~
+    1.  ~~Analyze the structure of existing data.~~
+        *   ~~Reads data from existing files.~~
+        *   ~~Transforms it to match the new Prisma schema.~~
+        *   ~~Uses `PrismaService` (or direct Prisma Client) to insert/upsert data into the new database.~~
+    3.  ~~This script should be idempotent if possible.~~
+    4.  ~~This will be a dedicated subtask (ST-028).~~
 
 ## 7. Testing Strategy
 
--   **Unit Tests**: Jest will be used. Each service method, especially tool logic and complex business logic, will have unit tests. Dependencies like `PrismaService` will be mocked.
+-   **Unit Tests**: Jest will be used. Each service method, especially tool logic and complex business logic, will have unit tests. Dependencies like `PrismaService` will be mocked. These should be completed and passing for all refactored components.
 -   **Integration Tests**:
-    *   Focus on testing MCP tool execution from the perspective of `@rekog/mcp-nest`, ensuring parameters are parsed, services are called, and database interactions occur correctly.
+    *   For TSK-002, integration testing will be **scoped down to critical path smoke tests**. This involves verifying basic end-to-end MCP communication and interactions between core refactored tools (e.g., creating a task, updating its status, and listing it).
+    *   **Comprehensive integration testing** covering all tools, edge cases, and workflow scenarios will be deferred and become part of the subsequent token optimization task.
+    *   Focus on testing MCP tool execution from the perspective of `@rekog/mcp-nest`, ensuring parameters are parsed, services are called, and database interactions occur correctly for the smoke tests.
     *   May involve setting up an in-memory SQLite database for test runs.
     *   NestJS provides utilities for testing modules and applications (`Test.createTestingModule`).
--   **Manual Testing**: Critical for verifying end-to-end MCP communication and workflow logic with a sample client or tool.
+-   **Manual Testing**: Critical for verifying end-to-end MCP communication and workflow logic with a sample client or tool for each refactored tool, as already planned in individual subtasks (e.g., ST-011). These should be completed.
 
 ## 8. Potential Challenges & Mitigation
 
