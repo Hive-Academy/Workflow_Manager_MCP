@@ -32,18 +32,20 @@ import {
   TaskCrudService,
   TaskQueryService,
   TaskStateService,
+  RoleTransitionService,
+  ProcessCommandService,
 } from './services';
 
 @Injectable()
 export class TaskWorkflowService {
   // This is now a Facade
   constructor(
-    // Remove direct PrismaService injection if all DB logic is in specialized services
-    // private readonly prisma: PrismaService,
     private readonly taskCrudService: TaskCrudService,
     private readonly taskQueryService: TaskQueryService,
     private readonly taskStateService: TaskStateService,
     private readonly taskCommentService: TaskCommentService,
+    private readonly roleTransitionService: RoleTransitionService,
+    private readonly processCommandService: ProcessCommandService,
   ) {}
 
   @Tool({
@@ -89,16 +91,75 @@ export class TaskWorkflowService {
   })
   async getTaskContext(params: z.infer<typeof GetTaskContextSchema>) {
     try {
-      const task = await this.taskQueryService.getTaskContext(params);
+      const fullContext = await this.taskQueryService.getTaskContext(params);
+
+      if (!fullContext || !fullContext.task) {
+        // This case should ideally be handled by taskQueryService throwing a NotFoundException
+        // but as a safeguard in the facade:
+        throw new NotFoundException(
+          `Task context not found for ID: ${params.taskId}`,
+        );
+      }
+
+      const {
+        task,
+        taskDescription,
+        currentImplementationPlan,
+        // latestDelegation, // Example of omitting for brevity
+        // latestResearchReport,
+        // latestCodeReview,
+        // latestCompletionReport,
+        recentComments,
+      } = fullContext;
+
+      // Prepare a simplified JSON response
+      const simplifiedContext: any = {
+        taskId: task.taskId,
+        name: task.name,
+        status: task.status,
+        currentMode: task.currentMode,
+        creationDate: task.creationDate,
+        completionDate: task.completionDate,
+      };
+
+      if (taskDescription) {
+        simplifiedContext.description = taskDescription.description;
+        simplifiedContext.acceptanceCriteria =
+          taskDescription.acceptanceCriteria;
+      }
+
+      if (currentImplementationPlan) {
+        simplifiedContext.implementationPlanSummary = {
+          id: currentImplementationPlan.id,
+          totalSubtasks: currentImplementationPlan.subtasks?.length || 0,
+          completedSubtasks:
+            currentImplementationPlan.subtasks?.filter(
+              (st: any) => st.status === 'completed' || st.status === 'COM',
+            ).length || 0,
+        };
+      }
+
+      if (recentComments && recentComments.length > 0) {
+        // Take top 3-5 comments, and only essential fields
+        simplifiedContext.recentComments = recentComments
+          .slice(0, 5) // Take max 5
+          .map((comment: any) => ({
+            mode: comment.mode,
+            content:
+              comment.content.substring(0, 100) +
+              (comment.content.length > 100 ? '...' : ''), // Truncate long comments
+            createdAt: comment.createdAt,
+          }));
+      }
+
+      // Other fields like latestDelegation, latestResearchReport etc. are intentionally omitted for brevity
+      // to keep the general context lean. Specific tools can be used to fetch those details if needed.
+
       return {
         content: [
           {
-            type: 'text',
-            text: `Found task: ID=${task.taskId}, Name=${task.name}, Status=${task.status}, Mode=${task.currentMode}. Description and Plans included if they exist.`,
-          },
-          {
             type: 'json',
-            json: task,
+            json: simplifiedContext,
           },
         ],
       };
@@ -114,7 +175,7 @@ export class TaskWorkflowService {
         error,
       );
       throw new InternalServerErrorException(
-        `Facade: Could not get context for task '${params.taskId}'.`,
+        `Facade: Could not get context for task '${params.taskId}'. Error: ${(error as Error).message}`,
       );
     }
   }
@@ -152,10 +213,6 @@ export class TaskWorkflowService {
             type: 'text',
             text: responseText,
           },
-          {
-            type: 'json',
-            json: updatedTask,
-          },
         ],
       };
     } catch (error) {
@@ -181,18 +238,14 @@ export class TaskWorkflowService {
       'Lists tasks from the database, with optional filtering by status and pagination.',
     parameters: ListTasksSchema,
   })
-  async listTasks(params: z.infer<typeof ListTasksSchema>) {
+  async listTasks() {
     try {
-      const listData = await this.taskQueryService.listTasks(params);
+      const listData = await this.taskQueryService.listTasks();
       return {
         content: [
           {
             type: 'text',
-            text: `Found ${listData.tasks.length} tasks out of ${listData.totalTasks} total matching criteria.`,
-          },
-          {
-            type: 'json',
-            json: listData,
+            text: `Found ${listData.length} tasks matching criteria.`,
           },
         ],
       };
@@ -251,10 +304,6 @@ export class TaskWorkflowService {
             type: 'text',
             text: `Note added successfully to task '${params.taskId}'. Comment ID: ${createdComment.id}`,
           },
-          {
-            type: 'json',
-            json: createdComment,
-          },
         ],
       };
     } catch (error) {
@@ -284,11 +333,7 @@ export class TaskWorkflowService {
         content: [
           {
             type: 'text',
-            text: `Task '${taskStatus.name}' (ID: ${taskStatus.taskId}) has status '${taskStatus.status}' and is currently owned by ${taskStatus.currentMode || 'no one'}.`,
-          },
-          {
-            type: 'json',
-            json: taskStatus,
+            text: `Task has status '${taskStatus.status}'.`,
           },
         ],
       };
@@ -332,11 +377,7 @@ export class TaskWorkflowService {
         content: [
           {
             type: 'text',
-            text: `Task '${delegatedTask.name}' (ID: ${delegatedTask.taskId}) delegated from '${params.fromMode}' to '${params.toMode}'${params.message ? ' with message' : ''}.`,
-          },
-          {
-            type: 'json',
-            json: delegatedTask,
+            text: `Task '${delegatedTask.task.name}' (ID: ${delegatedTask.task.taskId}) delegated from '${params.fromMode}' to '${params.toMode}'${params.message ? ' with message' : ''}.`,
           },
         ],
       };
@@ -384,11 +425,7 @@ export class TaskWorkflowService {
         content: [
           {
             type: 'text',
-            text: `Task '${completedTask.name}' (ID: ${completedTask.taskId}) has been ${statusText} by ${params.mode}${params.notes ? ' with notes' : ''}.`,
-          },
-          {
-            type: 'json',
-            json: completedTask,
+            text: `Task '${completedTask.task.name}' (ID: ${completedTask.task.taskId}) has been ${statusText} by ${params.mode}${params.notes ? ' with notes' : ''}.`,
           },
         ],
       };
@@ -425,10 +462,6 @@ export class TaskWorkflowService {
             type: 'text',
             text: `Current mode for task '${params.taskId}' is '${result.currentMode}'.`,
           },
-          {
-            type: 'json',
-            json: result,
-          },
         ],
       };
     } catch (error) {
@@ -461,11 +494,7 @@ export class TaskWorkflowService {
         content: [
           {
             type: 'text',
-            text: `Context for continuing task '${params.taskId}' retrieved. Status: ${taskContext.status}, Mode: ${taskContext.currentMode}.`,
-          },
-          {
-            type: 'json',
-            json: taskContext,
+            text: `Context for continuing task '${taskContext.task?.taskId}' retrieved.`,
           },
         ],
       };
@@ -495,16 +524,12 @@ export class TaskWorkflowService {
   async taskDashboard(/* params: z.infer<typeof TaskDashboardParamsSchema> */) {
     // No params used yet
     try {
-      const dashboardData = await this.taskQueryService.getTaskDashboardData();
+      const dashboardData = await this.taskQueryService.getTaskDashboard();
       return {
         content: [
           {
             type: 'text',
             text: `Dashboard: ${dashboardData.totalTasks} total tasks. Status breakdown: ${JSON.stringify(dashboardData.tasksByStatus)}. Mode breakdown: ${JSON.stringify(dashboardData.tasksByMode)}`,
-          },
-          {
-            type: 'json',
-            json: dashboardData,
           },
         ],
       };
@@ -522,7 +547,7 @@ export class TaskWorkflowService {
   @Tool({
     name: 'workflow_map',
     description:
-      'Displays a Mermaid diagram of the workflow, optionally highlighting the current task\'s mode.',
+      "Displays a Mermaid diagram of the workflow, optionally highlighting the current task's mode.",
     parameters: WorkflowMapSchema,
   })
   async workflowMap(params: z.infer<typeof WorkflowMapSchema>) {
@@ -538,42 +563,19 @@ export class TaskWorkflowService {
       );
     }
   }
+
   @Tool({
     name: 'transition_role',
-    description: 'Transitions a task between different roles/modes in the workflow.',
+    description:
+      'Transitions a task between different roles/modes in the workflow.',
     parameters: TransitionRoleSchema,
   })
-  async transitionRole(params: z.infer<typeof TransitionRoleSchema>) {
-    try {
-      const result = await this.taskStateService.transitionRole(params);
-      // Format the response as in the legacy tool
-      const fromEmoji = '';
-      const toEmoji = '';
-      const displayTaskName = result.name || params.taskId;
-      const textContent = `# ✈️ Role Transition: ${fromEmoji} ${params.fromRole.replace('-role','')} -> ${toEmoji} ${params.toRole.replace('-role','')}
-\nTask '${displayTaskName}' (ID: ${result.taskId}) has transitioned from **${params.fromRole.replace('-role','')}** to **${params.toRole.replace('-role','')}**.\n\n${params.summary ? `## Summary from ${params.fromRole.replace('-role','')}:
-${params.summary}
-\n` : ''}The task is now with ${toEmoji} ${params.toRole.replace('-role','')}. The new role should now take over.`;
-      return {
-        content: [
-          {
-            type: 'text',
-            text: textContent,
-          },
-          {
-            type: 'json',
-            json: result,
-          },
-        ],
-      };
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof InternalServerErrorException) {
-        throw error;
-      }
-      console.error('Facade Error in transitionRole:', error);
-      throw new InternalServerErrorException('Facade: Could not transition role.');
-    }
+  async transitionRole(
+    params: z.infer<typeof TransitionRoleSchema>,
+  ): Promise<any> {
+    return await this.roleTransitionService.transitionRole(params);
   }
+
   @Tool({
     name: 'workflow_status',
     description: 'Gets the detailed workflow status for a specific task.',
@@ -581,57 +583,37 @@ ${params.summary}
   })
   async workflowStatus(params: z.infer<typeof WorkflowStatusSchema>) {
     try {
-      return await this.taskQueryService.getWorkflowStatus(params);
+      const textData = await this.taskQueryService.getWorkflowStatus(params);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: textData,
+          },
+        ],
+      };
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof InternalServerErrorException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof InternalServerErrorException
+      ) {
         throw error;
       }
       console.error('Facade Error in workflowStatus:', error);
-      throw new InternalServerErrorException('Facade: Could not get workflow status.');
+      throw new InternalServerErrorException(
+        'Facade: Could not get workflow status.',
+      );
     }
   }
+
   @Tool({
     name: 'process_command',
     description: 'Processes slash commands for workflow management.',
     parameters: ProcessCommandSchema,
   })
-  async processCommand(params: z.infer<typeof ProcessCommandSchema>) {
-    const { command_string } = params;
-    if (!command_string.startsWith('/')) {
-      return { content: [{ type: 'text', text: 'Invalid command format. Commands must start with /' }] };
-    }
-    const parts = command_string.substring(1).split(' ');
-    const command = parts[0].toLowerCase();
-    const cmdArgs = parts.slice(1);
-    try {
-      switch (command) {
-        case 'next-role':
-          // Example: /next-role TSK-001
-          if (cmdArgs.length < 1) return { content: [{ type: 'text', text: 'Usage: /next-role [task-id]' }] };
-          // You may want to implement next-role logic or call transitionRole
-          return { content: [{ type: 'text', text: 'Not implemented: next-role' }] };
-        case 'role':
-          // Example: /role architect TSK-002
-          if (cmdArgs.length < 2) return { content: [{ type: 'text', text: 'Usage: /role [role-name] [task-id]' }] };
-          return await this.transitionRole({
-            taskId: cmdArgs[1],
-            fromRole: 'unknown', // You may want to fetch the current role
-            toRole: cmdArgs[0] + '-role',
-            summary: `Manual transition to ${cmdArgs[0]}-role`,
-          });
-        case 'workflow-status':
-          // Example: /workflow-status TSK-003
-          if (cmdArgs.length < 1) return { content: [{ type: 'text', text: 'Usage: /workflow-status [task-id]' }] };
-          return await this.workflowStatus({ taskId: cmdArgs[0] });
-        case 'research':
-          // Example: /research topic TSK-004
-          return { content: [{ type: 'text', text: 'Not implemented: research' }] };
-        default:
-          return { content: [{ type: 'text', text: `Unknown command: ${command}. Available commands: /next-role, /role, /workflow-status, /research` }] };
-      }
-    } catch (error) {
-      return { content: [{ type: 'text', text: `Error processing command: ${error instanceof Error ? error.message : String(error)}` }] };
-    }
+  async processCommand(
+    params: z.infer<typeof ProcessCommandSchema>,
+  ): Promise<any> {
+    return await this.processCommandService.processCommand(params);
   }
-  // Other tool methods (those not yet refactored into specialized services) would remain here for now.
 }

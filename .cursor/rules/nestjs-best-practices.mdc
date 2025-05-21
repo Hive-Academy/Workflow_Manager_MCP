@@ -1,7 +1,7 @@
 ---
-description: Outlines key best practices for developing scalable, maintainable, and robust applications using the NestJS framework. This rule is foundational for any work within a NestJS project, covering modularity, dependency injection, DTOs and validation, configuration management, asynchronous operations, error handling, logging, and testing strategies. Adherence to these practices is critical for building high-quality NestJS applications.
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # NestJS Best Practices
 

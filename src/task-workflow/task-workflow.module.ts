@@ -8,7 +8,11 @@ import {
   TaskStateService,
   TaskCommentService,
   TaskDescriptionService,
+  RoleTransitionService,
+  ProcessCommandService,
+  // PrismaErrorHandlerService, // Temporarily remove import
 } from './services'; // Import from the new services barrel file
+import { PrismaErrorHandlerService } from './utils/prisma-error.handler';
 
 @Module({
   imports: [PrismaModule], // Import PrismaModule as TaskWorkflowService depends on PrismaService
@@ -20,6 +24,9 @@ import {
     TaskStateService,
     TaskCommentService,
     TaskDescriptionService,
+    RoleTransitionService,
+    ProcessCommandService,
+    PrismaErrorHandlerService, // Temporarily remove from providers
   ],
   exports: [TaskWorkflowService], // Export TaskWorkflowService if it needs to be used by other modules
 })

@@ -1,7 +1,7 @@
 ---
-description:  Details crucial best practices for effectively using Prisma ORM, especially within a NestJS application context, for database access and management. This rule should be consulted when tasks involve database schema design (schema.prisma), migrations, data seeding, transaction management, query optimization, or implementing data access layers (e.g., PrismaService in NestJS). It emphasizes type safety and proper lifecycle management of PrismaClient. 
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Prisma Best Practices
 

@@ -1,7 +1,7 @@
 ---
-description: Provides comprehensive guidelines and best practices for integrating the '@rekog/mcp-nest' library into a NestJS application. This rule is essential when the task involves defining or interacting with Model Context Protocol (MCP) tools or resources within a NestJS environment. It covers project setup, McpModule configuration, defining tools with @Tool() decorator, parameter validation with Zod, authentication, error handling, and testing specific to @rekog/mcp-nest.
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Guidelines for @rekog/mcp-nest Integration
 
