@@ -15,5 +15,7 @@ export const AddTaskNoteSchema = z.object({
     .number()
     .int()
     .optional()
-    .describe('Optional ID of the subtask this note pertains to.'),
+    .describe(
+      'Optional Prisma-generated numeric ID of the subtask this note pertains to.',
+    ),
 });

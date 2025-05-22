@@ -46,8 +46,8 @@ export class ProcessCommandService {
         return await this.roleTransitionService.transitionRole({
           taskId: cmdArgs[1],
           fromRole: 'unknown', // You may want to fetch the current role
-          toRole: cmdArgs[0] + '-role',
-          summary: `Manual transition to ${cmdArgs[0]}-role`,
+          roleId: cmdArgs[0] + '-role',
+          focus: 'Manual role transition via /role command',
         });
       case 'workflow-status':
         if (cmdArgs.length < 1)

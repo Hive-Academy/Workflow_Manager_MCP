@@ -1,0 +1,19 @@
+{
+  "taskId": "TSK-003",
+  "taskName": "Architectural_Enhancements_and_MCP_Refactoring",
+  "status": "in-progress",
+  "progress": 0,
+  "currentOwner": "boomerang-mode",
+  "delegations": [],
+  "notesLog": [],
+  "statusNotes": [
+    {
+      "timestamp": "2025-05-22T11:52:18.828Z",
+      "status": "in-progress",
+      "notes": "🪃MB: Started analysis"
+    }
+  ],
+  "createdAt": "2025-05-22T11:52:06.278Z",
+  "updatedAt": "2025-05-22T11:52:18.828Z",
+  "description": "Address current codebase architecture, group files into folders, continue MCP Facade Refactoring (moving tools to focused services like TaskCrudOperationsService), and apply other best practices identified after code scan."
+}

@@ -1,5 +1,5 @@
 import {
-  ConflictException,
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -12,76 +12,42 @@ import { z } from 'zod';
 import {
   AddTaskNoteSchema,
   CompleteTaskSchema,
-  CreateTaskSchema,
-  DeleteTaskSchema,
+  ContinueTaskSchema,
   DelegateTaskSchema,
+  GetContextDiffSchema,
   GetCurrentModeForTaskSchema,
   GetTaskContextSchema,
   GetTaskStatusSchema,
+  RoleTransitionSchema as HandleRoleTransitionInputSchema,
   ListTasksSchema,
-  UpdateTaskStatusSchema,
-  ContinueTaskSchema,
-  TaskDashboardParamsSchema,
-  WorkflowMapSchema,
-  TransitionRoleSchema,
-  WorkflowStatusSchema,
   ProcessCommandSchema,
+  ShorthandCommandSchema,
+  TaskDashboardParamsSchema,
+  TOKEN_MAPS,
+  UpdateTaskStatusSchema,
+  WorkflowMapSchema,
+  WorkflowStatusSchema,
 } from './schemas';
 import {
+  ContextManagementService,
+  ProcessCommandService,
+  ShorthandParserService,
   TaskCommentService,
-  TaskCrudService,
   TaskQueryService,
   TaskStateService,
-  RoleTransitionService,
-  ProcessCommandService,
 } from './services';
 
 @Injectable()
 export class TaskWorkflowService {
   // This is now a Facade
   constructor(
-    private readonly taskCrudService: TaskCrudService,
     private readonly taskQueryService: TaskQueryService,
     private readonly taskStateService: TaskStateService,
     private readonly taskCommentService: TaskCommentService,
-    private readonly roleTransitionService: RoleTransitionService,
     private readonly processCommandService: ProcessCommandService,
+    private readonly contextManagementService: ContextManagementService,
+    private readonly shorthandParserService: ShorthandParserService,
   ) {}
-
-  @Tool({
-    name: 'create_task',
-    description: 'Creates a new core task entry in the workflow system.',
-    parameters: CreateTaskSchema,
-  })
-  async createTask(params: z.infer<typeof CreateTaskSchema>) {
-    try {
-      // Delegate to TaskCrudService
-      const newTask = await this.taskCrudService.createTask(params);
-      // Format MCP response
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Task '${newTask.name}' (ID: ${newTask.taskId}) created successfully with status '${newTask.status}'. Description provided: ${params.description ? 'Yes' : 'No'}`,
-          },
-        ],
-      };
-    } catch (error) {
-      // Handle errors thrown by the service, re-throw as MCP-appropriate exceptions if needed
-      // Or, let NestJS default exception filters handle them if they are standard (NotFound, Conflict, etc.)
-      if (
-        error instanceof ConflictException ||
-        error instanceof InternalServerErrorException
-      ) {
-        throw error;
-      }
-      // Fallback for unexpected errors from the service layer
-      console.error(`Facade Error in createTask for ${params.taskId}:`, error);
-      throw new InternalServerErrorException(
-        `Facade: Could not create task '${params.taskId}'.`,
-      );
-    }
-  }
 
   @Tool({
     name: 'get_task_context',
@@ -255,37 +221,6 @@ export class TaskWorkflowService {
       }
       console.error('Facade Error in listTasks:', error);
       throw new InternalServerErrorException('Facade: Could not list tasks.');
-    }
-  }
-
-  @Tool({
-    name: 'delete_task',
-    description:
-      'Deletes a task and all its associated data from the database.',
-    parameters: DeleteTaskSchema,
-  })
-  async deleteTask(params: z.infer<typeof DeleteTaskSchema>) {
-    try {
-      await this.taskCrudService.deleteTask(params); // deleteTask in service might not return anything or just a boolean
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Task '${params.taskId}' and all its associated data deleted successfully.`,
-          },
-        ],
-      };
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof InternalServerErrorException
-      ) {
-        throw error;
-      }
-      console.error(`Facade Error in deleteTask for ${params.taskId}:`, error);
-      throw new InternalServerErrorException(
-        `Facade: Could not delete task '${params.taskId}'.`,
-      );
     }
   }
 
@@ -521,7 +456,7 @@ export class TaskWorkflowService {
       'Provides a summary of all current tasks, aggregated by status and mode.',
     parameters: TaskDashboardParamsSchema,
   })
-  async taskDashboard(/* params: z.infer<typeof TaskDashboardParamsSchema> */) {
+  async taskDashboard() {
     // No params used yet
     try {
       const dashboardData = await this.taskQueryService.getTaskDashboard();
@@ -565,15 +500,111 @@ export class TaskWorkflowService {
   }
 
   @Tool({
-    name: 'transition_role',
+    name: 'handle_role_transition',
     description:
-      'Transitions a task between different roles/modes in the workflow.',
-    parameters: TransitionRoleSchema,
+      'Handles role transition with token-efficient context management, updating task mode and logging.',
+    parameters: HandleRoleTransitionInputSchema,
   })
-  async transitionRole(
-    params: z.infer<typeof TransitionRoleSchema>,
+  async handleRoleTransition(
+    params: z.infer<typeof HandleRoleTransitionInputSchema>,
   ): Promise<any> {
-    return await this.roleTransitionService.transitionRole(params);
+    try {
+      const { roleId, taskId, fromRole, focus, refs, contextHash } = params;
+
+      // 1. Get current task state (especially currentMode)
+      const taskState = await this.taskStateService.getTaskStatus({ taskId });
+      if (!taskState) {
+        throw new NotFoundException(
+          `Task with ID ${taskId} not found for role transition.`,
+        );
+      }
+
+      // 2. Fetch full context for diffing and caching (simplified version for now)
+      const fullContextResponse = await this.getTaskContext({ taskId });
+      const currentContextData =
+        fullContextResponse.content[0].type === 'json'
+          ? fullContextResponse.content[0].json
+          : {};
+      const currentContextHash =
+        this.contextManagementService.hashContext(currentContextData);
+
+      let contextDiff = null;
+      if (contextHash && contextHash !== currentContextHash) {
+        const oldContext =
+          this.contextManagementService.getContextByHash(contextHash);
+        contextDiff = oldContext
+          ? this.contextManagementService.diffContext(
+              oldContext,
+              currentContextData,
+            )
+          : { __isNew: true, ...currentContextData };
+      }
+      this.contextManagementService.cacheContext(currentContextData);
+
+      // 3. Update task's current mode if different from roleId
+      if (taskState.status !== roleId) {
+        const actualCurrentMode = (
+          await this.taskStateService.getCurrentModeForTask({ taskId })
+        ).currentMode;
+        if (actualCurrentMode !== roleId) {
+          await this.taskStateService.updateTaskStatus({
+            taskId,
+            status: taskState.status,
+            currentMode: roleId,
+          });
+        }
+      }
+
+      // 4. Add a note for the transition
+      const transitionNote = `Role transition: ${fromRole || 'N/A'} -> ${roleId}. Focus: ${focus}. Refs: ${refs ? refs.join(', ') : 'none'}`;
+      await this.taskCommentService.addTaskNote({
+        taskId,
+        note: transitionNote,
+        mode: 'system',
+      });
+
+      const taskName = currentContextData.name || taskId;
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Transitioned to role ${roleId} for task '${taskName}'. Focus: ${focus}. Context hash: ${currentContextHash}.`,
+          },
+          {
+            type: 'json',
+            json: {
+              role: roleId,
+              task: {
+                id: taskId,
+                name: taskName,
+                status: taskState.status,
+                currentMode: roleId,
+              },
+              focus,
+              refs: refs || [],
+              contextHash: currentContextHash,
+              contextChanged: !!contextDiff,
+              changes: contextDiff,
+            },
+          },
+        ],
+      };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      console.error(
+        `Facade Error in handleRoleTransition for task ${params.taskId} to role ${params.roleId}:`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        `Facade: Could not handle role transition for task '${params.taskId}'. Error: ${(error as Error).message}`,
+      );
+    }
   }
 
   @Tool({
@@ -615,5 +646,124 @@ export class TaskWorkflowService {
     params: z.infer<typeof ProcessCommandSchema>,
   ): Promise<any> {
     return await this.processCommandService.processCommand(params);
+  }
+
+  @Tool({
+    name: 'get_context_diff',
+    description:
+      'Gets only what has changed in the task context since last retrieval, or a specific slice of context.',
+    parameters: GetContextDiffSchema,
+  })
+  async getContextDiff(params: z.infer<typeof GetContextDiffSchema>) {
+    try {
+      const { taskId, lastContextHash, sliceType } = params;
+
+      let currentContextData;
+      let contextIdentifier = sliceType || 'full';
+
+      if (sliceType) {
+        const mappedSliceType = TOKEN_MAPS.document[sliceType] || sliceType;
+        currentContextData =
+          await this.contextManagementService.getContextSlice(
+            taskId,
+            mappedSliceType,
+          );
+        contextIdentifier = mappedSliceType;
+      } else {
+        const fullContextResponse = await this.getTaskContext({ taskId });
+        currentContextData =
+          fullContextResponse.content[0].type === 'json'
+            ? fullContextResponse.content[0].json
+            : {};
+      }
+
+      const currentHash =
+        this.contextManagementService.hashContext(currentContextData);
+
+      if (lastContextHash === currentHash) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No changes to ${contextIdentifier} context for task ${taskId} since last retrieval.`,
+            },
+            {
+              type: 'json',
+              json: {
+                unchanged: true,
+                contextHash: currentHash,
+                contextType: contextIdentifier,
+              },
+            },
+          ],
+        };
+      }
+
+      const oldContextData =
+        this.contextManagementService.getContextByHash(lastContextHash);
+      const diff = this.contextManagementService.diffContext(
+        oldContextData,
+        currentContextData,
+      );
+
+      this.contextManagementService.cacheContext(currentContextData);
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `${contextIdentifier} context for task ${taskId} updated.`,
+          },
+          {
+            type: 'json',
+            json: {
+              contextHash: currentHash,
+              contextType: contextIdentifier,
+              changes: diff,
+            },
+          },
+        ],
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error(
+        `Facade Error in getContextDiff for ${params.taskId}, sliceType ${params.sliceType}:`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        `Facade: Could not get context diff for task '${params.taskId}'. Error: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  @Tool({
+    name: 'shorthand_command',
+    description:
+      'Executes a shorthand command for more token-efficient operations.',
+    parameters: ShorthandCommandSchema,
+  })
+  async executeShorthandCommand(
+    params: z.infer<typeof ShorthandCommandSchema>,
+  ): Promise<any> {
+    try {
+      const { taskId, command } = params;
+      return await this.shorthandParserService.parseAndExecute(taskId, command);
+    } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+      console.error(
+        `Facade Error in executeShorthandCommand for task ${params.taskId}, command '${params.command}':`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        `Facade: Could not execute shorthand command '${params.command}' for task '${params.taskId}'. Error: ${(error as Error).message}`,
+      );
+    }
   }
 }

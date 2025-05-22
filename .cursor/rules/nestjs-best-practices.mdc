@@ -1,7 +1,7 @@
 ---
-description: 
+description: This document outlines key best practices for developing applications using the NestJS framework, ensuring maintainable, scalable, and robust code.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # NestJS Best Practices
 

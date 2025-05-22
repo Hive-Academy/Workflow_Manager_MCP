@@ -86,6 +86,8 @@ model Subtask {
   estimatedDuration   String?
   startedAt           DateTime?
   completedAt         DateTime?
+  batchId             String?    // Added for batch information
+  batchTitle          String?    // Added for batch information
 
   task                Task                @relation(fields: [taskId], references: [taskId])
   plan                ImplementationPlan  @relation(fields: [planId], references: [id])

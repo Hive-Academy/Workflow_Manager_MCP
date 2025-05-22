@@ -5939,6 +5939,8 @@ export namespace Prisma {
     estimatedDuration: string | null
     startedAt: Date | null
     completedAt: Date | null
+    batchId: string | null
+    batchTitle: string | null
   }
 
   export type SubtaskMaxAggregateOutputType = {
@@ -5953,6 +5955,8 @@ export namespace Prisma {
     estimatedDuration: string | null
     startedAt: Date | null
     completedAt: Date | null
+    batchId: string | null
+    batchTitle: string | null
   }
 
   export type SubtaskCountAggregateOutputType = {
@@ -5967,6 +5971,8 @@ export namespace Prisma {
     estimatedDuration: number
     startedAt: number
     completedAt: number
+    batchId: number
+    batchTitle: number
     _all: number
   }
 
@@ -5995,6 +6001,8 @@ export namespace Prisma {
     estimatedDuration?: true
     startedAt?: true
     completedAt?: true
+    batchId?: true
+    batchTitle?: true
   }
 
   export type SubtaskMaxAggregateInputType = {
@@ -6009,6 +6017,8 @@ export namespace Prisma {
     estimatedDuration?: true
     startedAt?: true
     completedAt?: true
+    batchId?: true
+    batchTitle?: true
   }
 
   export type SubtaskCountAggregateInputType = {
@@ -6023,6 +6033,8 @@ export namespace Prisma {
     estimatedDuration?: true
     startedAt?: true
     completedAt?: true
+    batchId?: true
+    batchTitle?: true
     _all?: true
   }
 
@@ -6124,6 +6136,8 @@ export namespace Prisma {
     estimatedDuration: string | null
     startedAt: Date | null
     completedAt: Date | null
+    batchId: string | null
+    batchTitle: string | null
     _count: SubtaskCountAggregateOutputType | null
     _avg: SubtaskAvgAggregateOutputType | null
     _sum: SubtaskSumAggregateOutputType | null
@@ -6157,6 +6171,8 @@ export namespace Prisma {
     estimatedDuration?: boolean
     startedAt?: boolean
     completedAt?: boolean
+    batchId?: boolean
+    batchTitle?: boolean
     task?: boolean | TaskDefaultArgs<ExtArgs>
     plan?: boolean | ImplementationPlanDefaultArgs<ExtArgs>
     delegationRecords?: boolean | Subtask$delegationRecordsArgs<ExtArgs>
@@ -6177,6 +6193,8 @@ export namespace Prisma {
     estimatedDuration?: boolean
     startedAt?: boolean
     completedAt?: boolean
+    batchId?: boolean
+    batchTitle?: boolean
     task?: boolean | TaskDefaultArgs<ExtArgs>
     plan?: boolean | ImplementationPlanDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["subtask"]>
@@ -6193,6 +6211,8 @@ export namespace Prisma {
     estimatedDuration?: boolean
     startedAt?: boolean
     completedAt?: boolean
+    batchId?: boolean
+    batchTitle?: boolean
     task?: boolean | TaskDefaultArgs<ExtArgs>
     plan?: boolean | ImplementationPlanDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["subtask"]>
@@ -6209,9 +6229,11 @@ export namespace Prisma {
     estimatedDuration?: boolean
     startedAt?: boolean
     completedAt?: boolean
+    batchId?: boolean
+    batchTitle?: boolean
   }
 
-  export type SubtaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "taskId" | "planId" | "name" | "description" | "sequenceNumber" | "status" | "assignedTo" | "estimatedDuration" | "startedAt" | "completedAt", ExtArgs["result"]["subtask"]>
+  export type SubtaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "taskId" | "planId" | "name" | "description" | "sequenceNumber" | "status" | "assignedTo" | "estimatedDuration" | "startedAt" | "completedAt" | "batchId" | "batchTitle", ExtArgs["result"]["subtask"]>
   export type SubtaskInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     task?: boolean | TaskDefaultArgs<ExtArgs>
     plan?: boolean | ImplementationPlanDefaultArgs<ExtArgs>
@@ -6250,6 +6272,8 @@ export namespace Prisma {
       estimatedDuration: string | null
       startedAt: Date | null
       completedAt: Date | null
+      batchId: string | null
+      batchTitle: string | null
     }, ExtArgs["result"]["subtask"]>
     composites: {}
   }
@@ -6689,6 +6713,8 @@ export namespace Prisma {
     readonly estimatedDuration: FieldRef<"Subtask", 'String'>
     readonly startedAt: FieldRef<"Subtask", 'DateTime'>
     readonly completedAt: FieldRef<"Subtask", 'DateTime'>
+    readonly batchId: FieldRef<"Subtask", 'String'>
+    readonly batchTitle: FieldRef<"Subtask", 'String'>
   }
     
 
@@ -18322,7 +18348,9 @@ export namespace Prisma {
     assignedTo: 'assignedTo',
     estimatedDuration: 'estimatedDuration',
     startedAt: 'startedAt',
-    completedAt: 'completedAt'
+    completedAt: 'completedAt',
+    batchId: 'batchId',
+    batchTitle: 'batchTitle'
   };
 
   export type SubtaskScalarFieldEnum = (typeof SubtaskScalarFieldEnum)[keyof typeof SubtaskScalarFieldEnum]
@@ -18839,6 +18867,8 @@ export namespace Prisma {
     estimatedDuration?: StringNullableFilter<"Subtask"> | string | null
     startedAt?: DateTimeNullableFilter<"Subtask"> | Date | string | null
     completedAt?: DateTimeNullableFilter<"Subtask"> | Date | string | null
+    batchId?: StringNullableFilter<"Subtask"> | string | null
+    batchTitle?: StringNullableFilter<"Subtask"> | string | null
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     plan?: XOR<ImplementationPlanScalarRelationFilter, ImplementationPlanWhereInput>
     delegationRecords?: DelegationRecordListRelationFilter
@@ -18858,6 +18888,8 @@ export namespace Prisma {
     estimatedDuration?: SortOrderInput | SortOrder
     startedAt?: SortOrderInput | SortOrder
     completedAt?: SortOrderInput | SortOrder
+    batchId?: SortOrderInput | SortOrder
+    batchTitle?: SortOrderInput | SortOrder
     task?: TaskOrderByWithRelationInput
     plan?: ImplementationPlanOrderByWithRelationInput
     delegationRecords?: DelegationRecordOrderByRelationAggregateInput
@@ -18880,6 +18912,8 @@ export namespace Prisma {
     estimatedDuration?: StringNullableFilter<"Subtask"> | string | null
     startedAt?: DateTimeNullableFilter<"Subtask"> | Date | string | null
     completedAt?: DateTimeNullableFilter<"Subtask"> | Date | string | null
+    batchId?: StringNullableFilter<"Subtask"> | string | null
+    batchTitle?: StringNullableFilter<"Subtask"> | string | null
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     plan?: XOR<ImplementationPlanScalarRelationFilter, ImplementationPlanWhereInput>
     delegationRecords?: DelegationRecordListRelationFilter
@@ -18899,6 +18933,8 @@ export namespace Prisma {
     estimatedDuration?: SortOrderInput | SortOrder
     startedAt?: SortOrderInput | SortOrder
     completedAt?: SortOrderInput | SortOrder
+    batchId?: SortOrderInput | SortOrder
+    batchTitle?: SortOrderInput | SortOrder
     _count?: SubtaskCountOrderByAggregateInput
     _avg?: SubtaskAvgOrderByAggregateInput
     _max?: SubtaskMaxOrderByAggregateInput
@@ -18921,6 +18957,8 @@ export namespace Prisma {
     estimatedDuration?: StringNullableWithAggregatesFilter<"Subtask"> | string | null
     startedAt?: DateTimeNullableWithAggregatesFilter<"Subtask"> | Date | string | null
     completedAt?: DateTimeNullableWithAggregatesFilter<"Subtask"> | Date | string | null
+    batchId?: StringNullableWithAggregatesFilter<"Subtask"> | string | null
+    batchTitle?: StringNullableWithAggregatesFilter<"Subtask"> | string | null
   }
 
   export type DelegationRecordWhereInput = {
@@ -19903,6 +19941,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
     task: TaskCreateNestedOneWithoutSubtasksInput
     plan: ImplementationPlanCreateNestedOneWithoutSubtasksInput
     delegationRecords?: DelegationRecordCreateNestedManyWithoutSubtaskInput
@@ -19922,6 +19962,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
     delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutSubtaskInput
     commits?: CommitUncheckedCreateNestedManyWithoutSubtaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutSubtaskInput
@@ -19936,6 +19978,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     task?: TaskUpdateOneRequiredWithoutSubtasksNestedInput
     plan?: ImplementationPlanUpdateOneRequiredWithoutSubtasksNestedInput
     delegationRecords?: DelegationRecordUpdateManyWithoutSubtaskNestedInput
@@ -19955,6 +19999,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutSubtaskNestedInput
     commits?: CommitUncheckedUpdateManyWithoutSubtaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutSubtaskNestedInput
@@ -19972,6 +20018,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
   }
 
   export type SubtaskUpdateManyMutationInput = {
@@ -19983,6 +20031,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SubtaskUncheckedUpdateManyInput = {
@@ -19997,6 +20047,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type DelegationRecordCreateInput = {
@@ -21133,6 +21185,8 @@ export namespace Prisma {
     estimatedDuration?: SortOrder
     startedAt?: SortOrder
     completedAt?: SortOrder
+    batchId?: SortOrder
+    batchTitle?: SortOrder
   }
 
   export type SubtaskAvgOrderByAggregateInput = {
@@ -21153,6 +21207,8 @@ export namespace Prisma {
     estimatedDuration?: SortOrder
     startedAt?: SortOrder
     completedAt?: SortOrder
+    batchId?: SortOrder
+    batchTitle?: SortOrder
   }
 
   export type SubtaskMinOrderByAggregateInput = {
@@ -21167,6 +21223,8 @@ export namespace Prisma {
     estimatedDuration?: SortOrder
     startedAt?: SortOrder
     completedAt?: SortOrder
+    batchId?: SortOrder
+    batchTitle?: SortOrder
   }
 
   export type SubtaskSumOrderByAggregateInput = {
@@ -22725,6 +22783,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
     plan: ImplementationPlanCreateNestedOneWithoutSubtasksInput
     delegationRecords?: DelegationRecordCreateNestedManyWithoutSubtaskInput
     commits?: CommitCreateNestedManyWithoutSubtaskInput
@@ -22742,6 +22802,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
     delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutSubtaskInput
     commits?: CommitUncheckedCreateNestedManyWithoutSubtaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutSubtaskInput
@@ -23045,6 +23107,8 @@ export namespace Prisma {
     estimatedDuration?: StringNullableFilter<"Subtask"> | string | null
     startedAt?: DateTimeNullableFilter<"Subtask"> | Date | string | null
     completedAt?: DateTimeNullableFilter<"Subtask"> | Date | string | null
+    batchId?: StringNullableFilter<"Subtask"> | string | null
+    batchTitle?: StringNullableFilter<"Subtask"> | string | null
   }
 
   export type DelegationRecordUpsertWithWhereUniqueWithoutTaskInput = {
@@ -23426,6 +23490,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
     task: TaskCreateNestedOneWithoutSubtasksInput
     delegationRecords?: DelegationRecordCreateNestedManyWithoutSubtaskInput
     commits?: CommitCreateNestedManyWithoutSubtaskInput
@@ -23443,6 +23509,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
     delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutSubtaskInput
     commits?: CommitUncheckedCreateNestedManyWithoutSubtaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutSubtaskInput
@@ -23892,6 +23960,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
     task: TaskCreateNestedOneWithoutSubtasksInput
     plan: ImplementationPlanCreateNestedOneWithoutSubtasksInput
     commits?: CommitCreateNestedManyWithoutSubtaskInput
@@ -23910,6 +23980,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
     commits?: CommitUncheckedCreateNestedManyWithoutSubtaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutSubtaskInput
   }
@@ -23996,6 +24068,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     task?: TaskUpdateOneRequiredWithoutSubtasksNestedInput
     plan?: ImplementationPlanUpdateOneRequiredWithoutSubtasksNestedInput
     commits?: CommitUpdateManyWithoutSubtaskNestedInput
@@ -24014,6 +24088,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     commits?: CommitUncheckedUpdateManyWithoutSubtaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutSubtaskNestedInput
   }
@@ -24402,6 +24478,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
     task: TaskCreateNestedOneWithoutSubtasksInput
     plan: ImplementationPlanCreateNestedOneWithoutSubtasksInput
     delegationRecords?: DelegationRecordCreateNestedManyWithoutSubtaskInput
@@ -24420,6 +24498,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
     delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutSubtaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutSubtaskInput
   }
@@ -24506,6 +24586,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     task?: TaskUpdateOneRequiredWithoutSubtasksNestedInput
     plan?: ImplementationPlanUpdateOneRequiredWithoutSubtasksNestedInput
     delegationRecords?: DelegationRecordUpdateManyWithoutSubtaskNestedInput
@@ -24524,6 +24606,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutSubtaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutSubtaskNestedInput
   }
@@ -24588,6 +24672,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
     task: TaskCreateNestedOneWithoutSubtasksInput
     plan: ImplementationPlanCreateNestedOneWithoutSubtasksInput
     delegationRecords?: DelegationRecordCreateNestedManyWithoutSubtaskInput
@@ -24606,6 +24692,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
     delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutSubtaskInput
     commits?: CommitUncheckedCreateNestedManyWithoutSubtaskInput
   }
@@ -24692,6 +24780,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     task?: TaskUpdateOneRequiredWithoutSubtasksNestedInput
     plan?: ImplementationPlanUpdateOneRequiredWithoutSubtasksNestedInput
     delegationRecords?: DelegationRecordUpdateManyWithoutSubtaskNestedInput
@@ -24710,6 +24800,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutSubtaskNestedInput
     commits?: CommitUncheckedUpdateManyWithoutSubtaskNestedInput
   }
@@ -24844,6 +24936,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
   }
 
   export type DelegationRecordCreateManyTaskInput = {
@@ -24960,6 +25054,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     plan?: ImplementationPlanUpdateOneRequiredWithoutSubtasksNestedInput
     delegationRecords?: DelegationRecordUpdateManyWithoutSubtaskNestedInput
     commits?: CommitUpdateManyWithoutSubtaskNestedInput
@@ -24977,6 +25073,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutSubtaskNestedInput
     commits?: CommitUncheckedUpdateManyWithoutSubtaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutSubtaskNestedInput
@@ -24993,6 +25091,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type DelegationRecordUpdateWithoutTaskInput = {
@@ -25212,6 +25312,8 @@ export namespace Prisma {
     estimatedDuration?: string | null
     startedAt?: Date | string | null
     completedAt?: Date | string | null
+    batchId?: string | null
+    batchTitle?: string | null
   }
 
   export type SubtaskUpdateWithoutPlanInput = {
@@ -25223,6 +25325,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     task?: TaskUpdateOneRequiredWithoutSubtasksNestedInput
     delegationRecords?: DelegationRecordUpdateManyWithoutSubtaskNestedInput
     commits?: CommitUpdateManyWithoutSubtaskNestedInput
@@ -25240,6 +25344,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutSubtaskNestedInput
     commits?: CommitUncheckedUpdateManyWithoutSubtaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutSubtaskNestedInput
@@ -25256,6 +25362,8 @@ export namespace Prisma {
     estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
     startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batchId?: NullableStringFieldUpdateOperationsInput | string | null
+    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type DelegationRecordCreateManySubtaskInput = {

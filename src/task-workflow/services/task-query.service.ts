@@ -15,6 +15,13 @@ import {
 } from '../schemas';
 import { TaskStatus, WorkflowMode, WorkflowTransitionView } from '../types';
 import { PrismaErrorHandlerService } from '../utils/prisma-error.handler';
+import {
+  SearchTasksInput,
+  PaginatedTaskSummary,
+  TaskSummary,
+} from '../schemas/search-tasks.schema';
+import { TOKEN_MAPS } from '../schemas/token-refs.schema';
+import { Prisma } from '../../../generated/prisma';
 
 @Injectable()
 export class TaskQueryService {
@@ -337,5 +344,87 @@ export class TaskQueryService {
     } catch (error) {
       this.errorHandler.handlePrismaError(error, params.taskId);
     }
+  }
+
+  async searchTasks(input: SearchTasksInput): Promise<PaginatedTaskSummary> {
+    const {
+      query,
+      status: rawStatus,
+      mode: rawMode,
+      owner,
+      priority,
+      page = 1,
+      pageSize = 10,
+      sortBy = 'creationDate',
+      sortOrder = 'desc',
+      taskId: specificTaskId,
+    } = input;
+
+    const status = rawStatus
+      ? TOKEN_MAPS.status[rawStatus as keyof typeof TOKEN_MAPS.status] ||
+        rawStatus
+      : undefined;
+    const mode = rawMode
+      ? TOKEN_MAPS.role[rawMode as keyof typeof TOKEN_MAPS.role] || rawMode
+      : undefined;
+
+    const where: Prisma.TaskWhereInput = {};
+    const orderBy: Prisma.TaskOrderByWithRelationInput = {};
+
+    if (specificTaskId) {
+      where.taskId = specificTaskId;
+    } else {
+      if (query) {
+        where.OR = [
+          { name: { contains: query } },
+          { taskDescription: { description: { contains: query } } },
+        ];
+      }
+      if (status) {
+        where.status = status;
+      }
+      if (mode) {
+        where.currentMode = mode;
+      }
+      if (owner) {
+        where.owner = { contains: owner };
+      }
+      if (priority) {
+        where.priority = priority;
+      }
+    }
+
+    orderBy[sortBy] = sortOrder;
+
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+
+    const tasks = await this.prisma.task.findMany({
+      where,
+      orderBy,
+      skip,
+      take,
+    });
+
+    const totalTasks = await this.prisma.task.count({ where });
+
+    const taskSummaries: TaskSummary[] = tasks.map((task: Task) => ({
+      taskId: task.taskId,
+      name: task.name,
+      status: task.status,
+      currentMode: task.currentMode,
+      priority: task.priority,
+      creationDate: task.creationDate,
+      completionDate: task.completionDate,
+      owner: task.owner,
+    }));
+
+    return {
+      tasks: taskSummaries,
+      totalTasks,
+      currentPage: page,
+      pageSize,
+      totalPages: Math.ceil(totalTasks / pageSize),
+    };
   }
 }

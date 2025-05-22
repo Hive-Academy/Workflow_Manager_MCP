@@ -1,7 +1,7 @@
 ---
-description: 
+description: This document provides practical guidelines and best practices for integrating the `@rekog/mcp-nest` library to expose Model Context Protocol (MCP) tools and resources from a NestJS application. Adhering to these guidelines will help create robust, maintainable, and well-structured MCP servers.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Guidelines for @rekog/mcp-nest Integration
 

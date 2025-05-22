@@ -164,7 +164,9 @@ exports.Prisma.SubtaskScalarFieldEnum = {
   assignedTo: 'assignedTo',
   estimatedDuration: 'estimatedDuration',
   startedAt: 'startedAt',
-  completedAt: 'completedAt'
+  completedAt: 'completedAt',
+  batchId: 'batchId',
+  batchTitle: 'batchTitle'
 };
 
 exports.Prisma.DelegationRecordScalarFieldEnum = {

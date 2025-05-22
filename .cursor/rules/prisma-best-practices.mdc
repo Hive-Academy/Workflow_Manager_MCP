@@ -1,7 +1,7 @@
 ---
-description: 
+description: This document details best practices for using Prisma ORM, particularly when integrated with a NestJS application. Following these guidelines will help ensure a robust, maintainable, and type-safe data access layer.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Prisma Best Practices
 

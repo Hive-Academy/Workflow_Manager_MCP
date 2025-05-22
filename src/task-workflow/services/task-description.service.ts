@@ -1,53 +1,118 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from 'generated/prisma';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { UpdateTaskDescriptionSchema } from '../schemas';
-import { z } from 'zod';
+import { UpdateTaskDescriptionInput } from '../schemas/update-task-description.schema';
+import { Prisma, TaskDescription } from 'generated/prisma';
 
 @Injectable()
 export class TaskDescriptionService {
   constructor(private readonly prisma: PrismaService) {}
 
   async updateTaskDescription(
-    input: z.infer<typeof UpdateTaskDescriptionSchema>,
-  ) {
+    params: UpdateTaskDescriptionInput,
+  ): Promise<TaskDescription> {
     const {
-      taskId,
+      taskId: rawTaskId,
       description,
-      acceptanceCriteria,
       businessRequirements,
       technicalRequirements,
-    } = input;
+      acceptanceCriteria,
+    } = params;
 
-    // Ensure task exists before attempting to upsert its description
-    const task = await this.prisma.task.findUnique({
-      where: { taskId },
-    });
-    if (!task) {
-      throw new NotFoundException(`Task with ID "${taskId}" not found.`);
+    const taskId = String(rawTaskId); // Ensure taskId is a string
+
+    try {
+      // 1. Ensure the TaskDescription exists, as we are doing a strict update.
+      //    findUniqueOrThrow would simplify this if your Prisma version supports it well for this use case.
+      const existingTaskDescription =
+        await this.prisma.taskDescription.findUnique({
+          where: { taskId },
+        });
+
+      if (!existingTaskDescription) {
+        throw new NotFoundException(
+          `TaskDescription for Task ID '${taskId}' not found. Cannot update.`,
+        );
+      }
+
+      // 2. Construct the update payload for Prisma
+      const updateData: Prisma.TaskDescriptionUpdateInput = {};
+
+      // Only include fields in the update payload if they were actually provided in the params
+      if ('description' in params) {
+        updateData.description = description as string;
+      }
+      if ('businessRequirements' in params) {
+        // If the field is in params, use its value (which could be null if Zod schema allows)
+        updateData.businessRequirements = businessRequirements as string;
+      }
+      if ('technicalRequirements' in params) {
+        updateData.technicalRequirements = technicalRequirements as string;
+      }
+      if ('acceptanceCriteria' in params) {
+        updateData.acceptanceCriteria = acceptanceCriteria
+          ? (acceptanceCriteria as Prisma.JsonArray) // Cast if it's string[] and DB is Json
+          : Prisma.JsonNull; // Explicitly set to null if input was null/empty and DB is Json
+      }
+
+      // Filter out any keys that ended up with an undefined value,
+      // though explicit checks above should handle most cases.
+      const finalUpdateData = Object.entries(updateData).reduce(
+        (acc, [key, value]) => {
+          if (value !== undefined) {
+            acc[key as keyof Prisma.TaskDescriptionUpdateInput] = value as any;
+          }
+          return acc;
+        },
+        {} as Prisma.TaskDescriptionUpdateInput,
+      );
+
+      if (Object.keys(finalUpdateData).length === 0) {
+        // No actual fields were provided for update (e.g., empty params or only undefined values)
+        return existingTaskDescription; // Return existing as no update is performed
+      }
+
+      // 3. Perform the update
+      return await this.prisma.taskDescription.update({
+        where: { taskId },
+        data: finalUpdateData,
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error(
+        `Error in TaskDescriptionService.updateTaskDescription for task ${taskId}:`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        `Could not update task description for task ID '${taskId}'. Error: ${(error as Error).message}`,
+      );
     }
+  }
 
-    return this.prisma.taskDescription.upsert({
-      where: { taskId },
-      create: {
-        task: { connect: { taskId } },
-        description: description || '', // description might be optional in schema but required in DB
-        businessRequirements: businessRequirements || '', // empty string instead of null for string fields
-        technicalRequirements: technicalRequirements || '', // empty string instead of null for string fields
-        // If optional fields are undefined in input, store them as DB null during creation
-        acceptanceCriteria: acceptanceCriteria ?? Prisma.JsonNull,
-      },
-      update: {
-        // Only include fields in the update payload if they are explicitly provided in the input
-        ...(description !== undefined && { description }),
-        ...(businessRequirements !== undefined && { businessRequirements }),
-        ...(technicalRequirements !== undefined && { technicalRequirements }),
-        // For acceptanceCriteria, handle it specifically for JSON field
-        ...(acceptanceCriteria !== undefined && {
-          acceptanceCriteria: acceptanceCriteria as Prisma.InputJsonValue,
-        }),
-        // Prisma automatically handles the @updatedAt field
-      },
-    });
+  async getTaskDescription(rawTaskId: string): Promise<TaskDescription | null> {
+    const taskId = String(rawTaskId);
+    try {
+      const taskDescription = await this.prisma.taskDescription.findUnique({
+        where: { taskId },
+      });
+
+      if (!taskDescription) {
+        return null;
+      }
+      return taskDescription;
+    } catch (error) {
+      console.error(
+        `Error in TaskDescriptionService.getTaskDescription for task ${taskId}:`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        `Could not retrieve task description for task ID '${taskId}'. Error: ${(error as Error).message}`,
+      );
+    }
   }
 }

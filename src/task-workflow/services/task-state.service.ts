@@ -13,22 +13,18 @@ import {
   CompleteTaskSchema,
   GetCurrentModeForTaskSchema,
   ContinueTaskSchema,
-  TransitionRoleSchema,
+  RoleTransitionSchema,
 } from '../schemas';
-
-interface TransitionRoleParams {
-  taskId: string;
-  fromRole: string;
-  toRole: string;
-}
 
 @Injectable()
 export class TaskStateService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async transitionRole(params: z.infer<typeof TransitionRoleSchema>) {
+  async transitionRole(params: z.infer<typeof RoleTransitionSchema>) {
     try {
-      const { taskId, fromRole, toRole } = params as TransitionRoleParams;
+      const taskId = params.taskId;
+      const toRole = params.roleId;
+      const fromRole = params.fromRole || 'system';
 
       // Update the task's currentMode and status, and log the delegation
       const updateData: Prisma.TaskUpdateInput = {
