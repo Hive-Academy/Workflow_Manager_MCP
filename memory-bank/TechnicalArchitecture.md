@@ -5,6 +5,7 @@
 The MCP Workflow Manager is now built on NestJS, Prisma, and @rekog/mcp-nest, replacing the legacy file-system-based approach. This enables modularity, scalability, and maintainability.
 
 ### Key Components
+
 - **NestJS**: Application structure, DI, modules, and service orchestration
 - **Prisma**: ORM, schema migrations, and type-safe DB access
 - **@rekog/mcp-nest**: MCP tool/resource exposure via decorators and Zod validation
@@ -25,7 +26,7 @@ graph TD
     subgraph NestJS Application
         direction LR
         B1[AppModule]
-        B2[Feature Modules]
+        B2[Feature Modules (e.g., TaskWorkflowModule)]
         B3[PrismaModule]
         B4[McpModule (@rekog/mcp-nest)]
         B1 --> B2
@@ -37,7 +38,23 @@ graph TD
     end
 ```
 
+### Feature Module Structure (Example: TaskWorkflowModule)
+
+Feature modules like `TaskWorkflowModule` are internally organized using a Domain-Driven Design (DDD) inspired approach. Files are grouped by domain/feature (e.g., `crud`, `query`, `state`, `interaction`, `plan`, `reporting`) under a `domains` directory within the module (`src/task-workflow/domains/`).
+
+Each domain typically contains:
+
+- **MCP Operation Services**: Expose tools using `@rekog/mcp-nest`. These services orchestrate calls to business logic services.
+  (e.g., `TaskCrudOperationsService.ts` in `src/task-workflow/domains/crud/`)
+- **Business Logic Services**: Contain the core business logic, interacting with Prisma or other services.
+  (e.g., `TaskCrudService.ts` in `src/task-workflow/domains/crud/`)
+- **Schemas (Zod)**: Define the structure and validation for MCP tool parameters and potentially internal data structures, typically in a `schemas` sub-directory within the domain.
+  (e.g., `create-task.schema.ts` in `src/task-workflow/domains/crud/schemas/`)
+
+This structure replaces a flatter organization where services, MCP operations, and schemas might have been grouped by technical type (e.g., all services in one folder, all schemas in another).
+
 ### Workflow & Data Flow
+
 - MCP client (Cursor IDE) sends requests via stdio or HTTP+SSE
 - @rekog/mcp-nest receives, validates, and routes to the correct tool method
 - Tool methods are implemented in NestJS services, using Prisma for DB access
@@ -45,11 +62,13 @@ graph TD
 - Results are returned to the client via MCP
 
 ### Updating the Architecture
+
 - When adding or refactoring tools, update the architecture diagram and this file as needed
 - Ensure all new tools/services follow the modular, DI-driven NestJS pattern
 - See `DeveloperGuide.md` for implementation and best practices
 
 ## 2. Security & Deployment
+
 - Use NestJS Guards for authentication/authorization
 - Prisma prevents SQL injection by design
 - Run Prisma migrations before production deployment

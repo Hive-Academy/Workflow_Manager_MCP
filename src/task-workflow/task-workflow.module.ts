@@ -1,56 +1,69 @@
 import { Module } from '@nestjs/common';
-// import { TaskWorkflowController } from './task-workflow.controller'; // Temporarily remove if not yet implemented
-import { TaskWorkflowService } from './task-workflow.service';
-// import { ImplementationPlanOperationsService } from './mcp-operations/implementation-plan-operations.service'; // Will come from barrel
 import { PrismaModule } from '../prisma/prisma.module';
-import {
-  TaskCrudService,
-  TaskQueryService,
-  TaskStateService,
-  TaskCommentService,
-  TaskDescriptionService,
-  RoleTransitionService,
-  ProcessCommandService,
-  ContextManagementService,
-  ShorthandParserService,
-  ImplementationPlanService as CoreImplementationPlanService, // Keep alias for CoreImplementationPlanService if used internally with this name
-  ResearchReportService, // Added
-} from './services';
+
+// Core Business Logic Services - New Paths
+import { TaskCrudService } from './domains/crud/task-crud.service';
+import { TaskDescriptionService } from './domains/crud/task-description.service';
+import { TaskQueryService } from './domains/query/task-query.service';
+import { ContextManagementService } from './domains/query/context-management.service';
+import { TaskStateService } from './domains/state/task-state.service';
+import { RoleTransitionService } from './domains/state/role-transition.service';
+import { TaskCommentService } from './domains/interaction/task-comment.service';
+import { ProcessCommandService } from './domains/interaction/process-command.service';
+import { ShorthandParserService } from './domains/interaction/shorthand-parser.service';
+import { ImplementationPlanService as CoreImplementationPlanService } from './domains/plan/implementation-plan.service';
+import { ResearchReportService } from './domains/reporting/research-report.service';
+import { CodeReviewReportService } from './domains/reporting/code-review-report.service'; // Added
+import { CompletionReportService } from './domains/reporting/completion-report.service'; // Added
+
+// MCP Operation Services - New Paths
+import { TaskCrudOperationsService } from './domains/crud/task-crud-operations.service';
+import { TaskQueryOperationsService } from './domains/query/task-query-operations.service';
+import { TaskStateOperationsService } from './domains/state/task-state-operations.service';
+import { TaskInteractionOperationsService } from './domains/interaction/task-interaction-operations.service';
+import { ImplementationPlanOperationsService } from './domains/plan/implementation-plan-operations.service';
+import { ReportOperationsService } from './domains/reporting/report-operations.service';
+
 import { PrismaErrorHandlerService } from './utils/prisma-error.handler';
-import {
-  ReportOperationsService,
-  ImplementationPlanOperationsService,
-  TaskCrudOperationsService,
-} from './mcp-operations/index'; // Explicitly point to index file
 
 @Module({
-  imports: [PrismaModule], // Import PrismaModule as TaskWorkflowService depends on PrismaService
-  // controllers: [TaskWorkflowController], // Temporarily remove
+  imports: [PrismaModule],
   providers: [
-    TaskWorkflowService, // The main facade service
-    ImplementationPlanOperationsService,
-    TaskCrudService, // Specialized services
-    TaskQueryService,
-    TaskStateService,
-    TaskCommentService,
+    // Core Business Logic Services
+    TaskCrudService,
     TaskDescriptionService,
+    TaskQueryService,
+    ContextManagementService,
+    TaskStateService,
     RoleTransitionService,
+    TaskCommentService,
     ProcessCommandService,
-    ContextManagementService, // Provide the new service
-    ShorthandParserService, // Provide the new service
-    PrismaErrorHandlerService, // Temporarily remove from providers
-    CoreImplementationPlanService, // This is ImplementationPlanService from ./services
+    ShorthandParserService,
+    CoreImplementationPlanService,
+    ResearchReportService,
+    CodeReviewReportService, // Added
+    CompletionReportService, // Added
+
+    // MCP Operation Services
     TaskCrudOperationsService,
-    ResearchReportService, // Added to providers
-    ReportOperationsService, // Added to providers
+    TaskQueryOperationsService,
+    TaskStateOperationsService,
+    TaskInteractionOperationsService,
+    ImplementationPlanOperationsService,
+    ReportOperationsService,
+
+    PrismaErrorHandlerService,
   ],
   exports: [
-    TaskWorkflowService,
-    ImplementationPlanOperationsService,
+    // Export only MCP Operation Services as per original intent?
+    // Or also core services if other modules might need them directly?
+    // For now, keeping exports to MCP Operation services primarily.
     TaskCrudOperationsService,
-    ReportOperationsService, // Added to exports
-    // Exporting individual services if they are meant to be used directly by other modules
-    // For now, assuming MCP operation services are the primary external interface
+    TaskQueryOperationsService,
+    TaskStateOperationsService,
+    TaskInteractionOperationsService,
+    ImplementationPlanOperationsService,
+    ReportOperationsService,
   ],
 })
 export class TaskWorkflowModule {}

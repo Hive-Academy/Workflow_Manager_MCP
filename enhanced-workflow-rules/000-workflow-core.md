@@ -244,4 +244,12 @@ Use these optimized MCP calls to minimize token usage:
 4.  **👨‍💻SD**: Implementation, testing, batch ACs.
 5.  **🔍CR**: QA, standards, AC verification.
 
-Follow role-specific files for detailed instructions.
+### Important note when using the file system mcp server
+
+> we should always use the absolute path ex: `{ path: D://projects/cursor-workflow/src/main.ts }`
+
+# Important: Roles Specific fetching
+
+    - Follow role-specific files for detailed instructions.
+    - You should use the `fetch_rules` initially to load the Boomerang rules.
+    - You should always make sure to load the correct rules file ( IF YOU DON'T HAVE THEM ) before proceeding with the task execution especially after each delegation.
