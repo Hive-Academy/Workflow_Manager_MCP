@@ -105,20 +105,92 @@ export class ReportOperationsService {
       GetResearchReportInputSchema as ZodSchema<GetResearchReportInput>,
     // Output schema handling might need refinement for union types if not already supported
   })
-  async getResearchReport(
-    input: GetResearchReportInput,
-  ): Promise<ResearchReport | ResearchReport[] | null> {
+  async getResearchReport(input: GetResearchReportInput): Promise<any> {
+    const contextIdentifier = 'research-report';
+    let reportData: ResearchReport | ResearchReport[] | null = null;
+
     if (input.reportId) {
-      return this.researchReportService.getResearchReportById(input.reportId);
-    }
-    if (input.taskId) {
-      return this.researchReportService.getResearchReportsByTaskId(
+      reportData = await this.researchReportService.getResearchReportById(
+        input.reportId,
+      );
+      if (!reportData) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier} found for reportId ${input.reportId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true,
+                contextHash: null,
+                contextType: contextIdentifier,
+                reportId: input.reportId,
+              }),
+            },
+          ],
+        };
+      }
+    } else if (input.taskId) {
+      reportData = await this.researchReportService.getResearchReportsByTaskId(
         input.taskId,
       );
+      if (
+        !reportData ||
+        (Array.isArray(reportData) && reportData.length === 0)
+      ) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier}s found for taskId ${input.taskId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true, // Or empty: true for arrays
+                contextHash: null,
+                contextType: contextIdentifier,
+                taskId: input.taskId,
+              }),
+            },
+          ],
+        };
+      }
+    } else {
+      // This case should ideally be prevented by schema validation (Zod refine)
+      // but if it occurs, return a standardized error response.
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error: Either reportId or taskId must be provided to get_research_report.`,
+          },
+          {
+            type: 'text',
+            text: JSON.stringify({
+              error: true,
+              message: 'Either reportId or taskId must be provided.',
+              contextType: contextIdentifier,
+            }),
+          },
+        ],
+      };
     }
-    throw new Error(
-      'Either reportId or taskId must be provided to get_research_report.',
-    );
+
+    // If reportData is found and not empty, return it in the old format for now
+    // Or, ideally, it should also be wrapped if MCP requires all tool outputs to be `content: [...]`
+    // For ST-004, the focus is on the "not found" case.
+    // The successful return path would be standardized later if needed project-wide.
+    return {
+      content: [
+        {
+          type: 'json',
+          json: reportData,
+        },
+      ],
+    };
   }
 
   @Tool({
@@ -165,28 +237,108 @@ export class ReportOperationsService {
   })
   async getCodeReviewReport(
     input: z.infer<typeof GetCodeReviewReportInputSchema>,
-  ): Promise<CodeReviewReport | CodeReviewReport[] | null> {
+  ): Promise<any> {
+    const contextIdentifier = 'code-review-report';
+    let reportData: CodeReviewReport | CodeReviewReport[] | null = null;
+
     if (input.reportId) {
       const reportIdNum = parseInt(input.reportId, 10);
       if (isNaN(reportIdNum)) {
-        throw new Error('Invalid reportId format for get_code_review_report.');
+        // Standardized error for invalid input
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error: Invalid reportId format for ${contextIdentifier}. Expected a number.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                error: true,
+                message: 'Invalid reportId format. Expected a number.',
+                contextType: contextIdentifier,
+                reportId: input.reportId,
+              }),
+            },
+          ],
+        };
       }
       const prismaReport =
         await this.codeReviewReportService.getCodeReviewReport(reportIdNum);
-      return mapPrismaCodeReviewToZod(prismaReport);
-    }
-    if (input.taskId) {
+      reportData = mapPrismaCodeReviewToZod(prismaReport);
+      if (!reportData) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier} found for reportId ${input.reportId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true,
+                contextHash: null,
+                contextType: contextIdentifier,
+                reportId: input.reportId,
+              }),
+            },
+          ],
+        };
+      }
+    } else if (input.taskId) {
       const prismaReports =
         await this.codeReviewReportService.getCodeReviewReportsByTaskId(
           input.taskId,
         );
-      return prismaReports
+      reportData = prismaReports
         .map(mapPrismaCodeReviewToZod)
         .filter((r) => r !== null);
+      if (reportData.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier}s found for taskId ${input.taskId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true, // or empty: true
+                contextHash: null,
+                contextType: contextIdentifier,
+                taskId: input.taskId,
+              }),
+            },
+          ],
+        };
+      }
+    } else {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error: Either reportId or taskId must be provided for ${contextIdentifier}.`,
+          },
+          {
+            type: 'text',
+            text: JSON.stringify({
+              error: true,
+              message: 'Either reportId or taskId must be provided.',
+              contextType: contextIdentifier,
+            }),
+          },
+        ],
+      };
     }
-    throw new Error(
-      'Either reportId or taskId must be provided for get_code_review_report.',
-    );
+    // Successful return, wrapped in content array
+    return {
+      content: [
+        {
+          type: 'json',
+          json: reportData,
+        },
+      ],
+    };
   }
 
   @Tool({
@@ -238,18 +390,87 @@ export class ReportOperationsService {
   })
   async getCompletionReport(
     input: z.infer<typeof GetCompletionReportInputSchema>,
-  ): Promise<CompletionReport | CompletionReport[] | null> {
+  ): Promise<any> {
+    const contextIdentifier = 'completion-report';
+    let reportData: CompletionReport | CompletionReport[] | null = null;
+
     if (input.reportId) {
-      return this.completionReportService.getCompletionReport(input.reportId);
-    }
-    if (input.taskId) {
-      return this.completionReportService.getCompletionReportsByTaskId(
-        input.taskId,
+      reportData = await this.completionReportService.getCompletionReport(
+        input.reportId,
       );
+      if (!reportData) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier} found for reportId ${input.reportId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true,
+                contextHash: null,
+                contextType: contextIdentifier,
+                reportId: input.reportId,
+              }),
+            },
+          ],
+        };
+      }
+    } else if (input.taskId) {
+      reportData =
+        await this.completionReportService.getCompletionReportsByTaskId(
+          input.taskId,
+        );
+      if (
+        !reportData ||
+        (Array.isArray(reportData) && reportData.length === 0)
+      ) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier}s found for taskId ${input.taskId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true, // or empty: true
+                contextHash: null,
+                contextType: contextIdentifier,
+                taskId: input.taskId,
+              }),
+            },
+          ],
+        };
+      }
+    } else {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error: Either reportId or taskId must be provided for ${contextIdentifier}.`,
+          },
+          {
+            type: 'text',
+            text: JSON.stringify({
+              error: true,
+              message: 'Either reportId or taskId must be provided.',
+              contextType: contextIdentifier,
+            }),
+          },
+        ],
+      };
     }
-    throw new Error(
-      'Either reportId or taskId must be provided for get_completion_report.',
-    );
+    // Successful return, wrapped
+    return {
+      content: [
+        {
+          type: 'json',
+          json: reportData,
+        },
+      ],
+    };
   }
 
   @Tool({

@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Tool } from '@rekog/mcp-nest';
 import {
   DocumentRefSchema,
   RoleCodeSchema,
@@ -10,6 +11,7 @@ import { ContextManagementService } from '../query/context-management.service';
 import { TaskQueryOperationsService } from '../query/task-query-operations.service';
 import { TaskInteractionOperationsService } from './task-interaction-operations.service';
 import { TaskStateOperationsService } from '../state/task-state-operations.service';
+import { ShorthandCommandSchema } from './schemas/shorthand-command.schema';
 
 // Define Zod schemas for shorthand command parameters
 const NoteParamsSchema = z.object({ message: z.string() });
@@ -38,7 +40,16 @@ export class ShorthandParserService {
     private readonly taskStateOperationsService: TaskStateOperationsService,
   ) {}
 
-  async parseAndExecute(taskId: string, commandString: string): Promise<any> {
+  @Tool({
+    name: 'shorthand_command',
+    description:
+      'Executes a shorthand command for more token-efficient operations.',
+    parameters: ShorthandCommandSchema,
+  })
+  async parseAndExecute(
+    params: z.infer<typeof ShorthandCommandSchema>,
+  ): Promise<any> {
+    const { taskId, command: commandString } = params;
     this.logger.debug(`Parsing command for task ${taskId}: ${commandString}`);
     const match = commandString.match(/^([a-zA-Z_]+)\((.*)\)$/);
     if (!match) {

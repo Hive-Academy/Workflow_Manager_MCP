@@ -38,9 +38,23 @@ export class TaskQueryOperationsService {
       const fullContext = await this.taskQueryService.getTaskContext(params);
 
       if (!fullContext || !fullContext.task) {
-        throw new NotFoundException(
-          `Task context not found for ID: ${params.taskId}`,
-        );
+        const contextIdentifier = 'task-context';
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier} found for task ${params.taskId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true,
+                contextHash: null, // No hash available for a non-existent context
+                contextType: contextIdentifier,
+              }),
+            },
+          ],
+        };
       }
 
       const {
@@ -97,10 +111,28 @@ export class TaskQueryOperationsService {
         ],
       };
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof InternalServerErrorException
-      ) {
+      if (error instanceof NotFoundException) {
+        const contextIdentifier = 'task-context';
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error: Context identified as '${contextIdentifier}' not found for task ${params.taskId}. Message: ${(error as Error).message}`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true,
+                error: true,
+                message: (error as Error).message,
+                contextHash: null,
+                contextType: contextIdentifier,
+              }),
+            },
+          ],
+        };
+      }
+      if (error instanceof InternalServerErrorException) {
         throw error;
       }
       console.error(
@@ -120,13 +152,37 @@ export class TaskQueryOperationsService {
     parameters: ListTasksSchema,
   })
   async listTasks() {
+    const contextIdentifier = 'task-list';
     try {
       const listData = await this.taskQueryService.listTasks();
+      if (!listData || listData.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No tasks found matching criteria for ${contextIdentifier}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                empty: true,
+                contextHash: null, // Or a hash of an empty list if meaningful
+                contextType: contextIdentifier,
+                count: 0,
+              }),
+            },
+          ],
+        };
+      }
       return {
         content: [
           {
             type: 'text',
-            text: `Found ${listData.length} tasks matching criteria.`,
+            text: `Found ${listData.length} tasks for ${contextIdentifier}.`,
+          },
+          {
+            type: 'text',
+            text: JSON.stringify(listData), // Return the actual list data stringified
           },
         ],
       };
@@ -135,9 +191,23 @@ export class TaskQueryOperationsService {
         throw error;
       }
       console.error('TaskQueryOperationsService Error in listTasks:', error);
-      throw new InternalServerErrorException(
-        'TaskQueryOperationsService: Could not list tasks.',
-      );
+      // Standardized generic error response
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `An internal error occurred while fetching ${contextIdentifier}.`,
+          },
+          {
+            type: 'text',
+            text: JSON.stringify({
+              error: true,
+              message: (error as Error).message,
+              contextType: contextIdentifier,
+            }),
+          },
+        ],
+      };
     }
   }
 
@@ -311,29 +381,81 @@ export class TaskQueryOperationsService {
     try {
       const { taskId, lastContextHash, sliceType } = params;
 
-      let currentContextData;
-      let contextIdentifier = sliceType || 'full';
+      let currentContextData: any;
+      let contextIdentifier = sliceType || 'full-task-context'; // More specific default
+      let isNotFoundOrEmpty = false;
 
       if (sliceType) {
         const mappedSliceType = TOKEN_MAPS.document[sliceType] || sliceType;
+        contextIdentifier = mappedSliceType; // Set specific identifier for slice
         currentContextData =
           await this.contextManagementService.getContextSlice(
             taskId,
             mappedSliceType,
           );
-        contextIdentifier = mappedSliceType;
+        if (
+          currentContextData == null ||
+          (typeof currentContextData === 'object' &&
+            Object.keys(currentContextData).length === 0) ||
+          (Array.isArray(currentContextData) && currentContextData.length === 0)
+        ) {
+          isNotFoundOrEmpty = true;
+        }
       } else {
+        // No sliceType, get full context (or what getTaskContext returns)
         const fullContextResponse = await this.getTaskContext({ taskId });
-        currentContextData =
-          fullContextResponse.content[0].type === 'json'
-            ? fullContextResponse.content[0].json
-            : {};
+        if (fullContextResponse.content[0].type === 'text') {
+          // This means getTaskContext itself determined "not found"
+          isNotFoundOrEmpty = true;
+          // We can directly return its response as it's already standardized
+          // Or, if we want getContextDiff to have its own distinct "not found" for 'full-task-context':
+          // currentContextData = {}; // or null, to be handled by subsequent logic
+          // For now, let's assume if getTaskContext says not found, we propagate that.
+          // However, the standard asks for getContextDiff to potentially have its own message.
+          // Let's refine: if getTaskContext returns its 'notFound', currentContextData remains undefined or empty
+        } else if (fullContextResponse.content[0].type === 'json') {
+          currentContextData = (
+            fullContextResponse.content[0] as { type: 'json'; json: any }
+          ).json;
+        } else {
+          // Should not happen if getTaskContext adheres to its new contract
+          currentContextData = {};
+          isNotFoundOrEmpty = true; // Treat unexpected structure as empty/error
+        }
+        // If currentContextData is still undefined or an empty object after call to getTaskContext
+        if (
+          currentContextData == null ||
+          (typeof currentContextData === 'object' &&
+            Object.keys(currentContextData).length === 0)
+        ) {
+          isNotFoundOrEmpty = true;
+        }
+      }
+
+      if (isNotFoundOrEmpty) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No data found for ${contextIdentifier} context for task ${taskId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true, // or empty: true
+                contextHash: null,
+                contextType: contextIdentifier,
+              }),
+            },
+          ],
+        };
       }
 
       const currentHash =
         this.contextManagementService.hashContext(currentContextData);
 
       if (lastContextHash === currentHash) {
+        // MODIFIED: Standardized response for unchanged context
         return {
           content: [
             {
@@ -341,12 +463,12 @@ export class TaskQueryOperationsService {
               text: `No changes to ${contextIdentifier} context for task ${taskId} since last retrieval.`,
             },
             {
-              type: 'json',
-              json: {
+              type: 'text',
+              text: JSON.stringify({
                 unchanged: true,
                 contextHash: currentHash,
                 contextType: contextIdentifier,
-              },
+              }),
             },
           ],
         };
@@ -359,8 +481,9 @@ export class TaskQueryOperationsService {
         currentContextData,
       );
 
-      this.contextManagementService.cacheContext(currentContextData);
+      this.contextManagementService.cacheContext(currentContextData); // Should this be here or in getTaskContext?
 
+      // MODIFIED: Standardized response for updated context with diff
       return {
         content: [
           {
@@ -368,26 +491,62 @@ export class TaskQueryOperationsService {
             text: `${contextIdentifier} context for task ${taskId} updated.`,
           },
           {
-            type: 'json',
-            json: {
+            type: 'text',
+            text: JSON.stringify({
               contextHash: currentHash,
               contextType: contextIdentifier,
               changes: diff,
-            },
+              unchanged: false, // Explicitly indicate data has changed
+            }),
           },
         ],
       };
     } catch (error) {
+      // Ensure catch block also returns standardized error if appropriate
+      const taskIdForError = params.taskId || 'unknown_task';
+      const contextIdentifierForError = params.sliceType || 'full-task-context';
       if (error instanceof NotFoundException) {
-        throw error;
+        // This might be thrown by getContextSlice or other internal calls
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error: Data not found for ${contextIdentifierForError} context for task ${taskIdForError}. Message: ${(error as Error).message}`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true,
+                error: true,
+                message: (error as Error).message,
+                contextHash: null,
+                contextType: contextIdentifierForError,
+              }),
+            },
+          ],
+        };
       }
       console.error(
-        `TaskQueryOperationsService Error in getContextDiff for ${params.taskId}, sliceType ${params.sliceType}:`,
+        `TaskQueryOperationsService Error in getContextDiff for ${taskIdForError}, sliceType ${params.sliceType}:`,
         error,
       );
-      throw new InternalServerErrorException(
-        `TaskQueryOperationsService: Could not get context diff for task '${params.taskId}'. Error: ${(error as Error).message}`,
-      );
+      // Generic error standardized response
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `An internal error occurred while fetching context diff for ${contextIdentifierForError} for task ${taskIdForError}.`,
+          },
+          {
+            type: 'text',
+            text: JSON.stringify({
+              error: true,
+              message: (error as Error).message,
+              contextType: contextIdentifierForError,
+            }),
+          },
+        ],
+      };
     }
   }
 

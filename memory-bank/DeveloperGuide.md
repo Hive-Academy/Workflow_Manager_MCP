@@ -62,3 +62,70 @@ npm install
 ## 7. Support
 
 - For questions, see the project README or contact the maintainers.
+
+## 8. MCP Tool Usage Best Practices
+
+### 8.1. Standardized Responses for Unchanged/Not Found/Empty Contexts
+
+Many MCP tools that retrieve context or data have been standardized to return a specific two-part text-based JSON response when the requested context is unchanged, not found, or the data is empty. This helps in reducing ambiguity and allows clients (like AI agents) to efficiently handle these common scenarios.
+
+**Response Format:**
+
+The first part of the response is a human-readable text message, and the second part is a stringified JSON object providing details.
+
+_Example for "Not Found":_
+
+```json
+// Part 1 (Human-readable)
+"No research-report context found for task TSK-001."
+// Part 2 (Stringified JSON details)
+"{\"notFound\":true,\"contextIdentifier\":\"research-report\"}"
+```
+
+_Example for "Unchanged" (typically from `getContextDiff`):_
+
+```json
+// Part 1
+"No changes to task-description context for task TSK-001 since last retrieval."
+// Part 2
+"{\"unchanged\":true,\"contextHash\":\"abcdef123456\",\"contextIdentifier\":\"task-description\"}"
+```
+
+_Example for "Empty" (e.g., an empty list of tasks):_
+
+```json
+// Part 1
+"Task list is empty based on the provided filters."
+// Part 2
+"{\"empty\":true,\"contextIdentifier\":\"task-list\"}"
+```
+
+Key fields in the stringified JSON part:
+
+- `unchanged: true`: Indicates the context slice has not changed since a previous hash was known.
+- `notFound: true`: Indicates the requested data or entity does not exist.
+- `empty: true`: Indicates that a normally list-based result is empty (e.g., no tasks found).
+- `contextHash: "..."`: The hash of the context if it's unchanged (mainly from `getContextDiff`).
+- `contextIdentifier: "..."`: A descriptive kebab-case string identifying the type of context (e.g., `task-status`, `ip-batch-b001`, `research-report`).
+
+### 8.2. Efficient Context Retrieval: Prefer `getContextDiff`
+
+To maximize token efficiency and minimize redundant data transfer, **it is strongly recommended to preferentially use the `mcp:get_context_diff(taskId, lastContextHash, sliceType)` tool when you need to check for updates to a known piece of context or retrieve its current version.**
+
+- **When to use `mcp:get_context_diff`**:
+
+  - You have previously fetched a context slice (e.g., Task Description, Implementation Plan, a specific report).
+  - You have the `lastContextHash` that was returned with that slice.
+  - You want to know if that slice has changed and, if so, get the new version.
+  - `getContextDiff` will efficiently tell you if it's `unchanged` (returning the hash again) or provide the updated content if it has changed.
+
+- **When to use `mcp:get_task_context(taskId, sliceType)`**:
+
+  - You are fetching a specific context slice (e.g., `taskDescription`, `implementationPlan`) for the _first time_ for a given task.
+  - You do not have a `lastContextHash` for that slice.
+  - You explicitly need a full refresh of that slice, regardless of changes.
+
+- **When to use `mcp:get_task_context(taskId)` (without `sliceType`)**:
+  - You need the entire task object's current state (e.g., for initial task loading by Boomerang, which includes status, notes, core description, etc.). This is a more comprehensive, and thus larger, data retrieval.
+
+Refer to the "Context Management" section in `enhanced-workflow-rules/000-workflow-core.md` for further guidance on these principles within the AI agent workflow.

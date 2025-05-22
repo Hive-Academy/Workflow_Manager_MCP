@@ -145,14 +145,45 @@ export class TaskCrudOperationsService {
   async searchTasksTool(
     params: z.infer<typeof SearchTasksInputSchema>,
   ): Promise<any> {
+    const contextIdentifier = 'task-search-results';
     try {
       const result: PaginatedTaskSummary =
         await this.taskQueryService.searchTasks(params);
+
+      if (!result || result.tasks.length === 0 || result.totalTasks === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No tasks found matching your search criteria for ${contextIdentifier}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                empty: true,
+                contextHash: null, // Hash of empty results might not be meaningful
+                contextType: contextIdentifier,
+                searchParams: params, // Optionally include search params for context
+                count: 0,
+              }),
+            },
+          ],
+        };
+      }
+
       return {
         content: [
+          // {
+          //   type: 'json',
+          //   json: result,
+          // },
           {
-            type: 'json',
-            json: result,
+            type: 'text',
+            text: `Found ${result.totalTasks} task(s) matching your search criteria for ${contextIdentifier}. Page ${result.currentPage} of ${result.totalPages}.`,
+          },
+          {
+            type: 'text',
+            text: JSON.stringify(result), // Return the actual paginated result stringified
           },
         ],
       };
@@ -161,9 +192,24 @@ export class TaskCrudOperationsService {
         `TaskCrudOperationsService Error in searchTasksTool:`,
         error,
       );
-      throw new InternalServerErrorException(
-        `TaskCrudOperationsService: Could not search tasks. Error: ${(error as Error).message}`,
-      );
+      // Standardized generic error response
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `An internal error occurred while searching tasks for ${contextIdentifier}.`,
+          },
+          {
+            type: 'text',
+            text: JSON.stringify({
+              error: true,
+              message: (error as Error).message,
+              contextType: contextIdentifier,
+              searchParams: params,
+            }),
+          },
+        ],
+      };
     }
   }
 }

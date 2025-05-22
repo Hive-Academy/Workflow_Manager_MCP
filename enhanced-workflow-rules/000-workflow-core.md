@@ -62,9 +62,12 @@ Focus: [area of focus]
 
 ### Context Management
 
-- Only include what has changed since the last update
-- Reference specific context slices using `mcp:context(TASK_ID, TYPE)`
-- Use the format `task(TSK-002).status` instead of repeating task details
+- **Prioritize fetching only necessary data.**
+- When you have a `lastContextHash` for a specific `sliceType` (e.g., TD, IP, RR) and need to check for updates or get the current version efficiently, **prefer using `mcp:get_context_diff(taskId, lastContextHash, sliceType)`**. This tool will return only changes or confirm if the slice is unchanged, saving tokens.
+- Use `mcp:get_task_context(taskId, sliceType)` when you need to fetch a specific context slice for the first time, if you don't have a `lastContextHash`, or if a full refresh of that slice is explicitly required.
+- Use `mcp:get_task_context(taskId)` (without `sliceType`) when the entire task object's current state is needed (e.g., for initial task loading by Boomerang).
+- Only include what has changed in your own communications since the last update.
+- Use the format `task(TSK-002).status` instead of repeating task details.
 
 ### MCP Command Shorthand
 
@@ -82,52 +85,52 @@ The lifecycle of a task (`taskId`, `taskName`) involves the following roles and 
     - Receives initial user request.
       - New task: `mcp:create_task(taskId='[taskId_value]', taskName='[taskName_value]', description='[description_value]')`.
       - Existing task: `mcp:get_task_context(taskId='[taskId_value]', taskName='[taskName_value]')`.
-    - Status update: `mcp:update_task_status(status='INP', notes='🪃MB: Started analysis')`.
+    - Status update: `mcp:status('INP', '🪃MB: Started analysis')`.
     - Performs task analysis, memory bank review, and research evaluation.
     - Creates TD with acceptance criteria.
     - **Delegation**:
-      - To Researcher (if needed): `mcp:delegate_task(toMode='🔬RS', message='Research needed. Ref: TD')`.
-      - To Architect (if no research or research complete): `mcp:delegate_task(toMode='🏛️AR', message='Plan task. Ref: TD')`.
+      - To Researcher (if needed): `mcp:delegate('🔬RS', 'Research needed. Ref: TD')`.
+      - To Architect (if no research or research complete): `mcp:delegate('🏛️AR', 'Plan task. Ref: TD')`.
 
 2.  **🔬 RESEARCHER (Optional)**:
 
     - Receives delegation.
-    - Status update: `mcp:update_task_status(status='INP', notes='🔬RS: Started research')`.
+    - Status update: `mcp:status('INP', '🔬RS: Started research')`.
     - Conducts research, synthesizes information, creates RR.
-    - **Returns to Boomerang**: `mcp:delegate_task(toMode='🪃MB', message='Research complete. Ref: RR')`.
+    - **Returns to Boomerang**: `mcp:delegate('🪃MB', 'Research complete. Ref: RR')`.
 
 3.  **🏛️ ARCHITECT (Planning & Batch Management)**:
 
     - Receives delegation.
-    - Status update: `mcp:update_task_status(status='INP', notes='🏛️AR: Planning started')`.
+    - Status update: `mcp:status('INP', '🏛️AR: Planning started')`.
     - Creates IP with work organized into logical batches (B001, B002, etc.) using `create_implementation_plan`.
     - **BATCH DELEGATION** (using notes to signal context for SD, SD will fetch IP slice):
-      - Initial batch: `mcp:add_task_note(note='🏛️AR: Delegating batch B001 (ST-001..ST-005) to 👨‍💻SD. Ref: IP_BATCH:B001')`.
-      - Subsequent batches: `mcp:add_task_note(note='🏛️AR: B001 complete. Delegating batch B002 (ST-006..ST-010) to 👨‍💻SD. Ref: IP_BATCH:B002')`
-    - **FINAL REVIEW DELEGATION**: After all batches complete: `mcp:delegate_task(toMode='🔍CR', message='Review implementation. Refs: TD,IP')`. Status updated to 'NRV'.
+      - Initial batch: `mcp:note('🏛️AR: Delegating batch B001 (ST-001..ST-005) to 👨‍💻SD. Ref: IP_BATCH:B001')`.
+      - Subsequent batches: `mcp:note('🏛️AR: B001 complete. Delegating batch B002 (ST-006..ST-010) to 👨‍💻SD. Ref: IP_BATCH:B002')`
+    - **FINAL REVIEW DELEGATION**: After all batches complete: `mcp:delegate('🔍CR', 'Review implementation. Refs: TD,IP')`. Status updated to 'NRV'.
 
 4.  **👨‍💻 SENIOR DEVELOPER (Batch Implementation)**:
 
     - Implements ENTIRE BATCH of subtasks. Fetches relevant batch from IP using `mcp:get_context_diff(taskId, lastContextHash, sliceType='IP_BATCH:<batchId>')`.
     - **MINIMIZE STATUS UPDATES**: Only at major milestones (50%, completion):
-      - `mcp:add_task_note(note='👨‍💻SD: B001 50% complete. Making good progress.')`
+      - `mcp:note('👨‍💻SD: B001 50% complete. Making good progress.')`
     - Completes testing and verification for all subtasks in batch (using `update_subtask_status` for each subtask).
     - **BATCH COMPLETION**: Reports only when batch is complete (after `check_batch_status` confirms):
-      - `mcp:add_task_note(note='👨‍💻SD: B001 (ST-001..ST-005) complete. Ready for review.')`
+      - `mcp:note('👨‍💻SD: B001 (ST-001..ST-005) complete. Ready for review.')`
     - **DO NOT TRANSITION ROLES BETWEEN SUBTASKS**.
 
 5.  **🔍 CODE REVIEW**:
 
     - Receives delegation when ALL implementation is complete.
-    - Acknowledge receipt: `mcp:add_task_note(note='🔍CR: Review started')`.
+    - Acknowledge receipt: `mcp:note('🔍CR: Review started')`.
     - Conducts comprehensive review of entire implementation, creates CRD (using `create_code_review_report`).
-    - **Returns to Architect**: `mcp:add_task_note(note='🔍CR: Complete. Status: [STATUS_CODE e.g. COM/NCH]. Ref: CRD')`.
+    - **Returns to Architect**: `mcp:note('🔍CR: Complete. Status: [STATUS_CODE e.g. COM/NCH]. Ref: CRD')`.
 
 6.  **🪃 BOOMERANG (Final)**:
     - Receives delegation from Architect.
-    - Status update: `mcp:update_task_status(status='INP', notes='🪃MB: Final verification')`.
+    - Status update: `mcp:status('INP', '🪃MB: Final verification')`.
     - Performs final verification, updates memory bank, creates completion report (using `create_completion_report`).
-    - Status update to 'completed': `mcp:update_task_status(status='COM', notes='Task delivered')`.
+    - Status update to 'completed': `mcp:status('COM', 'Task delivered')`.
     - Delivers to user.
 
 ### Role Transition Protocol (Optimized)
@@ -183,8 +186,6 @@ B002: Data Access Layer
 
 ### Token Budget Guidelines (Optimized)
 
-<token_budgets>
-
 # Role Transition (MINIMIZE!)
 
 - Role announcement: 50 tokens
@@ -209,31 +210,30 @@ B002: Data Access Layer
 - Research report core: 1000 tokens
 - Code review report core: 800 tokens
 - Completion report core: 600 tokens
-  </token_budgets>
 
 ### Integration with `workflow-manager` (Optimized)
 
 Use these optimized MCP calls to minimize token usage:
 
-- `mcp:create(taskId, taskName, description)`
+- `mcp:create_task(taskId, taskName, description)`
 - `mcp:context(taskId, type)`
 - `mcp:status(status, note)`
 - `mcp:note(note)` - USE SPARINGLY
 - `mcp:delegate(toMode, message)` - ONLY AT MAJOR PHASE TRANSITIONS
-- `mcp:status_check(taskId)`
-- `mcp:list()`
-- `mcp:dashboard()`
+- `mcp:get_task_status(taskId)`
+- `mcp:list_tasks()`
+- `mcp:task_dashboard()`
 
 > When ever you see a call for the mcp in this format `mcp:[tool-name]([parameters])` , you should be calling the workflow-manager mcp server with the correct tool-name and parameters
 
 ### Fallback Protocol (Optimized)
 
-1.  **Knowledge Gaps**: Boomerang: MCP: `delegate_task(toMode='researcher', message='Research needed on X')`.
-2.  **Critical Blockers Only**: Current role: MCP: `add_task_note(note='BLOCKED: Critical issue with X')`.
+1.  **Knowledge Gaps**: 🪃MB: `mcp:delegate('🔬RS', 'Research needed on X')`.
+2.  **Critical Blockers Only**: Current role: `mcp:note('BLOCKED: Critical issue with X')`.
 3.  **Implementation Challenges**: Handle within current role unless truly blocked.
 4.  **Quality Issues**:
-    - Code Review: Reports to Architect: MCP: `add_task_note(note='🔍CR: NEEDS CHANGES')`.
-    - Boomerang: Rejects work: MCP: `delegate_task(toMode='architect', message='Unmet ACs')`.
+    - 🔍CR: Reports to 🏛️AR: `mcp:note('🔍CR: NCH. Ref: CRD')`.
+    - 🪃MB: Rejects work: `mcp:delegate('🏛️AR', 'Unmet ACs. Ref: TD, CRD')`.
 5.  **User Feedback**: Incorporated by relevant role.
 
 ### Role Expertise and Separation (No Change)
@@ -244,7 +244,7 @@ Use these optimized MCP calls to minimize token usage:
 4.  **👨‍💻SD**: Implementation, testing, batch ACs.
 5.  **🔍CR**: QA, standards, AC verification.
 
-### Important note when using the file system mcp server
+### Important note when using only the filesystem MCP server, not any other internal tool
 
 > we should always use the absolute path ex: `{ path: D://projects/cursor-workflow/src/main.ts }`
 

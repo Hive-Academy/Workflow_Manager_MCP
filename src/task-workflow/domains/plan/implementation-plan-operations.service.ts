@@ -167,6 +167,7 @@ export class ImplementationPlanOperationsService {
     parameters: CheckBatchStatusSchema,
   })
   async checkBatchStatus(params: z.infer<typeof CheckBatchStatusSchema>) {
+    const contextIdentifier = `batch-status-${params.batchId}`;
     try {
       const batchStatus =
         await this.implementationPlanService.checkBatchStatus(params);
@@ -195,8 +196,8 @@ export class ImplementationPlanOperationsService {
       return {
         content: [
           {
-            type: 'json',
-            json: batchStatus,
+            type: 'text',
+            text: JSON.stringify(batchStatus),
           },
           {
             type: 'text',
@@ -205,10 +206,55 @@ export class ImplementationPlanOperationsService {
         ],
       };
     } catch (error) {
-      this.handleFacadeError(error, 'check batch status', {
-        taskId: params.taskId,
-        batchId: params.batchId,
-      });
+      if (error instanceof NotFoundException) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No data found for ${contextIdentifier} for task ${params.taskId}. Batch or plan may not exist. Message: ${(error as Error).message}`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true,
+                error: true,
+                message: (error as Error).message,
+                contextHash: null,
+                contextType: contextIdentifier,
+                taskId: params.taskId,
+                batchId: params.batchId,
+              }),
+            },
+          ],
+        };
+      } else if (
+        error instanceof BadRequestException ||
+        error instanceof InternalServerErrorException
+      ) {
+        throw error;
+      }
+      console.error(
+        `Facade Error in checkBatchStatus for task ${params.taskId}, batch ${params.batchId}:`,
+        error,
+      );
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `An internal error occurred while checking ${contextIdentifier} for task ${params.taskId}.`,
+          },
+          {
+            type: 'text',
+            text: JSON.stringify({
+              error: true,
+              message: (error as Error).message,
+              contextType: contextIdentifier,
+              taskId: params.taskId,
+              batchId: params.batchId,
+            }),
+          },
+        ],
+      };
     }
   }
 

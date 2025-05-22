@@ -9,8 +9,6 @@ import { z } from 'zod';
 import { ProcessCommandService } from './process-command.service';
 import { AddTaskNoteSchema } from './schemas/add-task-note.schema';
 import { ProcessCommandSchema } from './schemas/process-command.schema';
-import { ShorthandCommandSchema } from './schemas/shorthand-command.schema';
-import { ShorthandParserService } from './shorthand-parser.service';
 import { TaskCommentService } from './task-comment.service';
 
 @Injectable()
@@ -18,7 +16,6 @@ export class TaskInteractionOperationsService {
   constructor(
     private readonly taskCommentService: TaskCommentService,
     private readonly processCommandService: ProcessCommandService,
-    private readonly shorthandParserService: ShorthandParserService,
   ) {}
 
   // Tools will be migrated here
@@ -82,36 +79,6 @@ export class TaskInteractionOperationsService {
       );
       throw new InternalServerErrorException(
         `TaskInteractionOperationsService: Could not process command '${params.command_string}'. Error: ${(error as Error).message}`,
-      );
-    }
-  }
-
-  @Tool({
-    name: 'shorthand_command',
-    description:
-      'Executes a shorthand command for more token-efficient operations.',
-    parameters: ShorthandCommandSchema,
-  })
-  async executeShorthandCommand(
-    params: z.infer<typeof ShorthandCommandSchema>,
-  ): Promise<any> {
-    try {
-      const { taskId, command } = params;
-      return await this.shorthandParserService.parseAndExecute(taskId, command);
-    } catch (error) {
-      if (
-        error instanceof BadRequestException ||
-        error instanceof NotFoundException ||
-        error instanceof InternalServerErrorException
-      ) {
-        throw error;
-      }
-      console.error(
-        `TaskInteractionOperationsService Error in executeShorthandCommand for task ${params.taskId}, command '${params.command}':`,
-        error,
-      );
-      throw new InternalServerErrorException(
-        `TaskInteractionOperationsService: Could not execute shorthand command '${params.command}' for task '${params.taskId}'. Error: ${(error as Error).message}`,
       );
     }
   }
