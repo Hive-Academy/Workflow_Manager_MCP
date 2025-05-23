@@ -63,9 +63,33 @@ npm install
 
 - For questions, see the project README or contact the maintainers.
 
-## 8. MCP Tool Usage Best Practices
+## 8. MCP Schema-Database Alignment Guidelines
 
-### 8.1. Standardized Responses for Unchanged/Not Found/Empty Contexts
+### 8.1. Schema Maintenance Protocol
+
+**Status**: ✅ **All schemas aligned** with database models (Completed TSK-004 on 2025-05-23)
+
+**Key Principles**:
+- **Type Consistency**: All Zod schemas must match exact Prisma model field types (string, int, DateTime, etc.)
+- **Field Alignment**: Schema fields must correspond 1:1 with database columns (no extra fields, no missing required fields)
+- **Relationship Handling**: Foreign key fields properly defined with correct types and constraints
+- **Validation Rules**: Database constraints (unique, nullable, length) reflected in Zod validation
+
+**Domain Structure**: Schemas organized in 5 domains under `src/task-workflow/domains/`:
+- **CORE**: Task, TaskDescription, ImplementationPlan, Subtask operations
+- **TASK**: DelegationRecord, ResearchReport, CodeReview, CompletionReport operations  
+- **QUERY**: Search, list, context retrieval with slice support
+- **WORKFLOW**: Role transitions, state management, completion tracking
+- **INTERACTION**: Comments, command processing, user interactions
+
+**Critical Schema Patterns**:
+- ID fields: Use `z.number().int()` for autoincrement, `z.string()` for UUID
+- Timestamps: Always `z.date()` for DateTime fields
+- JSON fields: Use `z.any()` or specific object schemas for Prisma Json type
+- Optional fields: Use `.optional()` only for truly nullable database columns
+- Foreign keys: Always include required FK fields with correct types
+
+### 8.2. Standardized Responses for Unchanged/Not Found/Empty Contexts
 
 Many MCP tools that retrieve context or data have been standardized to return a specific two-part text-based JSON response when the requested context is unchanged, not found, or the data is empty. This helps in reducing ambiguity and allows clients (like AI agents) to efficiently handle these common scenarios.
 

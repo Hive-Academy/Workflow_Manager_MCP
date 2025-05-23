@@ -1,59 +1,55 @@
 import { z } from 'zod';
-import {
-  RoleCodeSchema,
-  TOKEN_MAPS,
-  DocumentRefSchema,
-} from '../../../types/token-refs.schema';
+import { RoleCodeSchema } from 'src/task-workflow/types/token-refs.schema';
 
+// ✅ FIXED: Role transition schema aligned with WorkflowTransition model
 export const RoleTransitionSchema = z.object({
-  roleId: z
-    .union([RoleCodeSchema, z.string()])
-    .transform((val) => {
-      return TOKEN_MAPS.role[val as keyof typeof TOKEN_MAPS.role] || val;
-    })
-    .pipe(
-      z
-        .string()
-        .min(1)
-        .describe(
-          'The role ID being transitioned to (full name after transform).',
-        ),
-    ),
-  taskId: z.string().describe('The ID of the task being worked on.'),
-  fromRole: z
-    .union([RoleCodeSchema, z.string()])
-    .optional()
-    .transform((val) => {
-      if (!val) return undefined;
-      return TOKEN_MAPS.role[val as keyof typeof TOKEN_MAPS.role] || val;
-    })
-    .pipe(
-      z
-        .string()
-        .optional()
-        .describe('The previous role (full name after transform).'),
-    ),
-  focus: z.string().describe('The current focus area.'),
-  refs: z
-    .array(
-      z
-        .union([DocumentRefSchema, z.string()])
-        .transform((val) => {
-          return (
-            TOKEN_MAPS.document[val as keyof typeof TOKEN_MAPS.document] || val
-          );
-        })
-        .pipe(
-          z
-            .string()
-            .min(1)
-            .describe('Document reference (full name after transform).'),
-        ),
-    )
-    .optional()
-    .describe('Referenced documents (e.g., TD, IP, RR).'),
-  contextHash: z
+  taskId: z.string().describe('The ID of the task being transitioned'),
+  fromRole: RoleCodeSchema.describe('The role transitioning from'),
+  toRole: RoleCodeSchema.describe('The role transitioning to'),
+  summary: z
     .string()
     .optional()
-    .describe('Hash of the previously seen context.'),
+    .describe('Summary of work completed by the fromRole'),
+  reason: z.string().optional().describe('Reason for the transition'),
+  taskName: z
+    .string()
+    .optional()
+    .describe('Optional task name for verification'),
 });
+
+export type RoleTransitionParams = z.infer<typeof RoleTransitionSchema>;
+
+// ✅ FIXED: Response schema matching WorkflowTransition database structure
+export const RoleTransitionResponseSchema = z.object({
+  transitionId: z
+    .number()
+    .int()
+    .describe('Database ID of the workflow transition record'),
+  taskId: z.string(),
+  fromMode: z.string(),
+  toMode: z.string(),
+  transitionTimestamp: z.date(),
+  reason: z.string().nullable(),
+
+  // Task state updates
+  taskUpdated: z.boolean().describe('Whether task currentMode was updated'),
+  previousMode: z.string().nullable(),
+  newMode: z.string(),
+
+  // Transition analysis
+  transitionValid: z
+    .boolean()
+    .describe('Whether the transition follows valid workflow patterns'),
+  transitionWarnings: z
+    .array(z.string())
+    .optional()
+    .describe('Any warnings about the transition'),
+  estimatedDuration: z
+    .number()
+    .optional()
+    .describe('Estimated time for this workflow step (minutes)'),
+});
+
+export type RoleTransitionResponse = z.infer<
+  typeof RoleTransitionResponseSchema
+>;

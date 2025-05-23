@@ -61,6 +61,21 @@ This structure replaces a flatter organization where services, MCP operations, a
 - All tool parameters are validated with Zod
 - Results are returned to the client via MCP
 
+### MCP Schema-Database Alignment
+
+**Status**: ✅ **FULLY ALIGNED** (Completed 2025-05-23)
+
+- **42 schema files** across 5 domains fully aligned with Prisma database models
+- **10 core models** properly mapped: Task, TaskDescription, ImplementationPlan, Subtask, DelegationRecord, ResearchReport, CodeReview, CompletionReport, Comment, WorkflowTransition
+- **P0 blocking issues resolved**: CodeReview schema ID type mismatch fixed, Subtask operations functional
+- **Domain coverage**: CORE (100%), TASK (100%), QUERY (100%), WORKFLOW (100%), INTERACTION (100%)
+- **Type safety**: Complete TypeScript alignment with database constraints
+- **Performance**: Optimized query patterns and efficient field mapping implemented
+
+**Migration Notes**:
+- Template, SchemaVersion, MemoryBank, and Commit models planned for removal from database
+- Focus maintained on 10 operational core models for active workflow management
+
 ### Updating the Architecture
 
 - When adding or refactoring tools, update the architecture diagram and this file as needed

@@ -1,37 +1,73 @@
 import { z } from 'zod';
-import { TOKEN_MAPS } from 'src/task-workflow/types/token-refs.schema';
+import {
+  TOKEN_MAPS,
+  StatusCodeSchema,
+  RoleCodeSchema,
+} from 'src/task-workflow/types/token-refs.schema';
 
-// Helper for preprocessing status
-const preprocessStatus = (val: unknown) => {
-  if (typeof val === 'string') {
-    return TOKEN_MAPS.status[val as keyof typeof TOKEN_MAPS.status] || val;
-  }
-  return val;
-};
-
-// Helper for preprocessing role/mode
-const preprocessRole = (val: unknown) => {
-  if (typeof val === 'string') {
-    return TOKEN_MAPS.role[val as keyof typeof TOKEN_MAPS.role] || val;
-  }
-  return val;
-};
-
+// ✅ ENHANCED: Update task status schema with proper preprocessing
 export const UpdateTaskStatusSchema = z.object({
-  taskId: z.string().describe('The ID of the task to update.'),
+  taskId: z.string().describe('The ID of the task to update'),
   status: z
-    .preprocess(preprocessStatus, z.string())
-    .describe(
-      'The new status for the task (can be shorthand like INP or full like in-progress).',
-    ),
+    .union([StatusCodeSchema, z.string()])
+    .describe('The new status for the task (shorthand or full name)'),
   currentMode: z
-    .preprocess(preprocessRole, z.string())
+    .union([RoleCodeSchema, z.string()])
     .optional()
     .describe(
-      'The new current mode/owner of the task (can be shorthand like 🏛️AR or full like architect).',
+      'The new current mode/owner of the task (shorthand or full name)',
     ),
   notes: z
     .string()
     .optional()
-    .describe('Additional notes about the status update.'),
+    .describe('Additional notes about the status update'),
+  priority: z
+    .string()
+    .optional()
+    .describe('Updated priority (Low, Medium, High, Critical)'),
+  owner: z.string().optional().describe('Updated task owner'),
+  completionDate: z
+    .date()
+    .optional()
+    .describe('Completion date if status is completed'),
 });
+
+export type UpdateTaskStatusParams = z.infer<typeof UpdateTaskStatusSchema>;
+
+// ✅ ENHANCED: Task status update response
+export const TaskStatusUpdateResponseSchema = z.object({
+  taskId: z.string(),
+  previousStatus: z.string(),
+  newStatus: z.string(),
+  previousMode: z.string().nullable(),
+  newMode: z.string().nullable(),
+  updatedAt: z.date(),
+
+  // Related updates
+  workflowTransitionCreated: z
+    .boolean()
+    .describe('Whether a workflow transition was recorded'),
+  delegationRecordUpdated: z
+    .boolean()
+    .describe('Whether any delegation records were updated'),
+  completionReportTriggered: z
+    .boolean()
+    .describe('Whether completion report creation was triggered'),
+
+  // Status change analysis
+  validTransition: z
+    .boolean()
+    .describe('Whether the status change follows valid patterns'),
+  statusWarnings: z
+    .array(z.string())
+    .optional()
+    .describe('Any warnings about the status change'),
+  nextPossibleStatuses: z
+    .array(z.string())
+    .optional()
+    .describe('Possible next status values'),
+});
+
+export type TaskStatusUpdateResponse = z.infer<
+  typeof TaskStatusUpdateResponseSchema
+>;
