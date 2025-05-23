@@ -17,15 +17,44 @@ export class TaskCrudService {
 
   async createTask(params: z.infer<typeof CreateTaskSchema>) {
     try {
-      const newTask = await this.prisma.task.create({
-        data: {
-          taskId: params.taskId,
-          name: params.taskName,
-          status: 'Not Started',
-          currentMode: 'boomerang',
-        },
+      // Check if any TaskDescription fields are provided
+      const hasTaskDescriptionData =
+        params.description ||
+        params.businessRequirements ||
+        params.technicalRequirements ||
+        params.acceptanceCriteria;
+
+      // Use transaction to ensure consistency between Task and TaskDescription creation
+      const result = await this.prisma.$transaction(async (tx) => {
+        // Create the main Task record
+        const newTask = await tx.task.create({
+          data: {
+            taskId: params.taskId,
+            name: params.taskName,
+            status: 'Not Started',
+            currentMode: 'boomerang',
+          },
+        });
+
+        // Create TaskDescription if any description fields are provided
+        if (hasTaskDescriptionData) {
+          await tx.taskDescription.create({
+            data: {
+              taskId: params.taskId,
+              description: params.description || 'To be defined',
+              businessRequirements:
+                params.businessRequirements || 'To be defined',
+              technicalRequirements:
+                params.technicalRequirements || 'To be defined',
+              acceptanceCriteria: params.acceptanceCriteria || [],
+            },
+          });
+        }
+
+        return newTask;
       });
-      return newTask;
+
+      return result;
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -40,7 +69,7 @@ export class TaskCrudService {
         error,
       );
       throw new InternalServerErrorException(
-        `Could not create task '${params.taskId}'.`,
+        `Could not create task '${params.taskId}'. ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }

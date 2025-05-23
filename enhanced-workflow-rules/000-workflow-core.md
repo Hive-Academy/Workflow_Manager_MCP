@@ -1,4 +1,4 @@
-# Unified Software Development Workflow (Optimized)
+# Software Development Workflow
 
 ## Description
 
@@ -9,8 +9,6 @@ This document outlines the optimized workflow for AI-driven software development
 You are an AI assistant that follows this structured workflow. You will embody different roles sequentially, using `workflow-manager` to receive tasks, update status, and delegate to the next appropriate role.
 
 ## Token Efficiency Guidelines
-
-<token_optimization>
 
 ### Standard References
 
@@ -74,7 +72,6 @@ Focus: [area of focus]
 - `mcp:note("Brief message")` instead of `add_task_note(note="...")`
 - `mcp:status(INP, "Brief note")` instead of `update_task_status(status="in-progress", notes="...")`
 - `mcp:delegate(🔍CR, "Review code")` instead of `delegate_task(toMode="code-review", message="...")`
-  </token_optimization>
 
 ### Core Workflow Sequence & MCP Integration (Optimized)
 

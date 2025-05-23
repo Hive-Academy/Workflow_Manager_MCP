@@ -3,12 +3,12 @@ import { StatusCodeSchema } from 'src/task-workflow/types/token-refs.schema'; //
 
 export const UpdateSubtaskStatusSchema = z.object({
   taskId: z.string().describe('The ID of the parent task.'),
-  subtaskPrismaId: z
+  subtaskId: z
     .number()
     .int()
     .positive()
     .describe(
-      'The Prisma-generated numeric ID of the subtask to update. This is not the client-generated string ID.',
+      'The database ID of the subtask to update (from Subtask.id field).',
     ),
   newStatus: StatusCodeSchema.describe('The new status for the subtask.'), // Use StatusCodeSchema
   notes: z

@@ -1,11 +1,8 @@
 import { z } from 'zod';
-// import { TaskIdSchema } from './task.schema'; // Assuming TaskIdSchema exists for relation
 
+// ✅ FIXED: Research report schema aligned with database structure
 export const ResearchReportSchema = z.object({
-  id: z
-    .number()
-    .int()
-    .describe('Unique identifier for the research report (DB generated)'),
+  id: z.number().int().describe('Database auto-increment ID'),
   taskId: z
     .string()
     .describe('The ID of the task this report is associated with'),
@@ -17,60 +14,40 @@ export const ResearchReportSchema = z.object({
   findings: z
     .string()
     .min(1)
-    .describe(
-      'The full content of the research findings, likely in Markdown format',
-    ),
-  recommendations: z
-    .string()
-    .optional()
-    .describe('Recommendations based on the research'),
+    .describe('The full content of the research findings'),
+  recommendations: z.string().describe('Recommendations based on the research'),
   references: z
-    .array(
-      z.object({
-        description: z
-          .string()
-          .optional()
-          .describe('Description of the reference'),
-        url: z
-          .string()
-          .url()
-          .optional()
-          .describe('URL of the reference, if applicable'),
-        citation: z.string().optional().describe('Formal citation string'),
-      }),
-    )
-    .optional()
-    .describe('A list of references or sources used in the research'),
+    .any()
+    .describe('JSON array of references (stored as Json in DB)'),
   createdAt: z.date().describe('Timestamp of when the report was created'),
   updatedAt: z.date().describe('Timestamp of when the report was last updated'),
 });
 
 export type ResearchReport = z.infer<typeof ResearchReportSchema>;
 
-export const CreateResearchReportInputSchema = ResearchReportSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-}).extend({
-  taskId: z.string().describe('ID of the task to associate the report with.'),
+// ✅ FIXED: Input schema for creating research reports
+export const CreateResearchReportInputSchema = z.object({
+  taskId: z.string().describe('ID of the task to associate the report with'),
+  title: z.string().min(1).describe('Title of the research report'),
+  summary: z.string().min(1).describe('Summary of the research findings'),
+  findings: z.string().min(1).describe('Full research findings content'),
+  recommendations: z.string().describe('Recommendations based on research'),
+  references: z.any().optional().describe('JSON array of references/sources'),
 });
 
 export type CreateResearchReportInput = z.infer<
   typeof CreateResearchReportInputSchema
 >;
 
+// ✅ FIXED: Get schema using proper ID handling
 export const GetResearchReportInputSchema = z
   .object({
     reportId: z
-      .string()
+      .number()
+      .int()
       .optional()
-      .describe(
-        'The ID (string UUID or number string) of the specific research report to retrieve.',
-      ),
-    taskId: z
-      .string()
-      .optional()
-      .describe('The ID of the task to retrieve reports for.'),
+      .describe('Database ID of the specific research report'),
+    taskId: z.string().optional().describe('Task ID to retrieve reports for'),
   })
   .refine((data) => data.reportId || data.taskId, {
     message: 'Either reportId or taskId must be provided.',
@@ -80,24 +57,18 @@ export type GetResearchReportInput = z.infer<
   typeof GetResearchReportInputSchema
 >;
 
-export const UpdateResearchReportInputSchema = ResearchReportSchema.omit({
-  id: true,
-  taskId: true,
-  createdAt: true,
-  updatedAt: true,
-})
-  .partial()
-  .extend({
-    reportId: z
-      .string()
-      .describe('ID (string UUID or number string) of the report to update'),
+// ✅ FIXED: Update schema for research reports
+export const UpdateResearchReportInputSchema = z
+  .object({
+    title: z.string().min(1).optional(),
+    summary: z.string().min(1).optional(),
+    findings: z.string().min(1).optional(),
+    recommendations: z.string().optional(),
+    references: z.any().optional(),
   })
-  .refine(
-    (data) => Object.keys(data).filter((k) => k !== 'reportId').length > 0,
-    {
-      message: 'At least one field to update must be provided.',
-    },
-  );
+  .refine((data) => Object.keys(data).length > 0, {
+    message: 'At least one field to update must be provided.',
+  });
 
 export type UpdateResearchReportInput = z.infer<
   typeof UpdateResearchReportInputSchema

@@ -1,103 +1,115 @@
 import { z } from 'zod';
-import { BatchSchema } from './batch.schema';
+import { BatchResponseSchema, CreateBatchInputSchema } from './batch.schema';
 import { SubtaskSchema } from './subtask.schema';
-import {
-  DocumentRefSchema,
-  StatusCodeSchema,
-} from 'src/task-workflow/types/token-refs.schema';
+import { StatusCodeSchema } from 'src/task-workflow/types/token-refs.schema';
 
-// Represents the structure of the ImplementationPlan as it might be stored
-// or retrieved, where subtasks are directly associated with the plan
-// but contain _batchInfo for logical grouping.
-export const ImplementationPlanStorageSchema = z.object({
-  id: z
-    .number()
-    .optional()
-    .describe('Numeric ID from the database, if applicable.'),
+// ✅ FIXED: Database representation schema (what comes from Prisma)
+export const ImplementationPlanDatabaseSchema = z.object({
+  id: z.number().int().describe('Database auto-increment ID from Prisma'),
   taskId: z
     .string()
-    .describe('The ID of the task this implementation plan belongs to.'),
-  title: z
-    .string()
-    .optional()
-    .describe('Overall title for the implementation plan.'),
-  overview: z
-    .string()
-    .optional()
-    .describe('Overview of the plan, from Prisma model.'),
-  approach: z
-    .string()
-    .optional()
-    .describe('Approach details, from Prisma model.'),
-  technicalDecisions: z
-    .string()
-    .optional()
-    .describe('Technical decisions, from Prisma model.'),
+    .describe('The ID of the task this implementation plan belongs to'),
+  overview: z.string().describe('Overview of the plan'),
+  approach: z.string().describe('Approach details'),
+  technicalDecisions: z.string().describe('Technical decisions made'),
   filesToModify: z
-    .array(z.string())
-    .optional()
-    .describe('JSON array of files to modify, from Prisma model.'),
-  version: z
-    .string()
-    .default('1.0.0')
-    .describe('Version of the implementation plan.'),
-  status: StatusCodeSchema.default('NS').describe(
-    'Overall status of the implementation plan.',
-  ),
+    .any()
+    .describe('JSON array of files to modify (stored as Json in DB)'),
+  createdAt: z.date().describe('Creation timestamp'),
+  updatedAt: z.date().describe('Last update timestamp'),
+  createdBy: z.string().describe('User/role who created the plan'),
+
+  // Relations (from Prisma)
   subtasks: z
     .array(SubtaskSchema)
-    .describe('An array of subtasks. Each subtask contains _batchInfo.'),
-  generalNotes: z
-    .array(z.string())
     .optional()
-    .describe(
-      'General notes or comments about the implementation plan as a whole.',
-    ),
-  linkedTd: DocumentRefSchema.optional().describe(
-    'Reference to the main Task Description document (TD).',
-  ),
-  createdAt: z.date().optional().describe('Creation timestamp from DB.'),
-  updatedAt: z.date().optional().describe('Last update timestamp from DB.'),
-  createdBy: z.string().optional().describe('User/role who created the plan.'),
+    .describe('Related subtasks from database'),
 });
 
-export type ImplementationPlanStorage = z.infer<
-  typeof ImplementationPlanStorageSchema
+export type ImplementationPlanDatabase = z.infer<
+  typeof ImplementationPlanDatabaseSchema
 >;
 
-// Input schema for creating/updating an implementation plan using batches
-export const ImplementationPlanInputSchema = z.object({
-  title: z
+// ✅ FIXED: Input schema for creating implementation plans
+export const CreateImplementationPlanInputSchema = z.object({
+  taskId: z
     .string()
-    .optional()
-    .describe(
-      'Overall title for the implementation plan, derived from the task if not provided.',
-    ),
-  overview: z.string().optional().describe('Overview of the plan.'),
-  approach: z.string().optional().describe('Approach details.'),
-  technicalDecisions: z
-    .string()
-    .optional()
-    .describe('Technical decisions made.'),
+    .describe('The ID of the task this implementation plan belongs to'),
+  overview: z.string().describe('Overview of the plan'),
+  approach: z.string().describe('Approach details'),
+  technicalDecisions: z.string().describe('Technical decisions made'),
   filesToModify: z
     .array(z.string())
     .optional()
-    .describe('List of files expected to be modified.'),
+    .describe('List of files expected to be modified'),
+  createdBy: z.string().describe('User/role creating the plan'),
   batches: z
-    .array(BatchSchema)
-    .describe('An array of batches that make up this implementation plan.'),
-  generalNotes: z
-    .array(z.string())
+    .array(CreateBatchInputSchema)
     .optional()
-    .describe(
-      'General notes or comments about the implementation plan as a whole.',
-    ),
-  linkedTd: DocumentRefSchema.optional().describe(
-    'Reference to the main Task Description document (TD).',
-  ),
-  createdBy: z.string().optional().describe('User/role creating the plan.'),
+    .describe('Initial batches for the plan'),
 });
 
-export type ImplementationPlanInput = z.infer<
-  typeof ImplementationPlanInputSchema
+export type CreateImplementationPlanInput = z.infer<
+  typeof CreateImplementationPlanInputSchema
+>;
+
+// ✅ FIXED: Response schema for implementation plans
+export const ImplementationPlanResponseSchema = z.object({
+  id: z.number().int().describe('Database ID'),
+  taskId: z
+    .string()
+    .describe('The ID of the task this implementation plan belongs to'),
+  overview: z.string(),
+  approach: z.string(),
+  technicalDecisions: z.string(),
+  filesToModify: z.any().describe('JSON array of files to modify'),
+  createdAt: z.date().describe('Creation timestamp'),
+  updatedAt: z.date().describe('Last update timestamp'),
+  createdBy: z.string().describe('User/role who created the plan'),
+
+  // Computed fields
+  status: StatusCodeSchema.describe('Overall status derived from subtasks'),
+  totalSubtasks: z.number().int().describe('Total number of subtasks'),
+  completedSubtasks: z.number().int().describe('Number of completed subtasks'),
+
+  // Related data
+  subtasks: z.array(SubtaskSchema).describe('All subtasks in this plan'),
+  batches: z
+    .array(BatchResponseSchema)
+    .optional()
+    .describe('Organized batches of subtasks'),
+});
+
+export type ImplementationPlanResponse = z.infer<
+  typeof ImplementationPlanResponseSchema
+>;
+
+// ✅ FIXED: Update schema for implementation plans
+export const UpdateImplementationPlanInputSchema = z
+  .object({
+    overview: z.string().optional(),
+    approach: z.string().optional(),
+    technicalDecisions: z.string().optional(),
+    filesToModify: z.array(z.string()).optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, {
+    message: 'At least one field to update must be provided.',
+  });
+
+export type UpdateImplementationPlanInput = z.infer<
+  typeof UpdateImplementationPlanInputSchema
+>;
+
+// ✅ FIXED: Get schema for retrieving implementation plans
+export const GetImplementationPlanInputSchema = z
+  .object({
+    planId: z.number().int().optional().describe('Database ID of the plan'),
+    taskId: z.string().optional().describe('Task ID to find plans for'),
+  })
+  .refine((data) => data.planId || data.taskId, {
+    message: 'Either planId or taskId must be provided.',
+  });
+
+export type GetImplementationPlanInput = z.infer<
+  typeof GetImplementationPlanInputSchema
 >;

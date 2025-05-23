@@ -133,7 +133,7 @@ export class ImplementationPlanOperationsService {
       const result =
         await this.implementationPlanService.updateSubtaskStatus(params);
       const { planStatusUpdated, ...updatedSubtask } = result;
-      let responseText = `Subtask '${updatedSubtask.name}' (Prisma ID: ${updatedSubtask.id}) status updated to '${updatedSubtask.status}'.`;
+      let responseText = `Subtask '${updatedSubtask.name}' (Database ID: ${updatedSubtask.id}) status updated to '${updatedSubtask.status}'.`;
       if (params.notes) {
         responseText += ` Provided notes: "${params.notes}" (Note: not directly stored on subtask via this tool, use add_note_to_subtask).`;
       }
@@ -155,7 +155,7 @@ export class ImplementationPlanOperationsService {
     } catch (error) {
       this.handleFacadeError(error, 'updateSubtaskStatus', {
         taskId: params.taskId,
-        subtaskPrismaId: params.subtaskPrismaId,
+        subtaskId: params.subtaskId, // Use correct field name
       });
     }
   }
@@ -261,7 +261,7 @@ export class ImplementationPlanOperationsService {
   private handleFacadeError(
     error: any,
     arg1: string,
-    arg2: { taskId: string; batchId?: string; subtaskPrismaId?: number },
+    arg2: { taskId: string; batchId?: string; subtaskId?: number },
   ) {
     if (
       error instanceof NotFoundException ||
@@ -271,7 +271,7 @@ export class ImplementationPlanOperationsService {
       throw error;
     }
     console.error(
-      `Facade Error in ${arg1} for task ${arg2.taskId}${arg2.batchId ? `, batch ${arg2.batchId}` : ''}:`,
+      `Facade Error in ${arg1} for task ${arg2.taskId}${arg2.batchId ? `, batch ${arg2.batchId}` : ''}${arg2.subtaskId ? `, subtask ${arg2.subtaskId}` : ''}:`,
       error,
     );
     throw new InternalServerErrorException(

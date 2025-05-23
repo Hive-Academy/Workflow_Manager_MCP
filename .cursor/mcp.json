@@ -4,10 +4,7 @@
       "command": "node",
       "args": [
         "D://projects/cursor-workflow/workflow-mcp-source/workflow-mcp-server.bundle.js"
-      ],
-      "env": {
-        "REPO_ROOT": "D://projects/cursor-workflow"
-      }
+      ]
     }
   }
 }

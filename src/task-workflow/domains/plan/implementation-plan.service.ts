@@ -5,58 +5,154 @@ import {
 } from '@nestjs/common';
 
 import { Prisma, Subtask as PrismaSubtaskType } from 'generated/prisma';
-import { ImplementationPlanStorage } from './schemas/implementation-plan.schema';
+import {
+  ImplementationPlanStorage,
+  ImplementationPlanResponse,
+  ImplementationPlanDatabaseSchema,
+} from './schemas/implementation-plan.schema';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ImplementationPlanInput } from './schemas/implementation-plan.schema';
 import {
   AddSubtaskToBatchParams,
-  SubtaskInput,
+  SubtaskInputLegacy,
 } from './schemas/add-subtask-to-batch.schema';
-import { Subtask } from './schemas/subtask.schema';
+import {
+  SubtaskResponse,
+  SubtaskLegacy,
+  SubtaskInput,
+} from './schemas/subtask.schema';
 import { UpdateSubtaskStatusParams } from './schemas/update-subtask-status.schema';
 import { CheckBatchStatusParams } from './schemas/check-batch-status.schema';
+import { TOKEN_MAPS } from 'src/task-workflow/types/token-refs.schema';
 
 @Injectable()
 export class ImplementationPlanService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // Helper method to convert database subtask to API response format
+  private mapDbSubtaskToResponse(
+    dbSubtask: PrismaSubtaskType,
+    originalInput?: SubtaskInput,
+    logicalIdCounter?: number,
+  ): SubtaskResponse {
+    // Generate logical ID if not provided
+    const logicalId =
+      originalInput?.id ||
+      `ST-${String(logicalIdCounter || dbSubtask.sequenceNumber).padStart(3, '0')}`;
+
+    // Convert status from DB format to schema format
+    const statusCode =
+      Object.entries(TOKEN_MAPS.status).find(
+        ([code, fullName]) => fullName === dbSubtask.status,
+      )?.[0] || dbSubtask.status;
+
+    // Convert assignedTo from DB format to schema format
+    const roleCode =
+      Object.entries(TOKEN_MAPS.role).find(
+        ([code, fullName]) => fullName === dbSubtask.assignedTo,
+      )?.[0] || dbSubtask.assignedTo;
+
+    return {
+      id: logicalId,
+      databaseId: dbSubtask.id, // Use correct field name from Prisma
+      title: dbSubtask.name,
+      description: dbSubtask.description,
+      status: statusCode as any,
+      assignedTo: roleCode as any,
+      dependencies: originalInput?.dependencies || [],
+      acceptanceCriteria: originalInput?.acceptanceCriteria || [],
+      estimatedHours: dbSubtask.estimatedDuration
+        ? parseFloat(dbSubtask.estimatedDuration)
+        : originalInput?.estimatedHours,
+      actualHours: this.calculateActualHours(
+        dbSubtask.startedAt,
+        dbSubtask.completedAt,
+      ),
+      relatedDocs: originalInput?.relatedDocs || [],
+      notes: originalInput?.notes || [],
+      sequenceNumber: dbSubtask.sequenceNumber,
+      _batchInfo:
+        dbSubtask.batchId && dbSubtask.batchTitle
+          ? {
+              id: dbSubtask.batchId,
+              title: dbSubtask.batchTitle,
+            }
+          : undefined,
+      startedAt: dbSubtask.startedAt || undefined, // Convert null to undefined
+      completedAt: dbSubtask.completedAt || undefined, // Convert null to undefined
+    };
+  }
+
+  // Helper method to convert input to database format
+  private mapInputToDbData(
+    input: SubtaskInput,
+    batchId?: string,
+    batchTitle?: string,
+  ) {
+    // Convert status from schema format to DB format
+    const statusFull =
+      TOKEN_MAPS.status[input.status as keyof typeof TOKEN_MAPS.status] ||
+      input.status ||
+      'not-started';
+
+    // Convert assignedTo from schema format to DB format
+    const assignedToFull = input.assignedTo
+      ? TOKEN_MAPS.role[input.assignedTo as keyof typeof TOKEN_MAPS.role] ||
+        input.assignedTo
+      : undefined;
+
+    return {
+      name: input.title,
+      description: input.description,
+      status: statusFull,
+      sequenceNumber: input.sequenceNumber || 0, // Will be set properly in creation
+      assignedTo: assignedToFull,
+      estimatedDuration: input.estimatedHours?.toString(),
+      batchId: batchId || input._batchInfo?.id,
+      batchTitle: batchTitle || input._batchInfo?.title,
+    };
+  }
+
+  // Helper to calculate actual hours from timestamps
+  private calculateActualHours(
+    startedAt?: Date | null,
+    completedAt?: Date | null,
+  ): number | undefined {
+    if (!startedAt || !completedAt) return undefined;
+    const diffMs = completedAt.getTime() - startedAt.getTime();
+    return diffMs / (1000 * 60 * 60); // Convert to hours
+  }
+
   async createOrUpdatePlan(
     taskId: string,
     planInput: ImplementationPlanInput,
-  ): Promise<ImplementationPlanStorage> {
+  ): Promise<ImplementationPlanResponse> {
     const taskExists = await this.prisma.task.findUnique({ where: { taskId } });
     if (!taskExists) {
       throw new NotFoundException(`Task with ID '${taskId}' not found.`);
     }
 
     const prismaSubtasksToCreate: Prisma.SubtaskCreateWithoutPlanInput[] = [];
-    const inputSubtaskBatchMapping: Array<
-      SubtaskInput & {
-        _batchData: { id: string; title: string };
-        sequence: number;
-      }
-    > = [];
+    const inputSubtaskMapping: Map<number, SubtaskInput> = new Map();
     let currentSequence = 0;
 
+    // Process all batches and their subtasks
     for (const batch of planInput.batches) {
       for (const stInput of batch.subtasks) {
         currentSequence++;
-        prismaSubtasksToCreate.push({
-          name: stInput.title || 'Untitled Subtask',
-          description: stInput.description || '',
-          status: stInput.status || 'NS',
+
+        // Store the mapping for later reference
+        inputSubtaskMapping.set(currentSequence, stInput);
+
+        const dbData = this.mapInputToDbData(stInput, batch.id, batch.title);
+
+        const fullDbData: Prisma.SubtaskCreateWithoutPlanInput = {
+          ...dbData,
           sequenceNumber: currentSequence,
-          assignedTo: stInput.assignedTo,
-          estimatedDuration: stInput.estimatedHours?.toString(),
           task: { connect: { taskId: taskId } },
-          batchId: batch.id,
-          batchTitle: batch.title,
-        });
-        inputSubtaskBatchMapping.push({
-          ...stInput,
-          _batchData: { id: batch.id, title: batch.title },
-          sequence: currentSequence,
-        });
+        };
+
+        prismaSubtasksToCreate.push(fullDbData);
       }
     }
 
@@ -75,29 +171,15 @@ export class ImplementationPlanService {
       include: { subtasks: { orderBy: { sequenceNumber: 'asc' } } },
     });
 
-    const finalZodSubtasks: Subtask[] = createdPlanFromDb.subtasks.map(
+    // Convert database result to API response format
+    const responseSubtasks: SubtaskResponse[] = createdPlanFromDb.subtasks.map(
       (dbSubtask) => {
-        const originalInputSubtask = inputSubtaskBatchMapping.find(
-          (ism) => ism.sequence === dbSubtask.sequenceNumber,
+        const originalInput = inputSubtaskMapping.get(dbSubtask.sequenceNumber);
+        return this.mapDbSubtaskToResponse(
+          dbSubtask,
+          originalInput,
+          dbSubtask.sequenceNumber,
         );
-        return {
-          id: dbSubtask.id.toString(),
-          title: dbSubtask.name,
-          description: dbSubtask.description,
-          status: dbSubtask.status as any,
-          assignedTo: dbSubtask.assignedTo as any,
-          _batchInfo:
-            dbSubtask.batchId && dbSubtask.batchTitle
-              ? { id: dbSubtask.batchId, title: dbSubtask.batchTitle }
-              : undefined,
-          sequenceNumber: dbSubtask.sequenceNumber,
-          estimatedHours: originalInputSubtask?.estimatedHours,
-          dependencies: originalInputSubtask?.dependencies || [],
-          acceptanceCriteria: originalInputSubtask?.acceptanceCriteria || [],
-          relatedDocs: originalInputSubtask?.relatedDocs || [],
-          notes: originalInputSubtask?.notes || [],
-          actualHours: undefined,
-        };
       },
     );
 
@@ -113,8 +195,8 @@ export class ImplementationPlanService {
       technicalDecisions: createdPlanFromDb.technicalDecisions,
       filesToModify: createdPlanFromDb.filesToModify as string[],
       version: '1.0.0',
-      status: 'NS',
-      subtasks: finalZodSubtasks,
+      status: 'NS' as any,
+      subtasks: responseSubtasks,
       generalNotes: planInput.generalNotes,
       linkedTd: planInput.linkedTd,
       createdAt: createdPlanFromDb.createdAt,
@@ -123,7 +205,7 @@ export class ImplementationPlanService {
     };
   }
 
-  async getPlan(taskId: string): Promise<ImplementationPlanStorage | null> {
+  async getPlan(taskId: string): Promise<ImplementationPlanResponse | null> {
     const planFromDb = await this.prisma.implementationPlan.findFirst({
       where: { taskId },
       include: { subtasks: { orderBy: { sequenceNumber: 'asc' } } },
@@ -132,27 +214,15 @@ export class ImplementationPlanService {
 
     if (!planFromDb) return null;
 
-    const mappedZodSubtasks: Subtask[] = planFromDb.subtasks.map(
-      (dbSubtask) => ({
-        id: dbSubtask.id.toString(),
-        title: dbSubtask.name,
-        description: dbSubtask.description,
-        status: dbSubtask.status as any,
-        assignedTo: dbSubtask.assignedTo as any,
-        dependencies: [],
-        acceptanceCriteria: [],
-        estimatedHours: dbSubtask.estimatedDuration
-          ? parseFloat(dbSubtask.estimatedDuration)
-          : undefined,
-        actualHours: undefined,
-        relatedDocs: [],
-        notes: [],
-        _batchInfo:
-          dbSubtask.batchId && dbSubtask.batchTitle
-            ? { id: dbSubtask.batchId, title: dbSubtask.batchTitle }
-            : undefined,
-        sequenceNumber: dbSubtask.sequenceNumber,
-      }),
+    // Convert all subtasks to response format
+    const responseSubtasks: SubtaskResponse[] = planFromDb.subtasks.map(
+      (dbSubtask) => {
+        return this.mapDbSubtaskToResponse(
+          dbSubtask,
+          undefined,
+          dbSubtask.sequenceNumber,
+        );
+      },
     );
 
     return {
@@ -164,8 +234,8 @@ export class ImplementationPlanService {
       technicalDecisions: planFromDb.technicalDecisions,
       filesToModify: planFromDb.filesToModify as string[],
       version: '1.0.0',
-      status: 'NS',
-      subtasks: mappedZodSubtasks,
+      status: 'NS' as any,
+      subtasks: responseSubtasks,
       generalNotes: [],
       linkedTd: undefined,
       createdAt: planFromDb.createdAt,
@@ -174,7 +244,9 @@ export class ImplementationPlanService {
     };
   }
 
-  async addSubtaskToBatch(params: AddSubtaskToBatchParams): Promise<Subtask> {
+  async addSubtaskToBatch(
+    params: AddSubtaskToBatchParams,
+  ): Promise<SubtaskResponse> {
     const { taskId, batchId, subtask: subtaskData } = params;
 
     const planFromDb = await this.prisma.implementationPlan.findFirst({
@@ -193,66 +265,74 @@ export class ImplementationPlanService {
     });
     const newSequenceNumber = currentSubtaskCount + 1;
 
+    const dbData = this.mapInputToDbData(
+      subtaskData,
+      batchId,
+      subtaskData._batchInfo?.title || batchId,
+    );
+
+    const createData: Prisma.SubtaskCreateInput = {
+      ...dbData,
+      sequenceNumber: newSequenceNumber,
+      plan: { connect: { id: planFromDb.id } },
+      task: { connect: { taskId: taskId } },
+    };
+
     const createdDbSubtask = await this.prisma.subtask.create({
-      data: {
-        name: subtaskData.title || 'Untitled Subtask',
-        description: subtaskData.description || '',
-        status: subtaskData.status || 'NS',
-        sequenceNumber: newSequenceNumber,
-        assignedTo: subtaskData.assignedTo,
-        estimatedDuration: subtaskData.estimatedHours?.toString(),
-        plan: { connect: { id: planFromDb.id } },
-        task: { connect: { taskId: taskId } },
-        batchId: batchId,
-        batchTitle: subtaskData._batchInfo?.title || batchId,
-      },
+      data: createData,
     });
 
-    const batchTitle = subtaskData._batchInfo?.title || batchId;
-
-    return {
-      id: createdDbSubtask.id.toString(),
-      title: createdDbSubtask.name,
-      description: createdDbSubtask.description,
-      status: createdDbSubtask.status as any,
-      assignedTo: createdDbSubtask.assignedTo as any,
-      _batchInfo: { id: batchId, title: batchTitle },
-      sequenceNumber: createdDbSubtask.sequenceNumber,
-      estimatedHours: subtaskData.estimatedHours,
-      dependencies: subtaskData.dependencies || [],
-      acceptanceCriteria: subtaskData.acceptanceCriteria || [],
-      relatedDocs: subtaskData.relatedDocs || [],
-      notes: subtaskData.notes || [],
-      actualHours: undefined,
-    };
+    return this.mapDbSubtaskToResponse(
+      createdDbSubtask,
+      subtaskData,
+      newSequenceNumber,
+    );
   }
 
   async updateSubtaskStatus(
     params: UpdateSubtaskStatusParams,
   ): Promise<PrismaSubtaskType & { planStatusUpdated?: boolean }> {
-    const { taskId, subtaskPrismaId, newStatus } = params;
+    const { taskId, subtaskId, newStatus } = params; // Use subtaskId instead of subtaskPrismaId
 
     const subtask = await this.prisma.subtask.findUnique({
-      where: { id: subtaskPrismaId },
+      where: { id: subtaskId }, // Use correct field name
       include: { plan: true },
     });
 
     if (!subtask) {
-      throw new NotFoundException(
-        `Subtask with Prisma ID '${subtaskPrismaId}' not found.`,
-      );
+      throw new NotFoundException(`Subtask with ID '${subtaskId}' not found.`);
     }
     if (!subtask.plan || subtask.plan.taskId !== taskId) {
       throw new BadRequestException(
-        `Subtask '${subtaskPrismaId}' does not belong to task '${taskId}' or its plan is missing.`,
+        `Subtask '${subtaskId}' does not belong to task '${taskId}' or its plan is missing.`,
       );
     }
 
+    // Convert status from schema format to DB format
+    const statusFull =
+      TOKEN_MAPS.status[newStatus as keyof typeof TOKEN_MAPS.status] ||
+      newStatus;
+
+    const updateData: Prisma.SubtaskUpdateInput = {
+      status: statusFull,
+    };
+
+    // Set timestamps based on status
+    if (statusFull === 'in-progress' && !subtask.startedAt) {
+      updateData.startedAt = new Date();
+    } else if (statusFull === 'completed') {
+      updateData.completedAt = new Date();
+      if (!subtask.startedAt) {
+        updateData.startedAt = new Date(); // Auto-set started if not already set
+      }
+    }
+
     const updatedSubtask = await this.prisma.subtask.update({
-      where: { id: subtaskPrismaId },
-      data: { status: newStatus },
+      where: { id: subtaskId }, // Use correct field name
+      data: updateData,
     });
 
+    // Check if batch/plan is complete
     const planId = subtask.planId;
     let planStatusUpdated = false;
     if (planId) {
@@ -261,7 +341,7 @@ export class ImplementationPlanService {
       });
 
       const allComplete = allSubtasksForPlan.every(
-        (st) => st.status === 'COM' || st.status === 'completed',
+        (st) => st.status === 'completed',
       );
 
       if (allComplete) {
@@ -313,11 +393,11 @@ export class ImplementationPlanService {
     }> = [];
 
     for (const subtask of subtasksInBatch) {
-      if (subtask.status === 'COM' || subtask.status === 'completed') {
+      if (subtask.status === 'completed') {
         completedCount++;
       } else {
         pendingSubtasks.push({
-          id: subtask.id.toString(),
+          id: `ST-${String(subtask.sequenceNumber).padStart(3, '0')}`, // Return logical ID
           title: subtask.name,
           status: subtask.status,
         });
@@ -332,6 +412,33 @@ export class ImplementationPlanService {
       totalSubtasksInBatch: subtasksInBatch.length,
       completedSubtasksInBatch: completedCount,
       pendingSubtasks,
+    };
+  }
+
+  // Legacy method for backward compatibility
+  async getPlanLegacy(
+    taskId: string,
+  ): Promise<ImplementationPlanStorage | null> {
+    const response = await this.getPlan(taskId);
+    if (!response) return null;
+
+    // Return the response as-is since ImplementationPlanStorage expects SubtaskResponse
+    return {
+      id: response.id,
+      taskId: response.taskId,
+      title: response.title,
+      overview: response.overview,
+      approach: response.approach,
+      technicalDecisions: response.technicalDecisions,
+      filesToModify: response.filesToModify,
+      version: response.version,
+      status: response.status,
+      subtasks: response.subtasks, // These already include databaseId
+      generalNotes: response.generalNotes,
+      linkedTd: response.linkedTd,
+      createdAt: response.createdAt,
+      updatedAt: response.updatedAt,
+      createdBy: response.createdBy,
     };
   }
 }
