@@ -1,46 +1,46 @@
 import { z } from 'zod';
 
+// ✅ FIXED: Schema aligned with TaskDescription database model
 export const UpdateTaskDescriptionSchema = z
   .object({
-    taskId: z.string().describe('The ID of the task to update.'),
-    description: z
-      .string()
-      .min(1, 'Description cannot be empty.')
-      .optional()
-      .describe('The new core description of the task.'),
+    taskId: z.string().describe('The ID of the task to update'),
+    description: z.string().min(1).optional().describe('Updated description'),
     businessRequirements: z
       .string()
       .optional()
-      .describe(
-        'The new detailed business requirements, objectives, and context.',
-      ),
+      .describe('Updated business requirements'),
     technicalRequirements: z
       .string()
       .optional()
-      .describe(
-        'The new specific technical requirements, constraints, or considerations.',
-      ),
+      .describe('Updated technical requirements'),
     acceptanceCriteria: z
-      .array(z.string().min(1, 'Acceptance criterion cannot be empty.'))
-      .min(1, 'At least one acceptance criterion is required if provided.')
+      .any()
       .optional()
-      .describe('The new list of acceptance criteria for the task.'),
+      .describe('Updated acceptance criteria (JSON array)'),
   })
   .refine(
-    (data) =>
-      data.description !== undefined ||
-      data.businessRequirements !== undefined ||
-      data.technicalRequirements !== undefined ||
-      data.acceptanceCriteria !== undefined,
-    {
-      message:
-        'At least one field (description, businessRequirements, technicalRequirements, or acceptanceCriteria) must be provided for an update.',
-    },
-  )
-  .describe(
-    'Schema for updating various descriptive fields of a task. At least one modifiable field must be provided.',
+    (data) => Object.keys(data).filter((k) => k !== 'taskId').length > 0,
+    { message: 'At least one field to update must be provided.' },
   );
 
-export type UpdateTaskDescriptionInput = z.infer<
+export type UpdateTaskDescriptionParams = z.infer<
   typeof UpdateTaskDescriptionSchema
+>;
+
+// Add the expected alias for backward compatibility
+export type UpdateTaskDescriptionInput = UpdateTaskDescriptionParams;
+
+// ✅ FIXED: Response schema matching TaskDescription database structure
+export const TaskDescriptionResponseSchema = z.object({
+  taskId: z.string().describe('Primary key matching task ID'),
+  description: z.string(),
+  businessRequirements: z.string(),
+  technicalRequirements: z.string(),
+  acceptanceCriteria: z.any().describe('JSON array of acceptance criteria'),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type TaskDescriptionResponse = z.infer<
+  typeof TaskDescriptionResponseSchema
 >;

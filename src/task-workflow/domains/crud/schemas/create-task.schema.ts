@@ -11,6 +11,26 @@ export const CreateTaskSchema = z.object({
     .string()
     .optional()
     .describe(
-      'A more detailed description of what the task entails (to be used by Boomerang for TaskDescription)',
+      'A more detailed description of what the task entails (core description for TaskDescription)',
+    ),
+  businessRequirements: z
+    .string()
+    .optional()
+    .describe(
+      'Detailed business requirements, objectives, and context for the task',
+    ),
+  technicalRequirements: z
+    .string()
+    .optional()
+    .describe(
+      'Specific technical requirements, constraints, or considerations',
+    ),
+  acceptanceCriteria: z
+    .array(z.string().min(1, 'Acceptance criterion cannot be empty.'))
+    .optional()
+    .describe(
+      'List of acceptance criteria that define when the task is considered complete',
     ),
 });
+
+export type CreateTaskInput = z.infer<typeof CreateTaskSchema>;

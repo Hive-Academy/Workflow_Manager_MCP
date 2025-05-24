@@ -1,68 +1,45 @@
 import { z } from 'zod';
 
-// Document reference schema
-export const DocumentRefSchema = z.enum([
-  'TD', // task-description
-  'IP', // implementation-plan
-  'RR', // research-report
-  'CRD', // code-review-report - Corrected from CR to CRD as per 000-workflow-core.md
-  'CP', // completion-report
-  'MB-PO', // memory-bank/ProjectOverview.md
-  'MB-TA', // memory-bank/TechnicalArchitecture.md
-  'MB-DG', // memory-bank/DeveloperGuide.md
-  'AC', // acceptance criteria
-  'ST', // subtask
+// ===== NEW: Full-name schemas (no shortcuts) =====
+export const TaskStatusSchema = z.enum([
+  'not-started',
+  'in-progress',
+  'needs-review',
+  'completed',
+  'needs-changes',
 ]);
 
-// Status code schema
-export const StatusCodeSchema = z.enum([
-  'INP', // in-progress
-  'NRV', // needs-review
-  'COM', // completed
-  'NS', // not-started
-  'NCH', // needs-changes
+export const WorkflowRoleSchema = z.enum([
+  'boomerang',
+  'researcher',
+  'architect',
+  'senior-developer',
+  'code-review',
 ]);
 
-// Role code schema
-export const RoleCodeSchema = z.enum([
-  '🪃MB', // boomerang
-  '🔬RS', // researcher
-  '🏛️AR', // architect
-  '👨‍💻SD', // senior-developer
-  '🔍CR', // code-review
+export const DocumentTypeSchema = z.enum([
+  'task-description',
+  'implementation-plan',
+  'research-report',
+  'code-review-report',
+  'completion-report',
+  'memory-bank-project-overview',
+  'memory-bank-technical-architecture',
+  'memory-bank-developer-guide',
+  'acceptance-criteria',
+  'subtask',
+  'subtasks-collection',
+  'comments-collection',
+  'delegation-history',
+  'workflow-transitions',
 ]);
 
-// Mapping objects for translation
-export const TOKEN_MAPS = {
-  document: {
-    TD: 'task-description.md', // Added .md extension
-    IP: 'implementation-plan.md', // Added .md extension
-    RR: 'research-report.md', // Added .md extension
-    CRD: 'code-review-report.md', // Corrected and added .md
-    CP: 'completion-report.md', // Added .md extension
-    'MB-PO': 'memory-bank/ProjectOverview.md',
-    'MB-TA': 'memory-bank/TechnicalArchitecture.md',
-    'MB-DG': 'memory-bank/DeveloperGuide.md',
-    AC: 'acceptance criteria',
-    ST: 'subtask',
-  },
-  status: {
-    INP: 'in-progress',
-    NRV: 'needs-review',
-    COM: 'completed',
-    NS: 'not-started',
-    NCH: 'needs-changes',
-  },
-  role: {
-    '🪃MB': 'boomerang',
-    '🔬RS': 'researcher',
-    '🏛️AR': 'architect',
-    '👨‍💻SD': 'senior-developer',
-    '🔍CR': 'code-review',
-  },
-};
+// ===== REMOVED: All legacy migration support since database is clean =====
 
-// Types for TypeScript
-export type DocumentRef = z.infer<typeof DocumentRefSchema>;
-export type StatusCode = z.infer<typeof StatusCodeSchema>;
-export type RoleCode = z.infer<typeof RoleCodeSchema>;
+// ===== TYPE EXPORTS =====
+// New preferred types
+export type TaskStatus = z.infer<typeof TaskStatusSchema>;
+export type WorkflowRole = z.infer<typeof WorkflowRoleSchema>;
+export type DocumentType = z.infer<typeof DocumentTypeSchema>;
+
+// ===== REMOVED: Legacy types completely eliminated =====

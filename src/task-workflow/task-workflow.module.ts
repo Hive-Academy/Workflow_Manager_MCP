@@ -9,8 +9,7 @@ import { ContextManagementService } from './domains/query/context-management.ser
 import { TaskStateService } from './domains/state/task-state.service';
 import { RoleTransitionService } from './domains/state/role-transition.service';
 import { TaskCommentService } from './domains/interaction/task-comment.service';
-import { ProcessCommandService } from './domains/interaction/process-command.service';
-import { ShorthandParserService } from './domains/interaction/shorthand-parser.service';
+
 import { ImplementationPlanService as CoreImplementationPlanService } from './domains/plan/implementation-plan.service';
 import { ResearchReportService } from './domains/reporting/research-report.service';
 import { CodeReviewReportService } from './domains/reporting/code-review-report.service'; // Added
@@ -25,6 +24,7 @@ import { ImplementationPlanOperationsService } from './domains/plan/implementati
 import { ReportOperationsService } from './domains/reporting/report-operations.service';
 
 import { PrismaErrorHandlerService } from './utils/prisma-error.handler';
+import { PerformanceAnalyticsService } from './domains/query/performance-analytics.service';
 
 @Module({
   imports: [PrismaModule],
@@ -37,8 +37,6 @@ import { PrismaErrorHandlerService } from './utils/prisma-error.handler';
     TaskStateService,
     RoleTransitionService,
     TaskCommentService,
-    ProcessCommandService,
-    ShorthandParserService,
     CoreImplementationPlanService,
     ResearchReportService,
     CodeReviewReportService, // Added
@@ -53,6 +51,7 @@ import { PrismaErrorHandlerService } from './utils/prisma-error.handler';
     ReportOperationsService,
 
     PrismaErrorHandlerService,
+    PerformanceAnalyticsService,
   ],
   exports: [
     // Export only MCP Operation Services as per original intent?

@@ -22,7 +22,7 @@ export class TaskStateService {
   async transitionRole(params: z.infer<typeof RoleTransitionSchema>) {
     try {
       const taskId = params.taskId;
-      const toRole = params.roleId;
+      const toRole = params.toRole;
       const fromRole = params.fromRole || 'system';
 
       // Update the task's currentMode and status, and log the delegation
@@ -247,14 +247,9 @@ export class TaskStateService {
 
       const dataToUpdate: Prisma.TaskUpdateInput = {};
 
-      if (params.newStatus) {
-        dataToUpdate.status = params.newStatus;
-      } else if (task.status === 'Blocked' || task.status === 'Paused') {
+      // Auto-resume blocked or paused tasks
+      if (task.status === 'Blocked' || task.status === 'Paused') {
         dataToUpdate.status = 'In Progress';
-      }
-
-      if (params.assignToMode) {
-        dataToUpdate.currentMode = params.assignToMode;
       }
 
       if (Object.keys(dataToUpdate).length === 0) {

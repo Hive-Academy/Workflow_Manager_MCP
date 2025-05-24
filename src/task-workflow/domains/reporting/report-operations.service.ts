@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest'; // Assuming @Tool decorator is available
 import { CodeReview, CompletionReport, ResearchReport } from 'generated/prisma';
 
@@ -7,75 +7,82 @@ import { CodeReviewReportService } from './code-review-report.service';
 import { CompletionReportService } from './completion-report.service';
 import { ResearchReportService } from './research-report.service';
 import {
-  CodeReviewReport,
   CreateCodeReviewReportInput,
   CreateCodeReviewReportInputSchema,
+  UpdateCodeReviewReportInput,
   UpdateCodeReviewReportInputSchema,
+  GetCodeReviewReportInput,
+  GetCodeReviewReportInputSchema,
 } from './schemas/code-review-report.schema';
 import {
   CreateCompletionReportInput,
   CreateCompletionReportInputSchema,
-  UpdateCompletionReportInputSchema,
 } from './schemas/completion-report.schema';
 import {
   CreateResearchReportInput,
   CreateResearchReportInputSchema,
   GetResearchReportInput,
   GetResearchReportInputSchema,
-  UpdateResearchReportInput,
-  UpdateResearchReportInputSchema,
 } from './schemas/research-report.schema';
 
-// Define complex input schemas separately for clarity and to avoid inline issues
-const GetCodeReviewReportInputSchema = z
-  .object({
-    reportId: z.string().uuid().optional(),
-    taskId: z.string().optional(),
-  })
-  .refine((data) => data.reportId || data.taskId, {
-    message: 'Either reportId or taskId must be provided',
-  });
-
-const UpdateCodeReviewReportToolInputSchema =
-  UpdateCodeReviewReportInputSchema.extend({
-    reportId: z.string().uuid(),
-  });
+// FIXED: Use the corrected schemas from the schema file
+// No need to redefine - import from schema file directly
 
 // Define complex input schemas for CompletionReport tools
 const GetCompletionReportInputSchema = z
   .object({
-    reportId: z.string().uuid().optional(),
+    reportId: z
+      .string()
+      .describe('String representation of report ID')
+      .optional(),
     taskId: z.string().optional(),
   })
   .refine((data) => data.reportId || data.taskId, {
     message: 'Either reportId or taskId must be provided',
   });
 
-const UpdateCompletionReportToolInputSchema =
-  UpdateCompletionReportInputSchema.extend({
-    reportId: z.string().uuid(),
-  });
+const UpdateCompletionReportToolInputSchema = z
+  .object({
+    reportId: z.string().describe('String representation of report ID'),
+    summary: z.string().min(1).optional(),
+    filesModified: z.any().optional(),
+    delegationSummary: z.string().min(1).optional(),
+    acceptanceCriteriaVerification: z.any().optional(),
+  })
+  .refine(
+    (data) => {
+      const { reportId, ...updateFields } = data;
+      return reportId && Object.keys(updateFields).length > 0;
+    },
+    {
+      message:
+        'reportId is required and at least one field to update must be provided.',
+    },
+  );
 
-// Helper function to map Prisma CodeReview model to Zod CodeReviewReport schema type
-function mapPrismaCodeReviewToZod(
-  prismaReport: CodeReview | null,
-): CodeReviewReport | null {
-  if (!prismaReport) {
-    return null;
-  }
-  return {
-    id: String(prismaReport.id),
-    taskId: prismaReport.taskId,
-    reviewer: 'N/A', // Placeholder, as Prisma model doesn't have this
-    status: prismaReport.status as CodeReviewReport['status'], // Assumes alignment
-    summary: prismaReport.summary,
-    findings: [], // Placeholder: Prisma model has 'issues: string', Zod schema expects structured findings.
-    // Proper reconciliation needed for actual findings data.
-    commitSha: undefined, // Placeholder, as Prisma model doesn't have this
-    createdAt: prismaReport.createdAt,
-    updatedAt: prismaReport.updatedAt,
-  };
-}
+// ✅ FIXED: Enhanced research report update schema with reportId
+const UpdateResearchReportToolInputSchema = z
+  .object({
+    reportId: z.number().int().describe('Database ID of the report to update'),
+    title: z.string().min(1).optional(),
+    summary: z.string().min(1).optional(),
+    findings: z.string().min(1).optional(),
+    recommendations: z.string().optional(),
+    references: z.any().optional(),
+  })
+  .refine(
+    (data) => {
+      const { reportId, ...updateFields } = data;
+      return reportId && Object.keys(updateFields).length > 0;
+    },
+    {
+      message:
+        'reportId is required and at least one field to update must be provided.',
+    },
+  );
+
+// FIXED: No longer needed - schema is now aligned with database
+// Return Prisma model directly as it matches the corrected schema
 
 @Injectable()
 export class ReportOperationsService {
@@ -105,38 +112,109 @@ export class ReportOperationsService {
       GetResearchReportInputSchema as ZodSchema<GetResearchReportInput>,
     // Output schema handling might need refinement for union types if not already supported
   })
-  async getResearchReport(
-    input: GetResearchReportInput,
-  ): Promise<ResearchReport | ResearchReport[] | null> {
+  async getResearchReport(input: GetResearchReportInput): Promise<any> {
+    const contextIdentifier = 'research-report';
+    let reportData: ResearchReport | ResearchReport[] | null = null;
+
     if (input.reportId) {
-      return this.researchReportService.getResearchReportById(input.reportId);
-    }
-    if (input.taskId) {
-      return this.researchReportService.getResearchReportsByTaskId(
+      reportData = await this.researchReportService.getResearchReportById(
+        input.reportId.toString(),
+      );
+      if (!reportData) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier} found for reportId ${input.reportId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true,
+                contextHash: null,
+                contextType: contextIdentifier,
+                reportId: input.reportId,
+              }),
+            },
+          ],
+        };
+      }
+    } else if (input.taskId) {
+      reportData = await this.researchReportService.getResearchReportsByTaskId(
         input.taskId,
       );
+      if (
+        !reportData ||
+        (Array.isArray(reportData) && reportData.length === 0)
+      ) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier}s found for taskId ${input.taskId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true, // Or empty: true for arrays
+                contextHash: null,
+                contextType: contextIdentifier,
+                taskId: input.taskId,
+              }),
+            },
+          ],
+        };
+      }
+    } else {
+      // This case should ideally be prevented by schema validation (Zod refine)
+      // but if it occurs, return a standardized error response.
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error: Either reportId or taskId must be provided to get_research_report.`,
+          },
+          {
+            type: 'text',
+            text: JSON.stringify({
+              error: true,
+              message: 'Either reportId or taskId must be provided.',
+              contextType: contextIdentifier,
+            }),
+          },
+        ],
+      };
     }
-    throw new Error(
-      'Either reportId or taskId must be provided to get_research_report.',
-    );
+
+    // If reportData is found and not empty, return it in the old format for now
+    // Or, ideally, it should also be wrapped if MCP requires all tool outputs to be `content: [...]`
+    // For ST-004, the focus is on the "not found" case.
+    // The successful return path would be standardized later if needed project-wide.
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(reportData, null, 2),
+        },
+      ],
+    };
   }
 
   @Tool({
     name: 'update_research_report',
     description: 'Updates an existing research report.',
-    parameters:
-      UpdateResearchReportInputSchema as ZodSchema<UpdateResearchReportInput>,
+    parameters: UpdateResearchReportToolInputSchema as ZodSchema<
+      z.infer<typeof UpdateResearchReportToolInputSchema>
+    >,
   })
   async updateResearchReport(
-    input: UpdateResearchReportInput,
+    input: z.infer<typeof UpdateResearchReportToolInputSchema>,
   ): Promise<ResearchReport> {
-    const { reportId } = input;
-    if (typeof reportId !== 'string') {
-      throw new Error(
-        'reportId must be a string and included in the input for updateResearchReport',
-      );
-    }
-    return this.researchReportService.updateResearchReport(reportId, input);
+    const { reportId, ...updateData } = input;
+    return this.researchReportService.updateResearchReport(
+      reportId.toString(),
+      updateData,
+    );
   }
 
   // --- CodeReviewReport Tools ---
@@ -149,69 +227,94 @@ export class ReportOperationsService {
   })
   async createCodeReviewReport(
     input: CreateCodeReviewReportInput,
-  ): Promise<CodeReviewReport | null> {
-    const prismaReport =
-      await this.codeReviewReportService.createCodeReviewReport(input);
-    return mapPrismaCodeReviewToZod(prismaReport);
+  ): Promise<CodeReview> {
+    // FIXED: Return Prisma model directly - schema is now aligned
+    return await this.codeReviewReportService.createCodeReviewReport(input);
   }
 
   @Tool({
     name: 'get_code_review_report',
     description:
       'Retrieves a code review report by its ID or all reports for a specific task ID.',
-    parameters: GetCodeReviewReportInputSchema as ZodSchema<
-      z.infer<typeof GetCodeReviewReportInputSchema>
-    >,
+    parameters:
+      GetCodeReviewReportInputSchema as ZodSchema<GetCodeReviewReportInput>,
   })
-  async getCodeReviewReport(
-    input: z.infer<typeof GetCodeReviewReportInputSchema>,
-  ): Promise<CodeReviewReport | CodeReviewReport[] | null> {
-    if (input.reportId) {
-      const reportIdNum = parseInt(input.reportId, 10);
-      if (isNaN(reportIdNum)) {
-        throw new Error('Invalid reportId format for get_code_review_report.');
+  async getCodeReviewReport(input: GetCodeReviewReportInput): Promise<any> {
+    const contextIdentifier = 'code-review-report';
+    let reportData: CodeReview | CodeReview[] | null = null;
+
+    try {
+      const result =
+        await this.codeReviewReportService.getCodeReviewReport(input);
+      reportData = result;
+
+      // Handle empty array case for taskId queries
+      if (Array.isArray(reportData) && reportData.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier}s found for taskId ${input.taskId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true,
+                contextHash: null,
+                contextType: contextIdentifier,
+                taskId: input.taskId,
+              }),
+            },
+          ],
+        };
       }
-      const prismaReport =
-        await this.codeReviewReportService.getCodeReviewReport(reportIdNum);
-      return mapPrismaCodeReviewToZod(prismaReport);
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(reportData, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        const identifier = input.reportId || input.taskId;
+        const identifierType = input.reportId ? 'reportId' : 'taskId';
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier} found for ${identifierType} ${identifier}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true,
+                contextHash: null,
+                contextType: contextIdentifier,
+                [identifierType]: identifier,
+              }),
+            },
+          ],
+        };
+      }
+      throw error;
     }
-    if (input.taskId) {
-      const prismaReports =
-        await this.codeReviewReportService.getCodeReviewReportsByTaskId(
-          input.taskId,
-        );
-      return prismaReports
-        .map(mapPrismaCodeReviewToZod)
-        .filter((r) => r !== null);
-    }
-    throw new Error(
-      'Either reportId or taskId must be provided for get_code_review_report.',
-    );
   }
 
   @Tool({
     name: 'update_code_review_report',
     description: 'Updates an existing code review report.',
-    parameters: UpdateCodeReviewReportToolInputSchema as ZodSchema<
-      z.infer<typeof UpdateCodeReviewReportToolInputSchema>
-    >,
+    parameters:
+      UpdateCodeReviewReportInputSchema as ZodSchema<UpdateCodeReviewReportInput>,
   })
   async updateCodeReviewReport(
-    input: z.infer<typeof UpdateCodeReviewReportToolInputSchema>,
-  ): Promise<CodeReviewReport | null> {
-    const reportIdNum = parseInt(input.reportId, 10);
-    if (isNaN(reportIdNum)) {
-      throw new Error('Invalid reportId format for update_code_review_report.');
-    }
-    // The service expects (id: number, data: UpdateCodeReviewReportInput)
-    // The 'input' here includes reportId, which should not be part of the 'data' payload for update
-    const { reportId, ...updateData } = input;
-    const prismaReport =
-      await this.codeReviewReportService.updateCodeReviewReport(
-        reportIdNum,
-        updateData as CreateCodeReviewReportInput,
-      );
-    return mapPrismaCodeReviewToZod(prismaReport);
+    input: UpdateCodeReviewReportInput,
+  ): Promise<CodeReview> {
+    // FIXED: Use the updated service method that handles input properly
+    return await this.codeReviewReportService.updateCodeReviewReport(input);
   }
 
   // --- CompletionReport Tools ---
@@ -238,18 +341,87 @@ export class ReportOperationsService {
   })
   async getCompletionReport(
     input: z.infer<typeof GetCompletionReportInputSchema>,
-  ): Promise<CompletionReport | CompletionReport[] | null> {
+  ): Promise<any> {
+    const contextIdentifier = 'completion-report';
+    let reportData: CompletionReport | CompletionReport[] | null = null;
+
     if (input.reportId) {
-      return this.completionReportService.getCompletionReport(input.reportId);
-    }
-    if (input.taskId) {
-      return this.completionReportService.getCompletionReportsByTaskId(
-        input.taskId,
+      reportData = await this.completionReportService.getCompletionReport(
+        input.reportId,
       );
+      if (!reportData) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier} found for reportId ${input.reportId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true,
+                contextHash: null,
+                contextType: contextIdentifier,
+                reportId: input.reportId,
+              }),
+            },
+          ],
+        };
+      }
+    } else if (input.taskId) {
+      reportData =
+        await this.completionReportService.getCompletionReportsByTaskId(
+          input.taskId,
+        );
+      if (
+        !reportData ||
+        (Array.isArray(reportData) && reportData.length === 0)
+      ) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier}s found for taskId ${input.taskId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true, // or empty: true
+                contextHash: null,
+                contextType: contextIdentifier,
+                taskId: input.taskId,
+              }),
+            },
+          ],
+        };
+      }
+    } else {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error: Either reportId or taskId must be provided for ${contextIdentifier}.`,
+          },
+          {
+            type: 'text',
+            text: JSON.stringify({
+              error: true,
+              message: 'Either reportId or taskId must be provided.',
+              contextType: contextIdentifier,
+            }),
+          },
+        ],
+      };
     }
-    throw new Error(
-      'Either reportId or taskId must be provided for get_completion_report.',
-    );
+    // Successful return, wrapped
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(reportData, null, 2),
+        },
+      ],
+    };
   }
 
   @Tool({

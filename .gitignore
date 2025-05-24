@@ -12,3 +12,4 @@ yarn-error.log*
 prisma/dev.db
 prisma/dev.db-journal
 prisma/migrations/*/*.sql
+/logs

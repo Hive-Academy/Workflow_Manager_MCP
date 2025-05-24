@@ -35,12 +35,54 @@ export class TaskCrudOperationsService {
   })
   async createTask(params: z.infer<typeof CreateTaskSchema>): Promise<any> {
     try {
+      // Validate and provide guidance for TaskDescription fields
+      const hasTaskDescriptionData =
+        params.description ||
+        params.businessRequirements ||
+        params.technicalRequirements ||
+        params.acceptanceCriteria;
+
       const newTask = await this.taskCrudService.createTask(params);
+
+      // Provide detailed feedback about what was created
+      let feedbackMessage = `Task '${newTask.name}' (ID: ${newTask.taskId}) created successfully with status '${newTask.status}'.`;
+
+      if (hasTaskDescriptionData) {
+        const providedFields = [];
+        if (params.description) providedFields.push('description');
+        if (params.businessRequirements)
+          providedFields.push('businessRequirements');
+        if (params.technicalRequirements)
+          providedFields.push('technicalRequirements');
+        if (params.acceptanceCriteria)
+          providedFields.push('acceptanceCriteria');
+
+        feedbackMessage += ` TaskDescription created with: ${providedFields.join(', ')}.`;
+
+        // Provide guidance for missing fields
+        const missingFields = [];
+        if (!params.description) missingFields.push('description');
+        if (!params.businessRequirements)
+          missingFields.push('businessRequirements');
+        if (!params.technicalRequirements)
+          missingFields.push('technicalRequirements');
+        if (!params.acceptanceCriteria)
+          missingFields.push('acceptanceCriteria');
+
+        if (missingFields.length > 0) {
+          feedbackMessage += ` Missing fields (set to defaults): ${missingFields.join(', ')}.`;
+          feedbackMessage += ` Consider using update_task_description to provide complete requirements.`;
+        }
+      } else {
+        feedbackMessage += ` No TaskDescription created (no description fields provided).`;
+        feedbackMessage += ` To add detailed requirements, use update_task_description with description, businessRequirements, technicalRequirements, and acceptanceCriteria.`;
+      }
+
       return {
         content: [
           {
             type: 'text',
-            text: `Task '${newTask.name}' (ID: ${newTask.taskId}) created successfully with status '${newTask.status}'. Description provided: ${params.description ? 'Yes' : 'No'}`,
+            text: feedbackMessage,
           },
         ],
       };
@@ -81,8 +123,8 @@ export class TaskCrudOperationsService {
             text: `Task description for ID '${updatedDescription.taskId}' updated successfully.`,
           },
           {
-            type: 'json',
-            json: { ...updatedDescription },
+            type: 'text',
+            text: JSON.stringify(updatedDescription, null, 2),
           },
         ],
       };
@@ -145,14 +187,45 @@ export class TaskCrudOperationsService {
   async searchTasksTool(
     params: z.infer<typeof SearchTasksInputSchema>,
   ): Promise<any> {
+    const contextIdentifier = 'task-search-results';
     try {
       const result: PaginatedTaskSummary =
         await this.taskQueryService.searchTasks(params);
+
+      if (!result || result.tasks.length === 0 || result.totalTasks === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No tasks found matching your search criteria for ${contextIdentifier}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                empty: true,
+                contextHash: null, // Hash of empty results might not be meaningful
+                contextType: contextIdentifier,
+                searchParams: params, // Optionally include search params for context
+                count: 0,
+              }),
+            },
+          ],
+        };
+      }
+
       return {
         content: [
+          // {
+          //   type: 'json',
+          //   json: result,
+          // },
           {
-            type: 'json',
-            json: result,
+            type: 'text',
+            text: `Found ${result.totalTasks} task(s) matching your search criteria for ${contextIdentifier}. Page ${result.currentPage} of ${result.totalPages}.`,
+          },
+          {
+            type: 'text',
+            text: JSON.stringify(result), // Return the actual paginated result stringified
           },
         ],
       };
@@ -161,9 +234,24 @@ export class TaskCrudOperationsService {
         `TaskCrudOperationsService Error in searchTasksTool:`,
         error,
       );
-      throw new InternalServerErrorException(
-        `TaskCrudOperationsService: Could not search tasks. Error: ${(error as Error).message}`,
-      );
+      // Standardized generic error response
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `An internal error occurred while searching tasks for ${contextIdentifier}.`,
+          },
+          {
+            type: 'text',
+            text: JSON.stringify({
+              error: true,
+              message: (error as Error).message,
+              contextType: contextIdentifier,
+              searchParams: params,
+            }),
+          },
+        ],
+      };
     }
   }
 }
