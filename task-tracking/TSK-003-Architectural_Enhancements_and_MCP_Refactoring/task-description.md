@@ -1,1 +1,0 @@
-Address current codebase architecture, group files into folders, continue MCP Facade Refactoring (moving tools to focused services like TaskCrudOperationsService), and apply other best practices identified after code scan.

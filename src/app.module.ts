@@ -13,7 +13,7 @@ import { TaskWorkflowModule } from './task-workflow/task-workflow.module';
       name: process.env.MCP_SERVER_NAME || 'MCP-Nest-Server',
       version: '0.1.0',
       instructions: 'MCP Server for Workflow Manager.',
-      transport: McpTransportType.SSE,
+      transport: McpTransportType.STDIO,
     }),
     TaskWorkflowModule,
   ],
