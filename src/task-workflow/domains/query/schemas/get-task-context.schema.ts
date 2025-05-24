@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-// ✅ ENHANCED: Get task context schema with slice type support
+// ✅ ENHANCED: Get task context schema with slice type support and optimization levels
 export const GetTaskContextSchema = z.object({
   taskId: z.string().describe('The ID of the task to get context for'),
   taskName: z
@@ -23,6 +23,17 @@ export const GetTaskContextSchema = z.object({
     .optional()
     .default('FULL')
     .describe('Type of context slice to retrieve'),
+  optimizationLevel: z
+    .enum([
+      'MINIMAL', // Only essential identifiers and status (~95% token savings)
+      'SUMMARY', // Optimized summaries with key metrics (~80-90% token savings)
+      'FULL', // Complete, unoptimized data (0% token savings)
+    ])
+    .optional()
+    .default('SUMMARY')
+    .describe(
+      'Optimization level for response: MINIMAL (max efficiency), SUMMARY (balanced), FULL (complete data)',
+    ),
   includeRelated: z
     .boolean()
     .optional()

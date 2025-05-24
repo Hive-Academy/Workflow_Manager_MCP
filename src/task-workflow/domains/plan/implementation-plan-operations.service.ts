@@ -91,6 +91,7 @@ export class ImplementationPlanOperationsService {
       const taskContextResponse = await this.taskQueryService.getTaskContext({
         taskId,
         sliceType: 'STATUS',
+        optimizationLevel: 'MINIMAL',
         includeRelated: false,
         maxComments: 0,
         maxDelegations: 0,
@@ -231,6 +232,7 @@ export class ImplementationPlanOperationsService {
           const taskContext = await this.taskQueryService.getTaskContext({
             taskId: params.taskId,
             sliceType: 'STATUS',
+            optimizationLevel: 'MINIMAL',
             includeRelated: false,
             maxComments: 0,
             maxDelegations: 0,
@@ -248,7 +250,7 @@ export class ImplementationPlanOperationsService {
           );
         }
       } else {
-        message += ` Pending subtasks: ${batchStatus.pendingSubtasks.map((st) => st.title).join(', ')}`;
+        message += ` Pending subtasks: ${batchStatus.pendingSubtasks.map((st) => `${st.displayId} (DB ID: ${st.id}) - ${st.title}`).join(', ')}`;
       }
       return {
         content: [

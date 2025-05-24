@@ -33,7 +33,6 @@ model Task {
   researchReports     ResearchReport[]
   codeReviews         CodeReview[]
   completionReports   CompletionReport[]
-  commits             Commit[]
   comments            Comment[]
   workflowTransitions WorkflowTransition[]
   // @@map("tasks") // If table name in DB should be 'tasks'
@@ -92,7 +91,6 @@ model Subtask {
   task              Task               @relation(fields: [taskId], references: [taskId])
   plan              ImplementationPlan @relation(fields: [planId], references: [id])
   delegationRecords DelegationRecord[]
-  commits           Commit[]
   comments          Comment[]
   // @@map("subtasks")
 
@@ -168,37 +166,6 @@ model CompletionReport {
   // @@map("completion_reports")
 }
 
-model MemoryBank {
-  id          Int      @id @default(autoincrement())
-  fileType    String // 'ProjectOverview', 'TechnicalArchitecture', 'DeveloperGuide'
-  section     String
-  content     String
-  lineStart   Int?
-  lineEnd     Int?
-  lastUpdated DateTime @updatedAt
-  // @@fulltext([content]) // Prisma's representation of FTS - Removed due to connector incompatibility
-  // @@map("memory_bank")
-
-  @@index([fileType])
-  @@index([section])
-}
-
-model Commit {
-  id              Int      @id @default(autoincrement())
-  taskId          String
-  subtaskId       Int?
-  hash            String   @unique
-  message         String
-  filesChanged    Json // JSON array of files changed
-  commitTimestamp DateTime
-  author          String
-
-  task    Task     @relation(fields: [taskId], references: [taskId])
-  subtask Subtask? @relation(fields: [subtaskId], references: [id])
-
-  // @@map("commits")
-}
-
 model Comment {
   id        Int      @id @default(autoincrement())
   taskId    String
@@ -224,22 +191,4 @@ model WorkflowTransition {
   task Task @relation(fields: [taskId], references: [taskId])
 
   // @@map("workflow_transitions")
-}
-
-model Template {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  content     String
-  description String
-  lastUpdated DateTime @updatedAt
-
-  // @@map("templates")
-}
-
-model SchemaVersion {
-  id          Int      @id @default(1) // Intended for a single row
-  version     String
-  lastUpdated DateTime @updatedAt
-
-  // @@map("schema_version")
 }

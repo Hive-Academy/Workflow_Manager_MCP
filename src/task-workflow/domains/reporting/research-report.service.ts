@@ -16,16 +16,6 @@ import {
 export class ResearchReportService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private parseReportId(reportIdString: string): number {
-    const reportIdNum = parseInt(reportIdString, 10);
-    if (isNaN(reportIdNum)) {
-      throw new BadRequestException(
-        'Invalid report ID format. Must be a number.',
-      );
-    }
-    return reportIdNum;
-  }
-
   async createResearchReport(
     data: CreateResearchReportInput,
   ): Promise<ResearchReport> {
@@ -61,9 +51,8 @@ export class ResearchReportService {
   }
 
   async getResearchReportById(
-    reportIdString: string,
+    reportId: number,
   ): Promise<ResearchReport | null> {
-    const reportId = this.parseReportId(reportIdString);
     try {
       const report = await this.prisma.researchReport.findUnique({
         where: { id: reportId },
@@ -74,7 +63,7 @@ export class ResearchReportService {
       return report as unknown as ResearchReport;
     } catch (error) {
       console.error(
-        `Error fetching research report with ID '${reportIdString}':`,
+        `Error fetching research report with ID '${reportId}':`,
         error,
       );
       throw new InternalServerErrorException(
@@ -104,10 +93,9 @@ export class ResearchReportService {
   }
 
   async updateResearchReport(
-    reportIdString: string,
+    reportId: number,
     data: UpdateResearchReportInput,
   ): Promise<ResearchReport> {
-    const reportId = this.parseReportId(reportIdString);
     const updateData = data;
 
     if (Object.keys(updateData).length === 0) {
@@ -153,7 +141,7 @@ export class ResearchReportService {
       return updatedReport as unknown as ResearchReport;
     } catch (error) {
       console.error(
-        `Error updating research report with ID '${reportIdString}':`,
+        `Error updating research report with ID '${reportId}':`,
         error,
       );
       if (
@@ -161,7 +149,7 @@ export class ResearchReportService {
         error.code === 'P2025'
       ) {
         throw new NotFoundException(
-          `Research report with ID '${reportIdString}' not found.`,
+          `Research report with ID '${reportId}' not found.`,
         );
       }
       throw new InternalServerErrorException(

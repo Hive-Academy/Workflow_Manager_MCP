@@ -8,7 +8,7 @@ export const UpdateSubtaskStatusSchema = z.object({
     .int()
     .positive()
     .describe(
-      'The database ID of the subtask to update (from Subtask.id field).',
+      'The database ID of the subtask to update (from Subtask.id field). NOT the display ID like ST-001. Use the numeric database ID shown in tool responses as "DB ID: X".',
     ),
   newStatus: TaskStatusSchema.describe('The new status for the subtask.'),
   notes: z

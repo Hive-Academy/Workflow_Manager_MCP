@@ -136,6 +136,7 @@ export class TaskQueryService {
       const {
         taskId,
         sliceType = 'FULL',
+        optimizationLevel: _optimizationLevel = 'SUMMARY', // Extracted for operations service, not used in data retrieval
         includeRelated = true,
         maxComments = 10,
         maxDelegations = 5,

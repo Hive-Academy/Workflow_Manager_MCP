@@ -44,19 +44,43 @@ export class TaskStateOperationsService {
         });
       }
 
-      let responseText = `Task '${updatedTask.name}' (ID: ${updatedTask.taskId}) status updated to '${updatedTask.status}'.`;
-      if (params.currentMode) {
-        responseText += ` Current mode set to '${updatedTask.currentMode}'.`;
-      }
-      if (params.notes) {
-        responseText += ` Notes: ${params.notes}`;
-      }
-
       return {
         content: [
           {
             type: 'text',
-            text: responseText,
+            text: JSON.stringify(
+              {
+                taskId: updatedTask.taskId,
+                name: updatedTask.name,
+                status: updatedTask.status,
+                currentMode: updatedTask.currentMode,
+                priority: updatedTask.priority,
+                owner: updatedTask.owner,
+                completionDate: updatedTask.completionDate,
+
+                // Include transition and comment data if available
+                workflowTransition:
+                  updatedTask.workflowTransitions?.[0] || null,
+                recentComment: updatedTask.comments?.[0] || null,
+
+                // Include update details
+                updateDetails: {
+                  fieldsUpdated: {
+                    status: true,
+                    currentMode: !!params.currentMode,
+                    priority: !!params.priority,
+                    owner: !!params.owner,
+                    completionDate:
+                      !!params.completionDate || params.status === 'completed',
+                    notes: !!params.notes,
+                  },
+                  timestamp: new Date().toISOString(),
+                  updatedBy: params.currentMode || 'system',
+                },
+              },
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -99,7 +123,30 @@ export class TaskStateOperationsService {
         content: [
           {
             type: 'text',
-            text: `Task '${delegatedTask.task.name}' (ID: ${delegatedTask.task.taskId}) delegated from '${params.fromMode}' to '${params.toMode}'${params.message ? ' with message' : ''}.`,
+            text: JSON.stringify(
+              {
+                taskId: delegatedTask.task.taskId,
+                taskName: delegatedTask.task.name,
+                status: delegatedTask.task.status,
+                fromMode: params.fromMode,
+                toMode: params.toMode,
+                currentMode: delegatedTask.task.currentMode,
+                message: params.message || null,
+                subtaskId: params.subtaskId || null,
+
+                // Delegation metadata
+                delegationData: {
+                  delegated: true,
+                  timestamp: new Date().toISOString(),
+                  redelegationCount:
+                    delegatedTask.task.delegationRecords?.[0]
+                      ?.redelegationCount || 0,
+                  messageAdded: !!params.message,
+                },
+              },
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -138,14 +185,31 @@ export class TaskStateOperationsService {
         });
       }
 
-      const statusText =
-        params.status === 'completed' ? 'successfully completed' : 'rejected';
-
       return {
         content: [
           {
             type: 'text',
-            text: `Task '${completedTask.task.name}' (ID: ${completedTask.task.taskId}) has been ${statusText} by ${params.mode}${params.notes ? ' with notes' : ''}.`,
+            text: JSON.stringify(
+              {
+                taskId: completedTask.task.taskId,
+                taskName: completedTask.task.name,
+                status: completedTask.task.status,
+                completionStatus: params.status,
+                completedBy: params.mode,
+                notes: params.notes || null,
+                rejectionReason: params.rejectionReason || null,
+
+                // Completion metadata
+                completionData: {
+                  timestamp: new Date().toISOString(),
+                  completionData: params.completionData || null,
+                  hasNotes: !!params.notes,
+                  wasRejected: params.status === 'rejected',
+                },
+              },
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -193,6 +257,7 @@ export class TaskStateOperationsService {
       const fullContext = await this.taskQueryService.getTaskContext({
         taskId,
         sliceType: 'FULL',
+        optimizationLevel: 'FULL',
         includeRelated: true,
         maxComments: 5,
         maxDelegations: 10,

@@ -399,7 +399,12 @@ export class ImplementationPlanService {
     isComplete: boolean;
     totalSubtasksInBatch: number;
     completedSubtasksInBatch: number;
-    pendingSubtasks: Array<{ id: string; title: string; status: string }>;
+    pendingSubtasks: Array<{
+      id: string;
+      displayId: string;
+      title: string;
+      status: string;
+    }>;
     efficiency?: number;
     averageCompletionTime?: number;
   }> {
@@ -433,6 +438,7 @@ export class ImplementationPlanService {
     let totalCompletionTime = 0;
     const pendingSubtasks: Array<{
       id: string;
+      displayId: string;
       title: string;
       status: string;
     }> = [];
@@ -447,7 +453,8 @@ export class ImplementationPlanService {
         }
       } else {
         pendingSubtasks.push({
-          id: `ST-${String(subtask.sequenceNumber).padStart(3, '0')}`,
+          id: subtask.id.toString(), // Database ID for tools
+          displayId: `ST-${String(subtask.sequenceNumber).padStart(3, '0')}`, // Display ID for users
           title: subtask.name,
           status: subtask.status,
         });

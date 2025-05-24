@@ -84,6 +84,37 @@ export class TaskCrudOperationsService {
             type: 'text',
             text: feedbackMessage,
           },
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                taskId: newTask.taskId,
+                name: newTask.name,
+                status: newTask.status,
+                currentMode: newTask.currentMode,
+                priority: newTask.priority,
+                owner: newTask.owner,
+                creationDate: newTask.creationDate,
+
+                // Include metadata about what was created
+                creationData: {
+                  hasTaskDescription: hasTaskDescriptionData,
+                  providedFields: Object.keys(params).filter(
+                    (key) =>
+                      [
+                        'description',
+                        'businessRequirements',
+                        'technicalRequirements',
+                        'acceptanceCriteria',
+                      ].includes(key) && params[key as keyof typeof params],
+                  ),
+                  timestamp: new Date().toISOString(),
+                },
+              },
+              null,
+              2,
+            ),
+          },
         ],
       };
     } catch (error) {
@@ -215,10 +246,6 @@ export class TaskCrudOperationsService {
 
       return {
         content: [
-          // {
-          //   type: 'json',
-          //   json: result,
-          // },
           {
             type: 'text',
             text: `Found ${result.totalTasks} task(s) matching your search criteria for ${contextIdentifier}. Page ${result.currentPage} of ${result.totalPages}.`,
