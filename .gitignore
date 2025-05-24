@@ -14,3 +14,5 @@ prisma/*.db
 prisma/*.db-journal
 prisma/migrations/*/*.sql
 /logs
+/.env.docker.example
+prisma/workflow-manager.db

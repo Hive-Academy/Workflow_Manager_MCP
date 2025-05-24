@@ -32,8 +32,9 @@ import {
 const GetCompletionReportInputSchema = z
   .object({
     reportId: z
-      .string()
-      .describe('String representation of report ID')
+      .number()
+      .int()
+      .describe('Database ID of the completion report')
       .optional(),
     taskId: z.string().optional(),
   })
@@ -43,7 +44,10 @@ const GetCompletionReportInputSchema = z
 
 const UpdateCompletionReportToolInputSchema = z
   .object({
-    reportId: z.string().describe('String representation of report ID'),
+    reportId: z
+      .number()
+      .int()
+      .describe('Database ID of the completion report to update'),
     summary: z.string().min(1).optional(),
     filesModified: z.any().optional(),
     delegationSummary: z.string().min(1).optional(),
@@ -118,7 +122,7 @@ export class ReportOperationsService {
 
     if (input.reportId) {
       reportData = await this.researchReportService.getResearchReportById(
-        input.reportId.toString(),
+        input.reportId,
       );
       if (!reportData) {
         return {
@@ -212,7 +216,7 @@ export class ReportOperationsService {
   ): Promise<ResearchReport> {
     const { reportId, ...updateData } = input;
     return this.researchReportService.updateResearchReport(
-      reportId.toString(),
+      reportId,
       updateData,
     );
   }

@@ -18,6 +18,7 @@ import { WorkflowMapSchema } from './schemas/workflow-map.schema';
 import { WorkflowStatusSchema } from './schemas/workflow-status.schema';
 import { TaskQueryService } from './task-query.service';
 import { PerformanceAnalyticsService } from './performance-analytics.service';
+import { OptimizationLevel } from '../../types/optimization.types';
 
 @Injectable()
 export class TaskQueryOperationsService {
@@ -60,107 +61,124 @@ export class TaskQueryOperationsService {
         };
       }
 
-      // 🚀 OPTIMIZATION: Slice-based context optimization for token efficiency
-      const { sliceType = 'FULL' } = params;
+      // 🚀 OPTIMIZATION: Proper optimization level handling
+      const {
+        sliceType = 'FULL',
+        optimizationLevel = OptimizationLevel.SUMMARY,
+      } = params;
 
-      let optimizedContext: any;
+      // Normalize optimization level to string for consistent comparison
+      const normalizedOptLevel = String(optimizationLevel).toUpperCase();
 
-      if (sliceType === 'STATUS') {
-        // Minimal status info only (90% size reduction)
-        optimizedContext = {
+      let responseContext: any;
+
+      // Handle optimization based on optimizationLevel parameter
+      if (normalizedOptLevel === 'FULL') {
+        // TRUE FULL: Return complete, unoptimized data
+        responseContext = fullContext;
+      } else if (normalizedOptLevel === 'MINIMAL') {
+        // MINIMAL: Only essential identifiers and status
+        responseContext = {
           taskId: fullContext.taskId,
+          name: fullContext.name,
           status: fullContext.status,
           currentMode: fullContext.currentMode,
-          name: fullContext.name,
-        };
-      } else if (sliceType === 'TD') {
-        // Task description only
-        optimizedContext = {
-          taskId: fullContext.taskId,
-          name: fullContext.name,
-          description: fullContext.taskDescription?.description,
-          acceptanceCriteria: fullContext.taskDescription?.acceptanceCriteria,
-        };
-      } else if (sliceType === 'IP') {
-        // Implementation plan summary only
-        optimizedContext = {
-          taskId: fullContext.taskId,
-          implementationPlanSummary: fullContext.implementationPlan
-            ? {
-                id: fullContext.implementationPlan.id,
-                overview:
-                  fullContext.implementationPlan.overview.substring(0, 200) +
-                  '...',
-                totalSubtasks:
-                  fullContext.implementationPlan.totalSubtasks || 0,
-                completedSubtasks:
-                  fullContext.implementationPlan.completedSubtasks || 0,
-                progressPercent: Math.round(
-                  ((fullContext.implementationPlan.completedSubtasks || 0) /
-                    (fullContext.implementationPlan.totalSubtasks || 1)) *
-                    100,
-                ),
-              }
-            : null,
-        };
-      } else if (sliceType === 'COMMENTS') {
-        // Recent comments only (last 3 for efficiency)
-        optimizedContext = {
-          taskId: fullContext.taskId,
-          recentComments:
-            fullContext.recentComments?.slice(0, 3).map((comment: any) => ({
-              mode: comment.mode,
-              content:
-                comment.content.substring(0, 100) +
-                (comment.content.length > 100 ? '...' : ''),
-              createdAt: comment.createdAt,
-            })) || [],
         };
       } else {
-        // FULL context but optimized
-        optimizedContext = {
-          taskId: fullContext.taskId,
-          name: fullContext.name,
-          status: fullContext.status,
-          currentMode: fullContext.currentMode,
-          creationDate: fullContext.creationDate,
+        // SUMMARY: Optimized summaries with key metrics (previous FULL behavior)
+        if (sliceType === 'STATUS') {
+          responseContext = {
+            taskId: fullContext.taskId,
+            status: fullContext.status,
+            currentMode: fullContext.currentMode,
+            name: fullContext.name,
+          };
+        } else if (sliceType === 'TD') {
+          responseContext = {
+            taskId: fullContext.taskId,
+            name: fullContext.name,
+            description: fullContext.taskDescription?.description,
+            acceptanceCriteria: fullContext.taskDescription?.acceptanceCriteria,
+          };
+        } else if (sliceType === 'IP') {
+          responseContext = {
+            taskId: fullContext.taskId,
+            implementationPlanSummary: fullContext.implementationPlan
+              ? {
+                  id: fullContext.implementationPlan.id,
+                  overview:
+                    fullContext.implementationPlan.overview.substring(0, 200) +
+                    '...',
+                  totalSubtasks:
+                    fullContext.implementationPlan.totalSubtasks || 0,
+                  completedSubtasks:
+                    fullContext.implementationPlan.completedSubtasks || 0,
+                  progressPercent: Math.round(
+                    ((fullContext.implementationPlan.completedSubtasks || 0) /
+                      (fullContext.implementationPlan.totalSubtasks || 1)) *
+                      100,
+                  ),
+                }
+              : null,
+          };
+        } else if (sliceType === 'COMMENTS') {
+          responseContext = {
+            taskId: fullContext.taskId,
+            recentComments:
+              fullContext.recentComments?.slice(0, 3).map((comment: any) => ({
+                mode: comment.mode,
+                content:
+                  comment.content.substring(0, 100) +
+                  (comment.content.length > 100 ? '...' : ''),
+                createdAt: comment.createdAt,
+              })) || [],
+          };
+        } else {
+          // SUMMARY level for FULL slice type
+          responseContext = {
+            taskId: fullContext.taskId,
+            name: fullContext.name,
+            status: fullContext.status,
+            currentMode: fullContext.currentMode,
+            creationDate: fullContext.creationDate,
 
-          // Summary objects instead of full data (AC11 optimization)
-          taskDescriptionSummary: fullContext.taskDescription
-            ? {
-                hasDescription: !!fullContext.taskDescription.description,
-                hasAcceptanceCriteria:
-                  !!fullContext.taskDescription.acceptanceCriteria,
-                lastUpdated: fullContext.taskDescription.updatedAt,
-              }
-            : null,
+            // Summary objects instead of full data
+            taskDescriptionSummary: fullContext.taskDescription
+              ? {
+                  hasDescription: !!fullContext.taskDescription.description,
+                  hasAcceptanceCriteria:
+                    !!fullContext.taskDescription.acceptanceCriteria,
+                  lastUpdated: fullContext.taskDescription.updatedAt,
+                }
+              : null,
 
-          implementationSummary: fullContext.implementationPlan
-            ? {
-                id: fullContext.implementationPlan.id,
-                totalSubtasks:
-                  fullContext.implementationPlan.totalSubtasks || 0,
-                completedSubtasks:
-                  fullContext.implementationPlan.completedSubtasks || 0,
-                progressPercent: Math.round(
-                  ((fullContext.implementationPlan.completedSubtasks || 0) /
-                    (fullContext.implementationPlan.totalSubtasks || 1)) *
-                    100,
-                ),
-              }
-            : null,
+            implementationSummary: fullContext.implementationPlan
+              ? {
+                  id: fullContext.implementationPlan.id,
+                  totalSubtasks:
+                    fullContext.implementationPlan.totalSubtasks || 0,
+                  completedSubtasks:
+                    fullContext.implementationPlan.completedSubtasks || 0,
+                  progressPercent: Math.round(
+                    ((fullContext.implementationPlan.completedSubtasks || 0) /
+                      (fullContext.implementationPlan.totalSubtasks || 1)) *
+                      100,
+                  ),
+                }
+              : null,
 
-          commentsSummary: {
-            count: fullContext.recentComments?.length || 0,
-            latestMode: fullContext.recentComments?.[0]?.mode,
-            latestTimestamp: fullContext.recentComments?.[0]?.createdAt,
-          },
-        };
+            commentsSummary: {
+              count: fullContext.recentComments?.length || 0,
+              latestMode: fullContext.recentComments?.[0]?.mode,
+              latestTimestamp: fullContext.recentComments?.[0]?.createdAt,
+            },
+          };
+        }
       }
 
       // 🚀 OPTIMIZATION: Add compression metrics for tracking
       const originalSize = JSON.stringify(fullContext).length;
-      const optimizedSize = JSON.stringify(optimizedContext).length;
+      const optimizedSize = JSON.stringify(responseContext).length;
       const compressionRatio = Math.round(
         (1 - optimizedSize / originalSize) * 100,
       );
@@ -178,9 +196,10 @@ export class TaskQueryOperationsService {
       );
 
       const responseData = {
-        ...optimizedContext,
+        ...responseContext,
         _optimization: {
           sliceType,
+          optimizationLevel,
           originalSize,
           optimizedSize,
           compressionRatio: `${compressionRatio}%`,
@@ -305,16 +324,29 @@ export class TaskQueryOperationsService {
   })
   async getTaskStatus(params: z.infer<typeof GetTaskStatusSchema>) {
     try {
-      // Assuming taskStateService.getTaskStatus actually returns the status correctly and is suitable here.
-      // The IP mentions TaskQueryOperationsService, but the original facade uses taskStateService.
-      // For now, sticking to the original service call to maintain behavior, but this might need review by Architect.
+      // Get the full task status data
       const taskStatus = await this.taskStateService.getTaskStatus(params);
 
       return {
         content: [
           {
             type: 'text',
-            text: `Task has status '${taskStatus.status}'.`,
+            text: JSON.stringify(
+              {
+                taskId: params.taskId,
+                status: taskStatus.status,
+                recentComments: taskStatus.recentComments || [],
+
+                // Add metadata for better context
+                statusData: {
+                  retrieved: true,
+                  timestamp: new Date().toISOString(),
+                  commentCount: taskStatus.recentComments?.length || 0,
+                },
+              },
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -344,13 +376,26 @@ export class TaskQueryOperationsService {
     params: z.infer<typeof GetCurrentModeForTaskSchema>,
   ) {
     try {
-      // Original facade uses taskStateService for this.
+      // Get the current mode data
       const result = await this.taskStateService.getCurrentModeForTask(params);
       return {
         content: [
           {
             type: 'text',
-            text: `Current mode for task '${params.taskId}' is '${result.currentMode}'.`,
+            text: JSON.stringify(
+              {
+                taskId: params.taskId,
+                currentMode: result.currentMode,
+
+                // Add metadata
+                modeData: {
+                  retrieved: true,
+                  timestamp: new Date().toISOString(),
+                },
+              },
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -384,7 +429,25 @@ export class TaskQueryOperationsService {
         content: [
           {
             type: 'text',
-            text: `Dashboard: ${dashboardData.totalTasks} total tasks. Status breakdown: ${JSON.stringify(dashboardData.tasksByStatus)}. Mode breakdown: ${JSON.stringify(dashboardData.tasksByMode)}`,
+            text: JSON.stringify(
+              {
+                totalTasks: dashboardData.totalTasks,
+                activeTasks: dashboardData.activeTasks,
+                completedTasks: dashboardData.completedTasks,
+                blockedTasks: dashboardData.blockedTasks,
+                tasksByStatus: dashboardData.tasksByStatus,
+                tasksByMode: dashboardData.tasksByMode,
+
+                // Add metadata
+                dashboardData: {
+                  retrieved: true,
+                  timestamp: new Date().toISOString(),
+                  summary: `${dashboardData.totalTasks} total tasks`,
+                },
+              },
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -505,6 +568,7 @@ export class TaskQueryOperationsService {
       const fullContextResponse = await this.getTaskContext({
         taskId,
         sliceType: sliceType as any,
+        optimizationLevel: 'SUMMARY', // Default to SUMMARY for diff operations
         includeRelated: true,
         maxComments: 5,
         maxDelegations: 10,
@@ -678,11 +742,43 @@ export class TaskQueryOperationsService {
         recentComments: any;
       } = await this.taskQueryService.continueTask(params);
 
+      // Return the actual context data instead of just a message
       return {
         content: [
           {
             type: 'text',
-            text: `Context for continuing task '${taskContext.task?.taskId}' retrieved.`,
+            text: JSON.stringify(
+              {
+                taskId: taskContext.task?.taskId,
+                name: taskContext.task?.name,
+                status: taskContext.task?.status,
+                currentMode: taskContext.task?.currentMode,
+
+                // Include the rich context data
+                taskDescription: taskContext.taskDescription,
+                implementationPlan: taskContext.currentImplementationPlan,
+                latestDelegation: taskContext.latestDelegation,
+                researchReport: taskContext.latestResearchReport,
+                codeReview: taskContext.latestCodeReview,
+                recentComments: taskContext.recentComments?.slice(0, 10) || [],
+
+                // Add metadata
+                continuationData: {
+                  retrieved: true,
+                  timestamp: new Date().toISOString(),
+                  contextAvailable: {
+                    taskDescription: !!taskContext.taskDescription,
+                    implementationPlan: !!taskContext.currentImplementationPlan,
+                    delegation: !!taskContext.latestDelegation,
+                    research: !!taskContext.latestResearchReport,
+                    codeReview: !!taskContext.latestCodeReview,
+                    comments: taskContext.recentComments?.length || 0,
+                  },
+                },
+              },
+              null,
+              2,
+            ),
           },
         ],
       };

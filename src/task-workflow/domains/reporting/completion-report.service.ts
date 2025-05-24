@@ -41,15 +41,9 @@ export class CompletionReportService {
     return report as unknown as CompletionReport;
   }
 
-  async getCompletionReport(id: string): Promise<CompletionReport | null> {
-    const reportId = parseInt(id, 10);
-    if (isNaN(reportId)) {
-      throw new NotFoundException(
-        `Invalid report ID format: "${id}". Must be an integer.`,
-      );
-    }
+  async getCompletionReport(id: number): Promise<CompletionReport | null> {
     const report = await this.prisma.completionReport.findUnique({
-      where: { id: reportId },
+      where: { id },
     });
     if (!report) {
       return null;
@@ -67,22 +61,15 @@ export class CompletionReportService {
   }
 
   async updateCompletionReport(
-    id: string,
+    id: number,
     data: UpdateCompletionReportInput,
   ): Promise<CompletionReport> {
-    const reportId = parseInt(id, 10);
-    if (isNaN(reportId)) {
-      throw new NotFoundException(
-        `Invalid report ID format: "${id}". Must be an integer.`,
-      );
-    }
-
     const existingReport = await this.prisma.completionReport.findUnique({
-      where: { id: reportId },
+      where: { id },
     });
     if (!existingReport) {
       throw new NotFoundException(
-        `CompletionReport with ID "${reportId}" not found.`,
+        `CompletionReport with ID "${id}" not found.`,
       );
     }
 
@@ -100,30 +87,24 @@ export class CompletionReportService {
     };
 
     const report = await this.prisma.completionReport.update({
-      where: { id: reportId },
+      where: { id },
       data: reportUpdateInput,
     });
     return report as unknown as CompletionReport;
   }
 
-  async deleteCompletionReport(id: string): Promise<CompletionReport> {
-    const reportId = parseInt(id, 10);
-    if (isNaN(reportId)) {
-      throw new NotFoundException(
-        `Invalid report ID format: "${id}". Must be an integer.`,
-      );
-    }
+  async deleteCompletionReport(id: number): Promise<CompletionReport> {
     const existingReport = await this.prisma.completionReport.findUnique({
-      where: { id: reportId },
+      where: { id },
     });
     if (!existingReport) {
       throw new NotFoundException(
-        `CompletionReport with ID "${reportId}" not found for deletion.`,
+        `CompletionReport with ID "${id}" not found for deletion.`,
       );
     }
 
     const report = await this.prisma.completionReport.delete({
-      where: { id: reportId },
+      where: { id },
     });
     return report as unknown as CompletionReport;
   }

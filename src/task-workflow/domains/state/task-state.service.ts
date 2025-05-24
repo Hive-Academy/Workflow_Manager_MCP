@@ -69,19 +69,87 @@ export class TaskStateService {
 
   async updateTaskStatus(params: z.infer<typeof UpdateTaskStatusSchema>) {
     try {
+      // Get current task to track changes
+      const currentTask = await this.prisma.task.findUnique({
+        where: { taskId: params.taskId },
+        select: {
+          taskId: true,
+          status: true,
+          currentMode: true,
+          priority: true,
+          owner: true,
+          completionDate: true,
+        },
+      });
+
+      if (!currentTask) {
+        throw new NotFoundException(`Task ${params.taskId} not found`);
+      }
+
+      // Build update data with all provided fields
+      const updateData: any = {
+        status: params.status,
+      };
+
+      // Update currentMode if provided
+      if (params.currentMode) {
+        updateData.currentMode = params.currentMode;
+      }
+
+      // Update priority if provided
+      if (params.priority) {
+        updateData.priority = params.priority;
+      }
+
+      // Update owner if provided
+      if (params.owner) {
+        updateData.owner = params.owner;
+      }
+
+      // Handle completion date - set automatically if status is completed, or use provided date
+      if (params.status === 'completed') {
+        updateData.completionDate = params.completionDate || new Date();
+      } else if (params.completionDate) {
+        updateData.completionDate = params.completionDate;
+      }
+
+      // Create workflow transition if mode changed
+      if (
+        params.currentMode &&
+        params.currentMode !== currentTask.currentMode
+      ) {
+        updateData.workflowTransitions = {
+          create: {
+            fromMode: currentTask.currentMode || 'system',
+            toMode: params.currentMode,
+            transitionTimestamp: new Date(),
+          },
+        };
+      }
+
+      // Add comment if notes provided
+      if (params.notes) {
+        updateData.comments = {
+          create: {
+            mode: params.currentMode || currentTask.currentMode || 'system',
+            content: params.notes,
+            createdAt: new Date(),
+          },
+        };
+      }
+
       const task = await this.prisma.task.update({
         where: { taskId: params.taskId },
-        data: {
-          status: params.status,
-          comments: params.notes
-            ? {
-                create: {
-                  mode: 'system',
-                  content: params.notes,
-                  createdAt: new Date(),
-                },
-              }
-            : undefined,
+        data: updateData,
+        include: {
+          workflowTransitions: {
+            orderBy: { transitionTimestamp: 'desc' },
+            take: 1,
+          },
+          comments: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
         },
       });
 

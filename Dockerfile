@@ -1,21 +1,92 @@
-# Use official Node.js image
-FROM node:22
+# Multi-stage build for optimized Docker Hub deployment
+FROM node:22-alpine AS builder
+
+# Add metadata labels for Docker Hub
+LABEL org.opencontainers.image.title="MCP Workflow Manager"
+LABEL org.opencontainers.image.description="A comprehensive Model Context Protocol server for AI workflow automation and task management"
+LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.authors="Hive Academy <abdallah@nghive.tech>"
+LABEL org.opencontainers.image.source="https://github.com/Hive-Academy/Workflow_Manager_MCP"
+LABEL org.opencontainers.image.documentation="https://github.com/Hive-Academy/Workflow_Manager_MCP/blob/main/README.md"
+LABEL org.opencontainers.image.licenses="MIT"
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Copy package files and install all dependencies (including dev) for build
 COPY package*.json ./
-RUN npm install
+RUN npm ci --ignore-scripts && npm cache clean --force
 
-# Copy source code
+# Copy source code and Prisma schema
 COPY . .
 
-# Build TypeScript
+# Generate Prisma client and build TypeScript
+RUN npx prisma generate
 RUN npm run build
 
-# Expose port for SSE/HTTP (if needed)
+# Production stage
+FROM node:22-alpine AS production
+
+# Add same metadata to final image
+LABEL org.opencontainers.image.title="MCP Workflow Manager"
+LABEL org.opencontainers.image.description="A comprehensive Model Context Protocol server for AI workflow automation and task management"
+LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.authors="Hive Academy <abdallah@nghive.tech>"
+LABEL org.opencontainers.image.source="https://github.com/Hive-Academy/Workflow_Manager_MCP"
+LABEL org.opencontainers.image.documentation="https://github.com/Hive-Academy/Workflow_Manager_MCP/blob/main/README.md"
+LABEL org.opencontainers.image.licenses="MIT"
+
+# Install system dependencies: dumb-init for proper signal handling, curl for health checks, bash for entrypoint script
+RUN apk add --no-cache dumb-init curl bash
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files and install production dependencies only (without running postinstall)
+COPY package*.json ./
+RUN npm ci --only=production --ignore-scripts && npm cache clean --force
+
+# Fix ownership of node_modules for the nestjs user
+RUN chown -R nestjs:nodejs /app/node_modules
+
+# Copy built application and generated Prisma client from builder stage
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nestjs:nodejs /app/generated ./generated
+
+# Copy scripts and make them executable
+COPY --chown=nestjs:nodejs scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Copy documentation
+COPY --chown=nestjs:nodejs README.md ./
+
+# Create data directory for SQLite with proper permissions
+RUN mkdir -p /app/data && chown -R nestjs:nodejs /app/data
+
+# Set default environment variables
+ENV DATABASE_URL="file:./data/workflow.db"
+ENV MCP_SERVER_NAME="MCP-Workflow-Manager"
+ENV MCP_SERVER_VERSION="1.0.0"
+ENV MCP_TRANSPORT_TYPE="STDIO"
+ENV NODE_ENV="production"
+ENV PORT="3000"
+
+# Switch to non-root user
+USER nestjs
+
+# Expose port for HTTP/SSE transport (only used when MCP_TRANSPORT_TYPE is not STDIO)
 EXPOSE 3000
 
-# Start the MCP server (adjust entrypoint if using SSE/HTTP)
-CMD ["node", "dist/workflow-mcp-server-http.js"] 
+# Add health check for container monitoring
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+  CMD if [ "$MCP_TRANSPORT_TYPE" = "STDIO" ]; then exit 0; else curl -f http://localhost:$PORT/health || exit 1; fi
+
+# Use entrypoint script for initialization
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
+# Start the MCP server
+CMD ["node", "dist/main.js"] 

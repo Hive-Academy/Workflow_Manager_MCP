@@ -11,8 +11,11 @@ export const AddTaskNoteSchema = z.object({
   subtaskId: z
     .number()
     .int()
+    .positive()
     .optional()
-    .describe('Optional database ID of the subtask this note pertains to'),
+    .describe(
+      'Optional database ID of the subtask this note pertains to (NOT display ID like ST-001)',
+    ),
 });
 
 export type AddTaskNoteParams = z.infer<typeof AddTaskNoteSchema>;

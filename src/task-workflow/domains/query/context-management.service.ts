@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { createHash } from 'crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { OptimizationLevel } from '../../types/optimization.types';
 
 @Injectable()
 export class ContextManagementService {
@@ -94,17 +95,23 @@ export class ContextManagementService {
     return changed ? diff : { __noChanges: true };
   }
 
-  // Enhanced getContextSlice with performance monitoring and minimal data returns
-  async getContextSlice(taskId: string, sliceType: string): Promise<any> {
+  // Enhanced getContextSlice with optimization level support
+  async getContextSlice(
+    taskId: string,
+    sliceType: string,
+    optimizationLevel: OptimizationLevel = OptimizationLevel.SUMMARY,
+  ): Promise<any> {
     const startTime = performance.now();
-    const cacheKey = `${taskId}:${sliceType}`;
+    const cacheKey = `${taskId}:${sliceType}:${optimizationLevel}`;
 
     // Check cache first for non-dynamic slices
     const cached = this.contextCache.get(cacheKey);
     if (cached && !this.isVolatileSlice(sliceType)) {
       const queryTime = performance.now() - startTime;
       this.recordPerformanceMetric(cacheKey, queryTime, true);
-      this.logger.debug(`Cache hit for ${sliceType} slice of task ${taskId}`);
+      this.logger.debug(
+        `Cache hit for ${sliceType} slice of task ${taskId} with ${optimizationLevel} optimization`,
+      );
       return cached;
     }
 
