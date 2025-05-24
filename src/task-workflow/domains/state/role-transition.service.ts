@@ -11,7 +11,7 @@ export class RoleTransitionService {
     const result = await this.taskStateService.transitionRole(params);
 
     const taskId = params.taskId;
-    const toRoleName = params.roleId; // Target role from roleId
+    const toRoleName = params.toRole; // Target role from toRole
     const fromRoleName = params.fromRole || 'System'; // Source role, with a default
 
     const fromEmoji = ''; // Placeholder

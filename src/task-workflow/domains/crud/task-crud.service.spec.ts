@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/unbound-method */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { TaskCrudService } from './task-crud.service';
 
@@ -18,12 +18,15 @@ const mockPrismaService = {
     delete: jest.fn(),
     // No need for other model mocks here if TaskCrudService only interacts with Task and its direct cascade deletions
   },
+  taskDescription: {
+    create: jest.fn(),
+    deleteMany: jest.fn(),
+  },
   comment: { deleteMany: jest.fn() }, // For cascading delete logic test
   commit: { deleteMany: jest.fn() },
   delegationRecord: { deleteMany: jest.fn() },
   subtask: { deleteMany: jest.fn() },
   implementationPlan: { deleteMany: jest.fn() },
-  taskDescription: { deleteMany: jest.fn() },
   codeReview: { deleteMany: jest.fn() },
   completionReport: { deleteMany: jest.fn() },
   researchReport: { deleteMany: jest.fn() },
@@ -33,7 +36,6 @@ const mockPrismaService = {
 
 describe('TaskCrudService', () => {
   let service: TaskCrudService;
-  let prisma: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -44,54 +46,136 @@ describe('TaskCrudService', () => {
     }).compile();
 
     service = module.get<TaskCrudService>(TaskCrudService);
-    prisma = module.get<PrismaService>(PrismaService); // For verifying prisma calls
     jest.clearAllMocks();
   });
 
   describe('createTask', () => {
-    const params = {
+    const basicParams = {
       taskId: 'CRUD-001',
       taskName: 'CRUD Test Task',
-      description: 'Desc',
     };
+
+    const paramsWithDescription = {
+      taskId: 'CRUD-002',
+      taskName: 'CRUD Test Task with Description',
+      description: 'Test description',
+      businessRequirements: 'Test business requirements',
+      technicalRequirements: 'Test technical requirements',
+      acceptanceCriteria: ['Criterion 1', 'Criterion 2'],
+    };
+
     const expectedDbTask = {
-      ...params,
-      id: 'uuid',
+      taskId: 'CRUD-001',
+      name: 'CRUD Test Task',
       status: 'Not Started',
       currentMode: 'boomerang',
     };
 
-    it('should create and return a task', async () => {
+    beforeEach(() => {
+      // Mock transaction to execute callback immediately
+      mockPrismaService.$transaction.mockImplementation((callback) =>
+        callback(mockPrismaService),
+      );
+    });
+
+    it('should create task without TaskDescription when no description fields provided', async () => {
       mockPrismaService.task.create.mockResolvedValue(expectedDbTask);
-      const result = await service.createTask(params);
-      expect(prisma.task.create).toHaveBeenCalledWith({
+
+      const result = await service.createTask(basicParams);
+
+      expect(mockPrismaService.$transaction).toHaveBeenCalledTimes(1);
+      expect(mockPrismaService.task.create).toHaveBeenCalledWith({
         data: {
-          taskId: params.taskId,
-          name: params.taskName,
+          taskId: basicParams.taskId,
+          name: basicParams.taskName,
           status: 'Not Started',
           currentMode: 'boomerang',
         },
       });
+      expect(mockPrismaService.taskDescription.create).not.toHaveBeenCalled();
       expect(result).toEqual(expectedDbTask);
     });
 
+    it('should create task with TaskDescription when description fields provided', async () => {
+      const expectedTaskWithDesc = {
+        taskId: 'CRUD-002',
+        name: 'CRUD Test Task with Description',
+        status: 'Not Started',
+        currentMode: 'boomerang',
+      };
+
+      mockPrismaService.task.create.mockResolvedValue(expectedTaskWithDesc);
+
+      const result = await service.createTask(paramsWithDescription);
+
+      expect(mockPrismaService.$transaction).toHaveBeenCalledTimes(1);
+      expect(mockPrismaService.task.create).toHaveBeenCalledWith({
+        data: {
+          taskId: paramsWithDescription.taskId,
+          name: paramsWithDescription.taskName,
+          status: 'Not Started',
+          currentMode: 'boomerang',
+        },
+      });
+      expect(mockPrismaService.taskDescription.create).toHaveBeenCalledWith({
+        data: {
+          taskId: paramsWithDescription.taskId,
+          description: paramsWithDescription.description,
+          businessRequirements: paramsWithDescription.businessRequirements,
+          technicalRequirements: paramsWithDescription.technicalRequirements,
+          acceptanceCriteria: paramsWithDescription.acceptanceCriteria,
+        },
+      });
+      expect(result).toEqual(expectedTaskWithDesc);
+    });
+
+    it('should create TaskDescription with defaults for missing fields', async () => {
+      const paramsWithPartialDesc = {
+        taskId: 'CRUD-003',
+        taskName: 'Partial Description Task',
+        description: 'Only description provided',
+      };
+
+      const expectedTask = {
+        taskId: 'CRUD-003',
+        name: 'Partial Description Task',
+        status: 'Not Started',
+        currentMode: 'boomerang',
+      };
+
+      mockPrismaService.task.create.mockResolvedValue(expectedTask);
+
+      const result = await service.createTask(paramsWithPartialDesc);
+
+      expect(mockPrismaService.taskDescription.create).toHaveBeenCalledWith({
+        data: {
+          taskId: paramsWithPartialDesc.taskId,
+          description: paramsWithPartialDesc.description,
+          businessRequirements: 'To be defined',
+          technicalRequirements: 'To be defined',
+          acceptanceCriteria: [],
+        },
+      });
+      expect(result).toEqual(expectedTask);
+    });
+
     it('should throw ConflictException on Prisma P2002 error', async () => {
-      mockPrismaService.task.create.mockRejectedValue(
+      mockPrismaService.$transaction.mockRejectedValue(
         new Prisma.PrismaClientKnownRequestError('', {
           code: 'P2002',
           clientVersion: 'test',
         }),
       );
-      await expect(service.createTask(params)).rejects.toThrow(
+      await expect(service.createTask(basicParams)).rejects.toThrow(
         ConflictException,
       );
     });
 
     it('should throw InternalServerErrorException for other errors', async () => {
-      mockPrismaService.task.create.mockRejectedValue(
+      mockPrismaService.$transaction.mockRejectedValue(
         new Error('Other DB Error'),
       );
-      await expect(service.createTask(params)).rejects.toThrow(
+      await expect(service.createTask(basicParams)).rejects.toThrow(
         InternalServerErrorException,
       );
     });

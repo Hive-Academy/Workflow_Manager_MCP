@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { TaskQueryService } from './task-query.service';
 import { PrismaService } from '../../prisma/prisma.service';
