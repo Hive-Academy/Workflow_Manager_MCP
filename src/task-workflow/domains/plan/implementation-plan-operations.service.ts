@@ -6,21 +6,67 @@ import {
 } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
-import { ImplementationPlanInputSchema } from './schemas/implementation-plan.schema';
 import { ImplementationPlanService } from './implementation-plan.service';
 import { TaskCommentService } from '../interaction/task-comment.service';
 import { TaskQueryService } from '../query/task-query.service';
 import { AddSubtaskToBatchSchema } from './schemas/add-subtask-to-batch.schema';
 import { UpdateSubtaskStatusSchema } from './schemas/update-subtask-status.schema';
 import { CheckBatchStatusSchema } from './schemas/check-batch-status.schema';
+import { CreateImplementationPlanInputSchema } from './schemas/implementation-plan.schema';
 
 const CreateImplementationPlanToolParamsSchema = z.object({
   taskId: z
     .string()
     .describe('The ID of the task for which to create the plan.'),
-  plan: ImplementationPlanInputSchema.describe(
-    'The implementation plan details.',
-  ),
+  plan: CreateImplementationPlanInputSchema.describe(`Complete implementation plan object that includes:
+
+REQUIRED FIELDS:
+- taskId: string - ID of the task this plan belongs to
+- overview: string - High-level summary of implementation goals and approach
+- approach: string - Detailed technical approach describing methodology and steps
+- technicalDecisions: string - Key technical decisions, architecture choices, and rationale
+- createdBy: string - Role creating the plan (e.g., "🏛️AR" for architect)
+
+OPTIONAL FIELDS:
+- filesToModify: string[] - List of file paths expected to be modified
+- batches: Batch[] - Organized work batches containing subtasks
+
+BATCH STRUCTURE (if included):
+{
+  id: string,              // Unique batch ID (e.g., "B001", "B002")
+  title: string,           // Clear, descriptive title for this batch
+  description?: string,    // Optional detailed description of batch goals
+  dependsOn?: string[],    // Array of batch IDs that must complete first
+  subtasks: [{             // Array of subtasks in this batch
+    name: string,          // Clear, actionable subtask name
+    description: string,   // Detailed description of what needs to be done
+    sequenceNumber: number, // Order within batch (1, 2, 3, etc.)
+    status?: string,       // Status code: "NS"=not-started (default), "INP"=in-progress, "COM"=completed
+    assignedTo?: string,   // Role assignment: "👨‍💻SD"=senior-developer, "🏛️AR"=architect, etc.
+    estimatedDuration?: string // Human-readable estimate ("2 hours", "1 day", "30 minutes")
+  }]
+}
+
+EXAMPLE STRUCTURE:
+{
+  taskId: "TSK-001",
+  overview: "Implement user authentication system with JWT tokens",
+  approach: "Create auth service using NestJS guards and JWT strategy",
+  technicalDecisions: "Using passport-jwt for validation, bcrypt for hashing",
+  createdBy: "🏛️AR",
+  filesToModify: ["src/auth/auth.service.ts", "src/users/users.service.ts"],
+  batches: [{
+    id: "B001",
+    title: "Core Authentication",
+    subtasks: [{
+      name: "Create Auth Service",
+      description: "Implement authentication service with login/logout",
+      sequenceNumber: 1,
+      status: "NS",
+      assignedTo: "👨‍💻SD"
+    }]
+  }]
+}`),
 });
 
 @Injectable()
@@ -44,33 +90,40 @@ export class ImplementationPlanOperationsService {
       const { taskId, plan } = params;
       const taskContextResponse = await this.taskQueryService.getTaskContext({
         taskId,
+        sliceType: 'STATUS',
+        includeRelated: false,
+        maxComments: 0,
+        maxDelegations: 0,
       });
-      if (!taskContextResponse || !taskContextResponse.task) {
+      if (!taskContextResponse || !taskContextResponse.name) {
         throw new NotFoundException(
           `Task with ID ${taskId} not found or context is invalid.`,
         );
       }
-      const taskName = taskContextResponse.task.name;
+      const taskName = taskContextResponse.name;
       const createdPlan =
         await this.implementationPlanService.createOrUpdatePlan(taskId, plan);
-      const numberOfBatches = plan.batches.length;
+      const numberOfBatches = plan.batches?.length || 0;
       const totalSubtasks = createdPlan.subtasks.length;
       return {
         content: [
           {
             type: 'text',
-            text: `Implementation plan version ${createdPlan.version} for task '${taskName}' (ID: ${taskId}) has been successfully created/updated with ${numberOfBatches} batch(es) and ${totalSubtasks} total subtasks.`,
+            text: `Implementation plan for task '${taskName}' (ID: ${taskId}) has been successfully created/updated with ${numberOfBatches} batch(es) and ${totalSubtasks} total subtasks.`,
           },
           {
-            type: 'json',
-            json: {
-              taskId: createdPlan.taskId,
-              planTitle: createdPlan.title,
-              version: createdPlan.version,
-              status: createdPlan.status,
-              totalBatches: numberOfBatches,
-              totalSubtasks: totalSubtasks,
-            },
+            type: 'text',
+            text: JSON.stringify(
+              {
+                taskId: createdPlan.taskId,
+                planId: createdPlan.id,
+                status: createdPlan.status,
+                totalBatches: numberOfBatches,
+                totalSubtasks: totalSubtasks,
+              },
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -87,7 +140,7 @@ export class ImplementationPlanOperationsService {
         error,
       );
       throw new InternalServerErrorException(
-        `Facade: Could not create/update implementation plan for task '${params.taskId}'. Error: ${(error as Error).message}`,
+        `Facade: Could not create/update implementation plan for task '${params.taskId}'. Error: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -105,12 +158,12 @@ export class ImplementationPlanOperationsService {
       return {
         content: [
           {
-            type: 'json',
-            json: newSubtask,
+            type: 'text',
+            text: JSON.stringify(newSubtask, null, 2),
           },
           {
             type: 'text',
-            text: `Subtask '${newSubtask.title}' (ID: ${newSubtask.id}) added to batch '${params.batchId}' for task '${params.taskId}'.`,
+            text: `Subtask '${newSubtask.name}' (ID: ${newSubtask.id}) added to batch '${params.batchId}' for task '${params.taskId}'.`,
           },
         ],
       };
@@ -143,8 +196,8 @@ export class ImplementationPlanOperationsService {
       return {
         content: [
           {
-            type: 'json',
-            json: updatedSubtask,
+            type: 'text',
+            text: JSON.stringify(updatedSubtask, null, 2),
           },
           {
             type: 'text',
@@ -177,8 +230,12 @@ export class ImplementationPlanOperationsService {
         try {
           const taskContext = await this.taskQueryService.getTaskContext({
             taskId: params.taskId,
+            sliceType: 'STATUS',
+            includeRelated: false,
+            maxComments: 0,
+            maxDelegations: 0,
           });
-          const modeForNote = taskContext?.task?.currentMode || 'system';
+          const modeForNote = taskContext?.currentMode || 'system';
           await this.taskCommentService.addTaskNote({
             taskId: params.taskId,
             note: `System: Batch '${batchStatus.batchId}' reported as complete by check_batch_status tool. All ${batchStatus.totalSubtasksInBatch} subtasks finished.`,
@@ -211,14 +268,14 @@ export class ImplementationPlanOperationsService {
           content: [
             {
               type: 'text',
-              text: `No data found for ${contextIdentifier} for task ${params.taskId}. Batch or plan may not exist. Message: ${(error as Error).message}`,
+              text: `No data found for ${contextIdentifier} for task ${params.taskId}. Batch or plan may not exist. Message: ${error instanceof Error ? error.message : String(error)}`,
             },
             {
               type: 'text',
               text: JSON.stringify({
                 notFound: true,
                 error: true,
-                message: (error as Error).message,
+                message: error instanceof Error ? error.message : String(error),
                 contextHash: null,
                 contextType: contextIdentifier,
                 taskId: params.taskId,
@@ -247,7 +304,7 @@ export class ImplementationPlanOperationsService {
             type: 'text',
             text: JSON.stringify({
               error: true,
-              message: (error as Error).message,
+              message: error instanceof Error ? error.message : String(error),
               contextType: contextIdentifier,
               taskId: params.taskId,
               batchId: params.batchId,
@@ -275,7 +332,7 @@ export class ImplementationPlanOperationsService {
       error,
     );
     throw new InternalServerErrorException(
-      `Facade: Could not ${arg1}. Error: ${(error as Error).message}`,
+      `Facade: Could not ${arg1}. Error: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }

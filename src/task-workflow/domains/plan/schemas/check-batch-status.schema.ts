@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { StatusCodeSchema } from 'src/task-workflow/types/token-refs.schema';
+import { TaskStatusSchema } from 'src/task-workflow/types/token-refs.schema';
 
 // ✅ FIXED: Input schema for checking batch status
 export const CheckBatchStatusSchema = z.object({
@@ -20,7 +20,7 @@ export const BatchStatusResponseSchema = z.object({
   batchTitle: z.string().optional(),
   taskId: z.string(),
   planId: z.number().int(),
-  status: StatusCodeSchema.describe(
+  status: TaskStatusSchema.describe(
     'Overall batch status derived from subtasks',
   ),
   totalSubtasks: z.number().int().describe('Total number of subtasks in batch'),

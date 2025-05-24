@@ -218,27 +218,6 @@ exports.Prisma.CompletionReportScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
-exports.Prisma.MemoryBankScalarFieldEnum = {
-  id: 'id',
-  fileType: 'fileType',
-  section: 'section',
-  content: 'content',
-  lineStart: 'lineStart',
-  lineEnd: 'lineEnd',
-  lastUpdated: 'lastUpdated'
-};
-
-exports.Prisma.CommitScalarFieldEnum = {
-  id: 'id',
-  taskId: 'taskId',
-  subtaskId: 'subtaskId',
-  hash: 'hash',
-  message: 'message',
-  filesChanged: 'filesChanged',
-  commitTimestamp: 'commitTimestamp',
-  author: 'author'
-};
-
 exports.Prisma.CommentScalarFieldEnum = {
   id: 'id',
   taskId: 'taskId',
@@ -255,20 +234,6 @@ exports.Prisma.WorkflowTransitionScalarFieldEnum = {
   toMode: 'toMode',
   transitionTimestamp: 'transitionTimestamp',
   reason: 'reason'
-};
-
-exports.Prisma.TemplateScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  content: 'content',
-  description: 'description',
-  lastUpdated: 'lastUpdated'
-};
-
-exports.Prisma.SchemaVersionScalarFieldEnum = {
-  id: 'id',
-  version: 'version',
-  lastUpdated: 'lastUpdated'
 };
 
 exports.Prisma.SortOrder = {
@@ -311,12 +276,8 @@ exports.Prisma.ModelName = {
   ResearchReport: 'ResearchReport',
   CodeReview: 'CodeReview',
   CompletionReport: 'CompletionReport',
-  MemoryBank: 'MemoryBank',
-  Commit: 'Commit',
   Comment: 'Comment',
-  WorkflowTransition: 'WorkflowTransition',
-  Template: 'Template',
-  SchemaVersion: 'SchemaVersion'
+  WorkflowTransition: 'WorkflowTransition'
 };
 
 /**

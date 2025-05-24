@@ -23,11 +23,6 @@ export class CodeReviewReportService {
       acceptanceCriteriaVerification,
       manualTestingResults,
       requiredChanges,
-      // Legacy fields - convert to appropriate database fields
-      findings,
-      reviewer,
-      commitSha,
-      ...rest
     } = data;
 
     // Validate that the task exists
@@ -39,32 +34,15 @@ export class CodeReviewReportService {
       throw new NotFoundException(`Task with ID ${taskId} not found.`);
     }
 
-    // Convert legacy findings array to issues string if provided
-    let issuesString = issues || '';
-    if (findings && findings.length > 0) {
-      const findingsText = findings
-        .map(
-          (f) =>
-            `${f.severity}: ${f.comment}${f.filePath ? ` (${f.filePath}${f.lineNumber ? `:${f.lineNumber}` : ''})` : ''}`,
-        )
-        .join('\n');
-      issuesString = issuesString
-        ? `${issuesString}\n\n--- Legacy Findings ---\n${findingsText}`
-        : findingsText;
-    }
-
-    // Map fields to actual database schema
+    // Map fields directly to database schema - no legacy field conversion needed
     const createData = {
       taskId,
       status,
       summary,
-      strengths:
-        strengths ||
-        (reviewer ? `Reviewed by: ${reviewer}` : 'No specific strengths noted'),
-      issues: issuesString || 'No issues identified',
+      strengths,
+      issues,
       acceptanceCriteriaVerification: acceptanceCriteriaVerification || {},
-      manualTestingResults:
-        manualTestingResults || 'Manual testing not documented',
+      manualTestingResults,
       requiredChanges: requiredChanges || null,
     };
 
@@ -83,11 +61,8 @@ export class CodeReviewReportService {
     const { reportId, taskId } = input;
 
     if (reportId) {
-      // Convert string ID to number
-      const id = parseInt(reportId, 10);
-      if (isNaN(id)) {
-        throw new NotFoundException(`Invalid report ID: ${reportId}`);
-      }
+      // reportId is already a number from the schema
+      const id = reportId;
 
       const report = await this.prisma.codeReview.findUnique({
         where: { id },
@@ -141,18 +116,10 @@ export class CodeReviewReportService {
       acceptanceCriteriaVerification,
       manualTestingResults,
       requiredChanges,
-      // Legacy fields
-      findings,
-      reviewer,
-      commitSha,
-      ...rest
     } = data;
 
-    // Convert string ID to number
-    const id = parseInt(reportId, 10);
-    if (isNaN(id)) {
-      throw new NotFoundException(`Invalid report ID: ${reportId}`);
-    }
+    // reportId is now correctly typed as number from schema
+    const id = reportId;
 
     // Check if report exists
     const existingReport = await this.prisma.codeReview.findUnique({
@@ -162,12 +129,21 @@ export class CodeReviewReportService {
       throw new NotFoundException(`CodeReviewReport with ID ${id} not found.`);
     }
 
-    // Build update data
-    const updateData: any = {};
+    // Build update data - direct field mapping without legacy conversion
+    const updateData: Partial<{
+      status: string;
+      summary: string;
+      strengths: string;
+      issues: string;
+      acceptanceCriteriaVerification: any;
+      manualTestingResults: string;
+      requiredChanges: string;
+    }> = {};
 
     if (status !== undefined) updateData.status = status;
     if (summary !== undefined) updateData.summary = summary;
     if (strengths !== undefined) updateData.strengths = strengths;
+    if (issues !== undefined) updateData.issues = issues;
     if (acceptanceCriteriaVerification !== undefined)
       updateData.acceptanceCriteriaVerification =
         acceptanceCriteriaVerification;
@@ -175,20 +151,6 @@ export class CodeReviewReportService {
       updateData.manualTestingResults = manualTestingResults;
     if (requiredChanges !== undefined)
       updateData.requiredChanges = requiredChanges;
-
-    // Handle issues field
-    if (issues !== undefined) {
-      updateData.issues = issues;
-    } else if (findings && findings.length > 0) {
-      // Convert legacy findings to issues string
-      const findingsText = findings
-        .map(
-          (f) =>
-            `${f.severity}: ${f.comment}${f.filePath ? ` (${f.filePath}${f.lineNumber ? `:${f.lineNumber}` : ''})` : ''}`,
-        )
-        .join('\n');
-      updateData.issues = findingsText;
-    }
 
     const report = await this.prisma.codeReview.update({
       where: { id },

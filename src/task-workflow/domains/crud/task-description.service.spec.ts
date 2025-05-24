@@ -7,7 +7,7 @@ import { Task } from 'generated/prisma';
 
 describe('TaskDescriptionService', () => {
   let service: TaskDescriptionService;
-  let prisma: PrismaService;
+  let _prisma: PrismaService;
 
   const mockPrismaService = {
     task: {
@@ -27,7 +27,7 @@ describe('TaskDescriptionService', () => {
     }).compile();
 
     service = module.get<TaskDescriptionService>(TaskDescriptionService);
-    prisma = module.get<PrismaService>(PrismaService);
+    _prisma = module.get<PrismaService>(PrismaService);
     jest.clearAllMocks();
   });
 

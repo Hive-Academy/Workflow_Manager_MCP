@@ -1,6 +1,6 @@
 import {
-  RoleCodeSchema,
-  StatusCodeSchema,
+  WorkflowRoleSchema,
+  TaskStatusSchema,
 } from 'src/task-workflow/types/token-refs.schema';
 import { z } from 'zod';
 
@@ -24,14 +24,8 @@ export const SearchTasksInputSchema = z.object({
     .describe(
       'General query string to search across task name, description, etc.',
     ),
-  status: z
-    .union([StatusCodeSchema, z.string()])
-    .optional()
-    .describe('Filter by task status (shorthand or full name)'),
-  mode: z
-    .union([RoleCodeSchema, z.string()])
-    .optional()
-    .describe('Filter by task currentMode (shorthand or full name)'),
+  status: TaskStatusSchema.optional().describe('Filter by task status'),
+  mode: WorkflowRoleSchema.optional().describe('Filter by task currentMode'),
   owner: z.string().optional().describe('Filter by task owner'),
   priority: z
     .string()

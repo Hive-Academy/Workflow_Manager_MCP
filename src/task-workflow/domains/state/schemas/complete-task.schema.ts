@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { RoleCodeSchema } from 'src/task-workflow/types/token-refs.schema';
 
 // ✅ FIXED: Complete task schema for multi-model operations
 export const CompleteTaskSchema = z.object({

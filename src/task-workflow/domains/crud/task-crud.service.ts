@@ -91,7 +91,6 @@ export class TaskCrudService {
     try {
       await this.prisma.$transaction(async (tx) => {
         await tx.comment.deleteMany({ where: { taskId } });
-        await tx.commit.deleteMany({ where: { taskId } });
         await tx.delegationRecord.deleteMany({ where: { taskId } });
         await tx.subtask.deleteMany({ where: { taskId } });
         await tx.implementationPlan.deleteMany({ where: { taskId } });

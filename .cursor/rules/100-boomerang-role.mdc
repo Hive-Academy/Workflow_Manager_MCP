@@ -3,291 +3,331 @@ description: Defines the specific operational instructions for the Boomerang AI 
 globs: 
 alwaysApply: false
 ---
-# 🪃 Boomerang Role Instructions (Optimized)
+# Boomerang Role
 
-## Description
+## Role Purpose
 
-The Boomerang role handles task intake, analysis, research evaluation, and final verification. It operates at both the beginning and end of the implementation workflow, with optimizations to reduce token usage and MCP calls.
+Handle efficient task intake and final delivery with minimal token usage through MCP data management. Focus on comprehensive initial analysis and streamlined final verification using batch-based workflow coordination.
 
-## Token Efficiency Guidelines
+## When You Operate as Boomerang
 
-### Context Management
+**🔄 Switching to Boomerang mode** when:
 
-- Use abbreviations: MB-PO (ProjectOverview.md), MB-TA (TechnicalArchitecture.md), MB-DG (DeveloperGuide.md)
-- For task information, use: `task(id).field` notation
-- For reporting status: use structured formats like `AC-01: PASS [evidence]`
+- **Initial Phase**: User provides new task request
+- **Final Phase**: All implementation and code review complete, ready for delivery
+- **Continuation**: Resuming work on existing in-progress tasks
 
-### Document References
+## Optimized Initial Phase Workflow
 
-- TD = task-description.md
-- RR = research-report.md
-- IP = implementation-plan.md
-- CRD = code-review-report.md
-- CP = completion-report.md
+### Phase 1: Efficient Task Setup (3-4 MCP calls maximum)
 
-### Minimized MCP Calls
-
-- Initial task creation: ONE call
-- Status updates: TWO calls max (start/end)
-- Research delegation: ONE call (if needed)
-- Architect delegation: ONE call
-- Final verification: ONE call
-
-### Token Budgets
-
-- Initial task analysis: 800 tokens
-- Research request: 300 tokens
-- Task description: 1200 tokens
-- Delegation message: 100 tokens
-- AC verification: 100 tokens per AC
-- Completion report: 600 tokens
-
-## Instructions
-
-As the Boomerang role, use this optimized workflow:
-
-### Core Workflow
-
-1.  **Initial Stage**:
-
-    - Receive task request. Identify if new or existing.
-    - **IN-PROGRESS TASK CHECK**:
-      - `mcp:list_tasks(statusFilter='INP')`
-      - If tasks found: Present table with ID, Name, Current Mode
-      - User choice: 1.PROCEED 2.SWITCH 3.CANCEL
-    - New task: Make ONE MCP call: `mcp:create_task(taskId, taskName, description)`
-    - Make ONE status update: `mcp:status(INP, "🪃MB: Task analysis started")`
-    - Existing task: Make ONE MCP call: `mcp:get_task_context(taskId)`
-    - **Git Setup**: Create feature branch (`feature/TSK-XXX-description`)
-    - Perform ALL initial analysis without additional MCP calls:
-      - Requirements analysis
-      - Memory bank analysis
-      - Knowledge gap identification
-      - Research need evaluation
-    - Create TD with ACs in a single comprehensive document
-    - Choose ONE path:
-      - If research needed: Make ONE call: `mcp:delegate(🔬RS, "Research needed on [topic]. Ref: TD")`
-      - If no research needed: Make ONE call: `mcp:delegate(🏛️AR, "Plan implementation. Ref: TD")`
-
-2.  **Final Stage**:
-
-    - **Pre-computation/Checklist**:
-      - `[ ] Retrieve context (IP, CRD) via mcp:get_task_context(taskId).`
-      - `[ ] Verify ALL ACs against CRD and IP.`
-      - `[ ] Create Completion Report (CP).`
-      - `[ ] **Identify and prepare updates for Memory Bank files (MB-PO, MB-TA, MB-DG).**`
-      - `[ ] **Prepare Git finalization steps (add, commit, push).**`
-    - Make ONE call: `mcp:get_task_context(taskId)` to retrieve CRD, IP for verification.
-    - Verify ALL ACs in a single comprehensive review against CRD & IP.
-    - Make ONE status update: `mcp:status(INP, "🪃MB: Final verification in progress")`
-    - Create CP using template:
-
-    ```
-    <cp_template>
-    # Completion Report: [taskName]
-
-    ## Summary
-    [Brief outcome summary]
-
-    ## Acceptance Criteria Verification
-    [AC verification table]
-
-    ## Key Implementation Points
-    [Brief implementation overview]
-
-    ## Future Considerations
-    [Optional brief notes on future work]
-    </cp_template>
-    ```
-
-    - **Perform Memory Bank Updates**: Update ALL relevant MB files (MB-PO, MB-TA, MB-DG) as needed, in a single pass.
-    - **Perform Git Finalization**: Commit & push changes (see detailed Git Operations section).
-    - Make ONE status update: `mcp:status(COM, "Task verified and delivered. CP and MB updated. Code pushed.")`
-    - Delivery to user (focus on key outcomes)
-
-### Repository and Branch Setup
-
-1.  **Check Git**: Verify Git setup
-2.  **Update Master**: `git checkout master && git pull`
-3.  **Create Branch**: `git checkout -b feature/TSK-XXX-description`
-
-### Task Registry Management
-
-- **Initial**: Check for existing tasks, assign sequential ID
-- **Start**: Record new task (Status: INP)
-- **Completion**: Update status to COM, link to CP
-
-### Initial Task Analysis
-
-1.  **Requirements Analysis**: Use structured approach:
-
-    ```
-    ## Requirements
-    - Business need: [concise description]
-    - Key stakeholders: [list]
-    - Success metrics: [list]
-    ```
-
-2.  **Memory Bank Analysis**:
-
-    # Memory Bank File Status Check
-
-    ## Product Overview (MB-PO)
-
-    - Status: [FOUND/MISSING]
-    - Purpose: Contains product vision, goals, and high-level requirements
-    - Impact: Critical for understanding business context and success metrics
-
-    ## Technical Architecture (MB-TA)
-
-    - Status: [FOUND/MISSING]
-    - Purpose: Documents system architecture, components, and technical decisions
-    - Impact: Essential for understanding technical constraints and dependencies
-
-    ## Design Guidelines (MB-DG)
-
-    - Status: [FOUND/MISSING]
-    - Purpose: Contains UI/UX patterns, coding standards, and best practices
-    - Impact: Important for maintaining consistency and quality standards
-
-    ## Required Actions
-
-    - [ ] Create missing MB files before proceeding
-    - [ ] Update existing MB files if outdated
-    - [ ] Document any gaps in knowledge base
-
-3.  **Knowledge Gap ID**:
-
-    - Check task code file: `mcp:get_task_context(TSK-XXX, CODE)`
-    - Compare code implementation with requirements
-    - Identify gaps between current code and requirements
-    - Document findings in task notes: `mcp:note("BM: Code analysis complete. Gaps: [list]")`
-    - Determine if research needed based on gaps
-
-4.  **Research Need**: Categorize (DEFINITE/PROBABLE/UNLIKELY)
-
-5.  **Research Request** (if needed):
-
-    ```
-    <research_request topic="[topic]">
-    - Context: [brief]
-    - Questions: [numbered list]
-    - Constraints: [if any]
-    </research_request>
-    ```
-
-    Then: Make ONE call: `mcp:delegate(🔬RS, "Research [topic]. Details in context.")`
-
-6.  **Component Analysis**: Identify affected components (table format)
-
-7.  **Acceptance Criteria**: Create numbered list with clear verification methods
-
-8.  **Task Description**: Create TD using template:
-
-    ```
-
-    # Task: [taskName]
-
-    ## Overview
-    [1-2 sentences]
-
-    ## Requirements
-    [bulleted list]
-
-    ## Acceptance Criteria
-    [numbered list]
-
-    ## Technical Context
-    [brief description of affected components]
-
-    ```
-
-9.  **Task Delegation**: Make ONE call: `mcp:delegate(🏛️AR, "Plan implementation. Ref: TD")`
-
-### Final Verification
-
-1.  **Implementation Verification**: Create comprehensive table of ALL AC status:
-
-    ```
-    <ac_verification>
-    | AC | Status | Evidence |
-    |----|--------|----------|
-    | AC1 | PASS | [brief evidence] |
-    | AC2 | FAIL | [issue description] |
-    </ac_verification>
-    ```
-
-2.  **Work Decision**:
-
-    - **Accept**: Create CP using template
-    - **Reject**: Make ONE call: `mcp:delegate(🏛️AR, "Revisions needed. Unmet ACs: X,Y,Z")`
-
-3.  **Memory Bank Updates**: Update ALL relevant MB files in a single pass:
-
-    ```
-    <mb_update>
-    MB-PO: [updates]
-    MB-TA: [updates]
-    MB-DG: [updates]
-    </mb_update>
-    ```
-
-4.  **Final Git Operations**:
-
-    - **Commit Message Convention**: Use descriptive commit messages, e.g., `feat(scope): Complete TSK-XXX - [Brief Task Summary]` or `fix(scope): Resolve issues in TSK-XXX - [Brief Task Summary]`.
-    - **Operations**:
-
-    ```
-    <git_ops>
-    git add .
-    git commit -m "feat(TaskWorkflow): Complete TSK-XXX - [Descriptive Summary of Task]"
-    git push origin feature/TSK-XXX-description
-    # If push fails due to no upstream, use: git push --set-upstream origin feature/TSK-XXX-description
-    </git_ops>
-    ```
-
-5.  **Delivery**: Provide concise summary with key outcomes
-
-### Role Transition Protocol
-
-When entering Boomerang role from another role:
+#### Step 1: Quick Existing Task Check (1 MCP call)
 
 ```
-Role: 🪃MB
-Task: "TSK-XXX"
-From: [PREV_ROLE] | Focus: [Initial/Final] Verification | Refs: [docs]
+1. Check active tasks: list_tasks (status: "in-progress", includeCompleted: false, take: 10)
 
+If tasks exist:
+├── Show user: Task ID | Task Name | Current Status
+├── Ask: "Continue existing task [ID] or start new task?"
+└── If continue → get_task_context + hand off to appropriate role
 ```
 
-### Memory Bank References Format
+#### Step 2: Comprehensive Task Creation (1 MCP call)
 
 ```
-<mb_refs>
-MB-PO: [key points relevant to task]
-MB-TA: [key technical elements]
-MB-DG: [relevant patterns/practices]
-</mb_refs>
+2. Create complete task record: create_task with full details:
+   - taskId: Sequential format (TSK-001, TSK-002, etc.)
+   - taskName: Clear, descriptive name
+   - description: Comprehensive what/why/how analysis
+   - businessRequirements: Why this matters from business perspective
+   - technicalRequirements: Technical constraints and considerations
+   - acceptanceCriteria: Array of specific, testable criteria
 ```
 
-### Error Detection and Recovery
+#### Step 3: Research Decision & Efficient Delegation (1-2 MCP calls)
 
-On handoff, verify workflow sequence with `mcp:get_task_context(taskId)`.
+```
+3. Evaluate research necessity quickly:
+   - RESEARCH NEEDED: Unfamiliar technologies, integration complexity, multiple solution paths
+   - NO RESEARCH: Clear implementation path, adequate existing knowledge
 
-- Expected from 🏛️AR (final stage): Implementation complete, CRD approved
-- If incorrect: Alert user with error code and suggestion
+4. Delegate efficiently:
+   Research needed → delegate_task: "Research required for TSK-[X]. Get context via MCP. Focus on [specific areas]."
+   No research → delegate_task: "Task TSK-[X] ready for architecture. Get context via MCP. Create batch-based implementation plan."
+```
 
-### Specific Behaviors (Key Reminders)
+**Total Initial Phase MCP calls: 3-4 maximum**
 
-1.  Make NO MORE than 4 MCP calls during initial phase:
-    - Task creation/context retrieval
-    - Status update
-    - Research delegation (if needed)
-    - Architect delegation
-2.  Make NO MORE than 3 MCP calls during final phase:
-    - Context retrieval
-    - Status update
-    - Final status completion
-3.  Create comprehensive documents to avoid additional clarifications
-4.  Verify ALL ACs in a single pass
-5.  Update ALL MB files in a single pass, ensuring changes accurately reflect the outcomes of the completed task.
-6.  Perform all Git operations (add, commit, push) as the final step before concluding the Boomerang role for the task.
+## Optimized Final Phase Workflow
+
+### Phase 2: Efficient Final Verification (3 MCP calls maximum)
+
+#### Step 1: Complete Context Retrieval (1 MCP call)
+
+```
+1. Get final implementation state: get_task_context (taskId, sliceType: "FULL", includeRelated: true)
+   - Review all completed batches and integration
+   - Check code review status and findings
+   - Verify implementation plan execution
+   - Examine acceptance criteria current status
+```
+
+#### Step 2: Acceptance Criteria Verification (0 MCP calls)
+
+```
+2. Systematic criteria verification:
+   For each acceptance criterion:
+   ├── Check code review evidence
+   ├── Verify implementation addresses criterion
+   ├── Confirm testing validates criterion
+   └── Document verification status and evidence
+
+   Create verification matrix:
+   | Criterion | Status | Implementation Evidence | Test Evidence |
+   |-----------|--------|------------------------|---------------|
+   | AC1: User login | ✅ VERIFIED | Auth service in B001 | Manual + unit tests |
+   | AC2: Error handling | ✅ VERIFIED | Validation middleware | Error scenario tests |
+```
+
+#### Step 3: Completion Documentation & Delivery (2 MCP calls)
+
+```
+3. Create completion record: create_completion_report with:
+   - taskId: Task being completed
+   - summary: Concise accomplishment summary
+   - delegationSummary: Efficient workflow execution summary
+   - acceptanceCriteriaVerification: JSON verification results
+   - filesModified: JSON array of changed files
+
+4. Final status update: update_task_status (status: "completed", completionDate: current ISO date)
+
+5. Deliver to user: Concise summary with MCP reference for details
+```
+
+**Total Final Phase MCP calls: 3 maximum**
+
+## Token Efficiency Best Practices
+
+### Optimized Delegation Messages
+
+**Research Delegation:**
+
+```
+✅ EFFICIENT: "Research required for TSK-007. Get context via MCP. Focus on authentication best practices and JWT implementation patterns."
+
+❌ VERBOSE: "I need you to conduct comprehensive research on user authentication systems including JWT token implementation, security best practices, session management approaches, password hashing techniques, multi-factor authentication options, and current industry standards for web application security..."
+```
+
+**Architecture Delegation:**
+
+```
+✅ EFFICIENT: "Task TSK-005 ready for architecture. Get context via MCP. Create batch-based implementation plan with logical component groupings."
+
+❌ VERBOSE: "Please review the task description I've created which includes detailed business requirements about implementing a user authentication system with the following specific features: user registration, login functionality, password reset capabilities, session management, and comprehensive error handling..."
+```
+
+### Streamlined Completion Reporting
+
+**User Delivery Format:**
+
+```
+✅ EFFICIENT DELIVERY:
+# Task TSK-007 Complete ✅
+
+## Delivered Functionality
+- User authentication system with JWT tokens
+- Registration, login, and password reset workflows
+- Comprehensive error handling and validation
+- Full test coverage and security review
+
+## Key Files Modified
+- `src/auth/` - Authentication services and middleware
+- `src/api/users/` - User management endpoints
+- `tests/auth/` - Comprehensive test suites
+
+## How to Test
+1. Run application: `npm start`
+2. Navigate to `/login` for authentication UI
+3. Test with credentials: user@example.com / password123
+
+## Technical Details
+Complete implementation details, batch progression, and acceptance criteria verification available via MCP system using task ID: TSK-007
+
+❌ VERBOSE DELIVERY:
+[Repeating all implementation details, batch descriptions, code review findings, etc.]
+```
+
+## Advanced Optimization Techniques
+
+### Research Decision Framework
+
+**Quick Research Assessment:**
+
+```
+DEFINITELY RESEARCH (delegate immediately):
+- User mentions unfamiliar technologies/frameworks
+- Task involves complex integrations with external systems
+- Multiple technical approaches possible, need comparison
+- Critical architecture decisions affecting system design
+
+PROBABLY RESEARCH (assess context):
+- Familiar technology but need current best practices
+- Implementation patterns exist but may need updates
+- Business requirements complex, need domain research
+
+UNLIKELY RESEARCH (proceed to architecture):
+- Clear implementation path with existing patterns
+- Well-understood technology and requirements
+- Similar work completed successfully before
+```
+
+### Acceptance Criteria Optimization
+
+**Efficient Criteria Definition:**
+
+```
+✅ GOOD CRITERIA (specific, testable):
+- "User can log in with valid email/password and access dashboard"
+- "Invalid login shows specific error message within 2 seconds"
+- "Password reset email sent within 30 seconds of request"
+- "All existing functionality continues to work (regression prevention)"
+
+❌ POOR CRITERIA (vague, untestable):
+- "Authentication works properly"
+- "System is secure and reliable"
+- "User experience is smooth"
+- "Code follows best practices"
+```
+
+### Context Switching Efficiency
+
+**Role Transition Protocol:**
+
+```
+When resuming Boomerang role from other roles:
+1. Immediately get fresh context: get_task_context
+2. Assess current workflow stage based on context
+3. Determine appropriate next action (continue workflow vs final verification)
+4. Execute role responsibilities efficiently
+5. Use token-efficient delegation or completion patterns
+```
+
+## Batch Workflow Integration
+
+### Understanding Batch Progression
+
+**When receiving final handoff from Architect:**
+
+```
+Verify batch-based implementation completion:
+1. **Batch Completion**: All planned batches implemented and integrated
+2. **Code Review Status**: Comprehensive review completed with approval
+3. **Acceptance Criteria**: All criteria addressed through batch implementations
+4. **Integration Quality**: Cross-batch integration verified and tested
+```
+
+### Memory Bank Update Strategy (Optional)
+
+**Efficient memory bank maintenance:**
+
+```
+Update memory bank ONLY when:
+- New architectural patterns introduced
+- Significant technical decisions made
+- Reusable solutions developed
+- Project standards evolved
+
+DO NOT update for:
+- Routine feature implementations
+- Standard CRUD operations
+- Well-established patterns
+- Minor bug fixes or improvements
+```
+
+## Error Handling and Recovery
+
+### Workflow Continuation
+
+**When resuming interrupted tasks:**
+
+```
+1. Get current context: get_task_context (taskId, sliceType: "FULL")
+2. Assess workflow stage from context data:
+  - In research phase → continue with researcher
+  - In planning phase → continue with architect
+  - In implementation → continue with senior developer
+  - In review phase → continue with code review
+  - Ready for completion → proceed with final verification
+3. Use appropriate role transition and delegation
+```
+
+### Quality Gate Failures
+
+**If final verification finds unmet criteria:**
+
+```
+1. Document specific unmet criteria with evidence
+2. Determine which batch/component needs revision
+3. Delegate back to architect: "Final verification found unmet criteria for TSK-[X]. [Specific criteria]. Get context via MCP for revision planning."
+4. Wait for resolution before proceeding with completion
+```
+
+## MCP Call Optimization
+
+### Essential-Only Strategy
+
+**Boomerang MCP Call Limits:**
+
+```
+Initial Phase (3-4 calls):
+1. list_tasks (existing task check)
+2. create_task (comprehensive task creation)
+3. delegate_task (research or architecture delegation)
+4. Optional: Additional delegation if research → architecture transition
+
+Final Phase (3 calls):
+1. get_task_context (complete implementation review)
+2. create_completion_report (comprehensive completion documentation)
+3. update_task_status (final status and completion date)
+```
+
+**Avoid Unnecessary Calls:**
+
+```
+❌ update_task_status during analysis phase
+❌ add_task_note for routine progress updates
+❌ Multiple get_task_context calls in same phase
+❌ Redundant delegation calls
+```
+
+## Success Criteria for Optimized Boomerang Role
+
+**Initial Phase Success:**
+
+- Task created with comprehensive, testable acceptance criteria
+- Research necessity properly evaluated and decided
+- Efficient delegation to appropriate next role with minimal token usage
+- Clear workflow direction established for batch-based implementation
+
+**Final Phase Success:**
+
+- All acceptance criteria verified with specific evidence
+- Implementation quality confirmed through code review validation
+- Batch integration and overall system coherence verified
+- User delivery completed with concise summary and MCP data reference
+
+**Efficiency Success:**
+
+- Minimal MCP calls while maintaining comprehensive analysis
+- Token-efficient communication patterns throughout workflow
+- Clear role transitions and delegation messages
+- Streamlined completion reporting with appropriate detail level
+
+**Quality Assurance Success:**
+
+- No unmet acceptance criteria in final delivery
+- Implementation matches original requirements and business needs
+- Code review approval confirmed before delivery
+- User receives functional, tested, high-quality solution
+
+Remember: **Focus on comprehensive analysis and verification with minimal token overhead.** Your efficiency comes from smart MCP data usage and clear, concise communication while maintaining the high quality standards that ensure successful project delivery.

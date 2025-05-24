@@ -1,20 +1,14 @@
 import { z } from 'zod';
 import {
-  StatusCodeSchema,
-  RoleCodeSchema,
+  TaskStatusSchema,
+  WorkflowRoleSchema,
 } from 'src/task-workflow/types/token-refs.schema';
 
 // ✅ ENHANCED: List tasks schema with comprehensive filtering
 export const ListTasksSchema = z.object({
   // Basic filters
-  status: z
-    .union([StatusCodeSchema, z.string()])
-    .optional()
-    .describe('Filter by task status (shorthand or full name)'),
-  currentMode: z
-    .union([RoleCodeSchema, z.string()])
-    .optional()
-    .describe('Filter by current mode (shorthand or full name)'),
+  status: TaskStatusSchema.optional().describe('Filter by task status'),
+  currentMode: WorkflowRoleSchema.optional().describe('Filter by current mode'),
   owner: z.string().optional().describe('Filter by task owner'),
   priority: z
     .string()

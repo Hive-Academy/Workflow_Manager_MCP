@@ -54,16 +54,6 @@ export type CodeReview = $Result.DefaultSelection<Prisma.$CodeReviewPayload>
  */
 export type CompletionReport = $Result.DefaultSelection<Prisma.$CompletionReportPayload>
 /**
- * Model MemoryBank
- * 
- */
-export type MemoryBank = $Result.DefaultSelection<Prisma.$MemoryBankPayload>
-/**
- * Model Commit
- * 
- */
-export type Commit = $Result.DefaultSelection<Prisma.$CommitPayload>
-/**
  * Model Comment
  * 
  */
@@ -73,16 +63,6 @@ export type Comment = $Result.DefaultSelection<Prisma.$CommentPayload>
  * 
  */
 export type WorkflowTransition = $Result.DefaultSelection<Prisma.$WorkflowTransitionPayload>
-/**
- * Model Template
- * 
- */
-export type Template = $Result.DefaultSelection<Prisma.$TemplatePayload>
-/**
- * Model SchemaVersion
- * 
- */
-export type SchemaVersion = $Result.DefaultSelection<Prisma.$SchemaVersionPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -290,26 +270,6 @@ export class PrismaClient<
   get completionReport(): Prisma.CompletionReportDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.memoryBank`: Exposes CRUD operations for the **MemoryBank** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more MemoryBanks
-    * const memoryBanks = await prisma.memoryBank.findMany()
-    * ```
-    */
-  get memoryBank(): Prisma.MemoryBankDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.commit`: Exposes CRUD operations for the **Commit** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more Commits
-    * const commits = await prisma.commit.findMany()
-    * ```
-    */
-  get commit(): Prisma.CommitDelegate<ExtArgs, ClientOptions>;
-
-  /**
    * `prisma.comment`: Exposes CRUD operations for the **Comment** model.
     * Example usage:
     * ```ts
@@ -328,26 +288,6 @@ export class PrismaClient<
     * ```
     */
   get workflowTransition(): Prisma.WorkflowTransitionDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.template`: Exposes CRUD operations for the **Template** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more Templates
-    * const templates = await prisma.template.findMany()
-    * ```
-    */
-  get template(): Prisma.TemplateDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.schemaVersion`: Exposes CRUD operations for the **SchemaVersion** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more SchemaVersions
-    * const schemaVersions = await prisma.schemaVersion.findMany()
-    * ```
-    */
-  get schemaVersion(): Prisma.SchemaVersionDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -796,12 +736,8 @@ export namespace Prisma {
     ResearchReport: 'ResearchReport',
     CodeReview: 'CodeReview',
     CompletionReport: 'CompletionReport',
-    MemoryBank: 'MemoryBank',
-    Commit: 'Commit',
     Comment: 'Comment',
-    WorkflowTransition: 'WorkflowTransition',
-    Template: 'Template',
-    SchemaVersion: 'SchemaVersion'
+    WorkflowTransition: 'WorkflowTransition'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -820,7 +756,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "task" | "taskDescription" | "implementationPlan" | "subtask" | "delegationRecord" | "researchReport" | "codeReview" | "completionReport" | "memoryBank" | "commit" | "comment" | "workflowTransition" | "template" | "schemaVersion"
+      modelProps: "task" | "taskDescription" | "implementationPlan" | "subtask" | "delegationRecord" | "researchReport" | "codeReview" | "completionReport" | "comment" | "workflowTransition"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1416,154 +1352,6 @@ export namespace Prisma {
           }
         }
       }
-      MemoryBank: {
-        payload: Prisma.$MemoryBankPayload<ExtArgs>
-        fields: Prisma.MemoryBankFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.MemoryBankFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$MemoryBankPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.MemoryBankFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$MemoryBankPayload>
-          }
-          findFirst: {
-            args: Prisma.MemoryBankFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$MemoryBankPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.MemoryBankFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$MemoryBankPayload>
-          }
-          findMany: {
-            args: Prisma.MemoryBankFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$MemoryBankPayload>[]
-          }
-          create: {
-            args: Prisma.MemoryBankCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$MemoryBankPayload>
-          }
-          createMany: {
-            args: Prisma.MemoryBankCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.MemoryBankCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$MemoryBankPayload>[]
-          }
-          delete: {
-            args: Prisma.MemoryBankDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$MemoryBankPayload>
-          }
-          update: {
-            args: Prisma.MemoryBankUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$MemoryBankPayload>
-          }
-          deleteMany: {
-            args: Prisma.MemoryBankDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.MemoryBankUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.MemoryBankUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$MemoryBankPayload>[]
-          }
-          upsert: {
-            args: Prisma.MemoryBankUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$MemoryBankPayload>
-          }
-          aggregate: {
-            args: Prisma.MemoryBankAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateMemoryBank>
-          }
-          groupBy: {
-            args: Prisma.MemoryBankGroupByArgs<ExtArgs>
-            result: $Utils.Optional<MemoryBankGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.MemoryBankCountArgs<ExtArgs>
-            result: $Utils.Optional<MemoryBankCountAggregateOutputType> | number
-          }
-        }
-      }
-      Commit: {
-        payload: Prisma.$CommitPayload<ExtArgs>
-        fields: Prisma.CommitFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.CommitFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CommitPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.CommitFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CommitPayload>
-          }
-          findFirst: {
-            args: Prisma.CommitFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CommitPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.CommitFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CommitPayload>
-          }
-          findMany: {
-            args: Prisma.CommitFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CommitPayload>[]
-          }
-          create: {
-            args: Prisma.CommitCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CommitPayload>
-          }
-          createMany: {
-            args: Prisma.CommitCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.CommitCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CommitPayload>[]
-          }
-          delete: {
-            args: Prisma.CommitDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CommitPayload>
-          }
-          update: {
-            args: Prisma.CommitUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CommitPayload>
-          }
-          deleteMany: {
-            args: Prisma.CommitDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.CommitUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.CommitUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CommitPayload>[]
-          }
-          upsert: {
-            args: Prisma.CommitUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CommitPayload>
-          }
-          aggregate: {
-            args: Prisma.CommitAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateCommit>
-          }
-          groupBy: {
-            args: Prisma.CommitGroupByArgs<ExtArgs>
-            result: $Utils.Optional<CommitGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.CommitCountArgs<ExtArgs>
-            result: $Utils.Optional<CommitCountAggregateOutputType> | number
-          }
-        }
-      }
       Comment: {
         payload: Prisma.$CommentPayload<ExtArgs>
         fields: Prisma.CommentFieldRefs
@@ -1712,154 +1500,6 @@ export namespace Prisma {
           }
         }
       }
-      Template: {
-        payload: Prisma.$TemplatePayload<ExtArgs>
-        fields: Prisma.TemplateFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.TemplateFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.TemplateFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePayload>
-          }
-          findFirst: {
-            args: Prisma.TemplateFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.TemplateFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePayload>
-          }
-          findMany: {
-            args: Prisma.TemplateFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePayload>[]
-          }
-          create: {
-            args: Prisma.TemplateCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePayload>
-          }
-          createMany: {
-            args: Prisma.TemplateCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.TemplateCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePayload>[]
-          }
-          delete: {
-            args: Prisma.TemplateDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePayload>
-          }
-          update: {
-            args: Prisma.TemplateUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePayload>
-          }
-          deleteMany: {
-            args: Prisma.TemplateDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.TemplateUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.TemplateUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePayload>[]
-          }
-          upsert: {
-            args: Prisma.TemplateUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TemplatePayload>
-          }
-          aggregate: {
-            args: Prisma.TemplateAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateTemplate>
-          }
-          groupBy: {
-            args: Prisma.TemplateGroupByArgs<ExtArgs>
-            result: $Utils.Optional<TemplateGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.TemplateCountArgs<ExtArgs>
-            result: $Utils.Optional<TemplateCountAggregateOutputType> | number
-          }
-        }
-      }
-      SchemaVersion: {
-        payload: Prisma.$SchemaVersionPayload<ExtArgs>
-        fields: Prisma.SchemaVersionFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.SchemaVersionFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SchemaVersionPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.SchemaVersionFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SchemaVersionPayload>
-          }
-          findFirst: {
-            args: Prisma.SchemaVersionFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SchemaVersionPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.SchemaVersionFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SchemaVersionPayload>
-          }
-          findMany: {
-            args: Prisma.SchemaVersionFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SchemaVersionPayload>[]
-          }
-          create: {
-            args: Prisma.SchemaVersionCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SchemaVersionPayload>
-          }
-          createMany: {
-            args: Prisma.SchemaVersionCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.SchemaVersionCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SchemaVersionPayload>[]
-          }
-          delete: {
-            args: Prisma.SchemaVersionDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SchemaVersionPayload>
-          }
-          update: {
-            args: Prisma.SchemaVersionUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SchemaVersionPayload>
-          }
-          deleteMany: {
-            args: Prisma.SchemaVersionDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.SchemaVersionUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.SchemaVersionUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SchemaVersionPayload>[]
-          }
-          upsert: {
-            args: Prisma.SchemaVersionUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$SchemaVersionPayload>
-          }
-          aggregate: {
-            args: Prisma.SchemaVersionAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateSchemaVersion>
-          }
-          groupBy: {
-            args: Prisma.SchemaVersionGroupByArgs<ExtArgs>
-            result: $Utils.Optional<SchemaVersionGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.SchemaVersionCountArgs<ExtArgs>
-            result: $Utils.Optional<SchemaVersionCountAggregateOutputType> | number
-          }
-        }
-      }
     }
   } & {
     other: {
@@ -1952,12 +1592,8 @@ export namespace Prisma {
     researchReport?: ResearchReportOmit
     codeReview?: CodeReviewOmit
     completionReport?: CompletionReportOmit
-    memoryBank?: MemoryBankOmit
-    commit?: CommitOmit
     comment?: CommentOmit
     workflowTransition?: WorkflowTransitionOmit
-    template?: TemplateOmit
-    schemaVersion?: SchemaVersionOmit
   }
 
   /* Types for Logging */
@@ -2058,7 +1694,6 @@ export namespace Prisma {
     researchReports: number
     codeReviews: number
     completionReports: number
-    commits: number
     comments: number
     workflowTransitions: number
   }
@@ -2070,7 +1705,6 @@ export namespace Prisma {
     researchReports?: boolean | TaskCountOutputTypeCountResearchReportsArgs
     codeReviews?: boolean | TaskCountOutputTypeCountCodeReviewsArgs
     completionReports?: boolean | TaskCountOutputTypeCountCompletionReportsArgs
-    commits?: boolean | TaskCountOutputTypeCountCommitsArgs
     comments?: boolean | TaskCountOutputTypeCountCommentsArgs
     workflowTransitions?: boolean | TaskCountOutputTypeCountWorkflowTransitionsArgs
   }
@@ -2131,13 +1765,6 @@ export namespace Prisma {
   /**
    * TaskCountOutputType without action
    */
-  export type TaskCountOutputTypeCountCommitsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CommitWhereInput
-  }
-
-  /**
-   * TaskCountOutputType without action
-   */
   export type TaskCountOutputTypeCountCommentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CommentWhereInput
   }
@@ -2187,13 +1814,11 @@ export namespace Prisma {
 
   export type SubtaskCountOutputType = {
     delegationRecords: number
-    commits: number
     comments: number
   }
 
   export type SubtaskCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     delegationRecords?: boolean | SubtaskCountOutputTypeCountDelegationRecordsArgs
-    commits?: boolean | SubtaskCountOutputTypeCountCommitsArgs
     comments?: boolean | SubtaskCountOutputTypeCountCommentsArgs
   }
 
@@ -2213,13 +1838,6 @@ export namespace Prisma {
    */
   export type SubtaskCountOutputTypeCountDelegationRecordsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: DelegationRecordWhereInput
-  }
-
-  /**
-   * SubtaskCountOutputType without action
-   */
-  export type SubtaskCountOutputTypeCountCommitsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CommitWhereInput
   }
 
   /**
@@ -2483,7 +2101,6 @@ export namespace Prisma {
     researchReports?: boolean | Task$researchReportsArgs<ExtArgs>
     codeReviews?: boolean | Task$codeReviewsArgs<ExtArgs>
     completionReports?: boolean | Task$completionReportsArgs<ExtArgs>
-    commits?: boolean | Task$commitsArgs<ExtArgs>
     comments?: boolean | Task$commentsArgs<ExtArgs>
     workflowTransitions?: boolean | Task$workflowTransitionsArgs<ExtArgs>
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
@@ -2540,7 +2157,6 @@ export namespace Prisma {
     researchReports?: boolean | Task$researchReportsArgs<ExtArgs>
     codeReviews?: boolean | Task$codeReviewsArgs<ExtArgs>
     completionReports?: boolean | Task$completionReportsArgs<ExtArgs>
-    commits?: boolean | Task$commitsArgs<ExtArgs>
     comments?: boolean | Task$commentsArgs<ExtArgs>
     workflowTransitions?: boolean | Task$workflowTransitionsArgs<ExtArgs>
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
@@ -2558,7 +2174,6 @@ export namespace Prisma {
       researchReports: Prisma.$ResearchReportPayload<ExtArgs>[]
       codeReviews: Prisma.$CodeReviewPayload<ExtArgs>[]
       completionReports: Prisma.$CompletionReportPayload<ExtArgs>[]
-      commits: Prisma.$CommitPayload<ExtArgs>[]
       comments: Prisma.$CommentPayload<ExtArgs>[]
       workflowTransitions: Prisma.$WorkflowTransitionPayload<ExtArgs>[]
     }
@@ -2975,7 +2590,6 @@ export namespace Prisma {
     researchReports<T extends Task$researchReportsArgs<ExtArgs> = {}>(args?: Subset<T, Task$researchReportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ResearchReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     codeReviews<T extends Task$codeReviewsArgs<ExtArgs> = {}>(args?: Subset<T, Task$codeReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodeReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     completionReports<T extends Task$completionReportsArgs<ExtArgs> = {}>(args?: Subset<T, Task$completionReportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompletionReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    commits<T extends Task$commitsArgs<ExtArgs> = {}>(args?: Subset<T, Task$commitsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     comments<T extends Task$commentsArgs<ExtArgs> = {}>(args?: Subset<T, Task$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     workflowTransitions<T extends Task$workflowTransitionsArgs<ExtArgs> = {}>(args?: Subset<T, Task$workflowTransitionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkflowTransitionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -3564,30 +3178,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: CompletionReportScalarFieldEnum | CompletionReportScalarFieldEnum[]
-  }
-
-  /**
-   * Task.commits
-   */
-  export type Task$commitsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitInclude<ExtArgs> | null
-    where?: CommitWhereInput
-    orderBy?: CommitOrderByWithRelationInput | CommitOrderByWithRelationInput[]
-    cursor?: CommitWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CommitScalarFieldEnum | CommitScalarFieldEnum[]
   }
 
   /**
@@ -6176,7 +5766,6 @@ export namespace Prisma {
     task?: boolean | TaskDefaultArgs<ExtArgs>
     plan?: boolean | ImplementationPlanDefaultArgs<ExtArgs>
     delegationRecords?: boolean | Subtask$delegationRecordsArgs<ExtArgs>
-    commits?: boolean | Subtask$commitsArgs<ExtArgs>
     comments?: boolean | Subtask$commentsArgs<ExtArgs>
     _count?: boolean | SubtaskCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["subtask"]>
@@ -6238,7 +5827,6 @@ export namespace Prisma {
     task?: boolean | TaskDefaultArgs<ExtArgs>
     plan?: boolean | ImplementationPlanDefaultArgs<ExtArgs>
     delegationRecords?: boolean | Subtask$delegationRecordsArgs<ExtArgs>
-    commits?: boolean | Subtask$commitsArgs<ExtArgs>
     comments?: boolean | Subtask$commentsArgs<ExtArgs>
     _count?: boolean | SubtaskCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -6257,7 +5845,6 @@ export namespace Prisma {
       task: Prisma.$TaskPayload<ExtArgs>
       plan: Prisma.$ImplementationPlanPayload<ExtArgs>
       delegationRecords: Prisma.$DelegationRecordPayload<ExtArgs>[]
-      commits: Prisma.$CommitPayload<ExtArgs>[]
       comments: Prisma.$CommentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -6671,7 +6258,6 @@ export namespace Prisma {
     task<T extends TaskDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TaskDefaultArgs<ExtArgs>>): Prisma__TaskClient<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     plan<T extends ImplementationPlanDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ImplementationPlanDefaultArgs<ExtArgs>>): Prisma__ImplementationPlanClient<$Result.GetResult<Prisma.$ImplementationPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     delegationRecords<T extends Subtask$delegationRecordsArgs<ExtArgs> = {}>(args?: Subset<T, Subtask$delegationRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DelegationRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    commits<T extends Subtask$commitsArgs<ExtArgs> = {}>(args?: Subset<T, Subtask$commitsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     comments<T extends Subtask$commentsArgs<ExtArgs> = {}>(args?: Subset<T, Subtask$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -7130,30 +6716,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: DelegationRecordScalarFieldEnum | DelegationRecordScalarFieldEnum[]
-  }
-
-  /**
-   * Subtask.commits
-   */
-  export type Subtask$commitsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitInclude<ExtArgs> | null
-    where?: CommitWhereInput
-    orderBy?: CommitOrderByWithRelationInput | CommitOrderByWithRelationInput[]
-    cursor?: CommitWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CommitScalarFieldEnum | CommitScalarFieldEnum[]
   }
 
   /**
@@ -11800,2223 +11362,6 @@ export namespace Prisma {
 
 
   /**
-   * Model MemoryBank
-   */
-
-  export type AggregateMemoryBank = {
-    _count: MemoryBankCountAggregateOutputType | null
-    _avg: MemoryBankAvgAggregateOutputType | null
-    _sum: MemoryBankSumAggregateOutputType | null
-    _min: MemoryBankMinAggregateOutputType | null
-    _max: MemoryBankMaxAggregateOutputType | null
-  }
-
-  export type MemoryBankAvgAggregateOutputType = {
-    id: number | null
-    lineStart: number | null
-    lineEnd: number | null
-  }
-
-  export type MemoryBankSumAggregateOutputType = {
-    id: number | null
-    lineStart: number | null
-    lineEnd: number | null
-  }
-
-  export type MemoryBankMinAggregateOutputType = {
-    id: number | null
-    fileType: string | null
-    section: string | null
-    content: string | null
-    lineStart: number | null
-    lineEnd: number | null
-    lastUpdated: Date | null
-  }
-
-  export type MemoryBankMaxAggregateOutputType = {
-    id: number | null
-    fileType: string | null
-    section: string | null
-    content: string | null
-    lineStart: number | null
-    lineEnd: number | null
-    lastUpdated: Date | null
-  }
-
-  export type MemoryBankCountAggregateOutputType = {
-    id: number
-    fileType: number
-    section: number
-    content: number
-    lineStart: number
-    lineEnd: number
-    lastUpdated: number
-    _all: number
-  }
-
-
-  export type MemoryBankAvgAggregateInputType = {
-    id?: true
-    lineStart?: true
-    lineEnd?: true
-  }
-
-  export type MemoryBankSumAggregateInputType = {
-    id?: true
-    lineStart?: true
-    lineEnd?: true
-  }
-
-  export type MemoryBankMinAggregateInputType = {
-    id?: true
-    fileType?: true
-    section?: true
-    content?: true
-    lineStart?: true
-    lineEnd?: true
-    lastUpdated?: true
-  }
-
-  export type MemoryBankMaxAggregateInputType = {
-    id?: true
-    fileType?: true
-    section?: true
-    content?: true
-    lineStart?: true
-    lineEnd?: true
-    lastUpdated?: true
-  }
-
-  export type MemoryBankCountAggregateInputType = {
-    id?: true
-    fileType?: true
-    section?: true
-    content?: true
-    lineStart?: true
-    lineEnd?: true
-    lastUpdated?: true
-    _all?: true
-  }
-
-  export type MemoryBankAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which MemoryBank to aggregate.
-     */
-    where?: MemoryBankWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of MemoryBanks to fetch.
-     */
-    orderBy?: MemoryBankOrderByWithRelationInput | MemoryBankOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: MemoryBankWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` MemoryBanks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` MemoryBanks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned MemoryBanks
-    **/
-    _count?: true | MemoryBankCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: MemoryBankAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: MemoryBankSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: MemoryBankMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: MemoryBankMaxAggregateInputType
-  }
-
-  export type GetMemoryBankAggregateType<T extends MemoryBankAggregateArgs> = {
-        [P in keyof T & keyof AggregateMemoryBank]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateMemoryBank[P]>
-      : GetScalarType<T[P], AggregateMemoryBank[P]>
-  }
-
-
-
-
-  export type MemoryBankGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: MemoryBankWhereInput
-    orderBy?: MemoryBankOrderByWithAggregationInput | MemoryBankOrderByWithAggregationInput[]
-    by: MemoryBankScalarFieldEnum[] | MemoryBankScalarFieldEnum
-    having?: MemoryBankScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: MemoryBankCountAggregateInputType | true
-    _avg?: MemoryBankAvgAggregateInputType
-    _sum?: MemoryBankSumAggregateInputType
-    _min?: MemoryBankMinAggregateInputType
-    _max?: MemoryBankMaxAggregateInputType
-  }
-
-  export type MemoryBankGroupByOutputType = {
-    id: number
-    fileType: string
-    section: string
-    content: string
-    lineStart: number | null
-    lineEnd: number | null
-    lastUpdated: Date
-    _count: MemoryBankCountAggregateOutputType | null
-    _avg: MemoryBankAvgAggregateOutputType | null
-    _sum: MemoryBankSumAggregateOutputType | null
-    _min: MemoryBankMinAggregateOutputType | null
-    _max: MemoryBankMaxAggregateOutputType | null
-  }
-
-  type GetMemoryBankGroupByPayload<T extends MemoryBankGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<MemoryBankGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof MemoryBankGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], MemoryBankGroupByOutputType[P]>
-            : GetScalarType<T[P], MemoryBankGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type MemoryBankSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    fileType?: boolean
-    section?: boolean
-    content?: boolean
-    lineStart?: boolean
-    lineEnd?: boolean
-    lastUpdated?: boolean
-  }, ExtArgs["result"]["memoryBank"]>
-
-  export type MemoryBankSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    fileType?: boolean
-    section?: boolean
-    content?: boolean
-    lineStart?: boolean
-    lineEnd?: boolean
-    lastUpdated?: boolean
-  }, ExtArgs["result"]["memoryBank"]>
-
-  export type MemoryBankSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    fileType?: boolean
-    section?: boolean
-    content?: boolean
-    lineStart?: boolean
-    lineEnd?: boolean
-    lastUpdated?: boolean
-  }, ExtArgs["result"]["memoryBank"]>
-
-  export type MemoryBankSelectScalar = {
-    id?: boolean
-    fileType?: boolean
-    section?: boolean
-    content?: boolean
-    lineStart?: boolean
-    lineEnd?: boolean
-    lastUpdated?: boolean
-  }
-
-  export type MemoryBankOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fileType" | "section" | "content" | "lineStart" | "lineEnd" | "lastUpdated", ExtArgs["result"]["memoryBank"]>
-
-  export type $MemoryBankPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "MemoryBank"
-    objects: {}
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      fileType: string
-      section: string
-      content: string
-      lineStart: number | null
-      lineEnd: number | null
-      lastUpdated: Date
-    }, ExtArgs["result"]["memoryBank"]>
-    composites: {}
-  }
-
-  type MemoryBankGetPayload<S extends boolean | null | undefined | MemoryBankDefaultArgs> = $Result.GetResult<Prisma.$MemoryBankPayload, S>
-
-  type MemoryBankCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<MemoryBankFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: MemoryBankCountAggregateInputType | true
-    }
-
-  export interface MemoryBankDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MemoryBank'], meta: { name: 'MemoryBank' } }
-    /**
-     * Find zero or one MemoryBank that matches the filter.
-     * @param {MemoryBankFindUniqueArgs} args - Arguments to find a MemoryBank
-     * @example
-     * // Get one MemoryBank
-     * const memoryBank = await prisma.memoryBank.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends MemoryBankFindUniqueArgs>(args: SelectSubset<T, MemoryBankFindUniqueArgs<ExtArgs>>): Prisma__MemoryBankClient<$Result.GetResult<Prisma.$MemoryBankPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one MemoryBank that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {MemoryBankFindUniqueOrThrowArgs} args - Arguments to find a MemoryBank
-     * @example
-     * // Get one MemoryBank
-     * const memoryBank = await prisma.memoryBank.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends MemoryBankFindUniqueOrThrowArgs>(args: SelectSubset<T, MemoryBankFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MemoryBankClient<$Result.GetResult<Prisma.$MemoryBankPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first MemoryBank that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {MemoryBankFindFirstArgs} args - Arguments to find a MemoryBank
-     * @example
-     * // Get one MemoryBank
-     * const memoryBank = await prisma.memoryBank.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends MemoryBankFindFirstArgs>(args?: SelectSubset<T, MemoryBankFindFirstArgs<ExtArgs>>): Prisma__MemoryBankClient<$Result.GetResult<Prisma.$MemoryBankPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first MemoryBank that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {MemoryBankFindFirstOrThrowArgs} args - Arguments to find a MemoryBank
-     * @example
-     * // Get one MemoryBank
-     * const memoryBank = await prisma.memoryBank.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends MemoryBankFindFirstOrThrowArgs>(args?: SelectSubset<T, MemoryBankFindFirstOrThrowArgs<ExtArgs>>): Prisma__MemoryBankClient<$Result.GetResult<Prisma.$MemoryBankPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more MemoryBanks that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {MemoryBankFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all MemoryBanks
-     * const memoryBanks = await prisma.memoryBank.findMany()
-     * 
-     * // Get first 10 MemoryBanks
-     * const memoryBanks = await prisma.memoryBank.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const memoryBankWithIdOnly = await prisma.memoryBank.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends MemoryBankFindManyArgs>(args?: SelectSubset<T, MemoryBankFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MemoryBankPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a MemoryBank.
-     * @param {MemoryBankCreateArgs} args - Arguments to create a MemoryBank.
-     * @example
-     * // Create one MemoryBank
-     * const MemoryBank = await prisma.memoryBank.create({
-     *   data: {
-     *     // ... data to create a MemoryBank
-     *   }
-     * })
-     * 
-     */
-    create<T extends MemoryBankCreateArgs>(args: SelectSubset<T, MemoryBankCreateArgs<ExtArgs>>): Prisma__MemoryBankClient<$Result.GetResult<Prisma.$MemoryBankPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many MemoryBanks.
-     * @param {MemoryBankCreateManyArgs} args - Arguments to create many MemoryBanks.
-     * @example
-     * // Create many MemoryBanks
-     * const memoryBank = await prisma.memoryBank.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends MemoryBankCreateManyArgs>(args?: SelectSubset<T, MemoryBankCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many MemoryBanks and returns the data saved in the database.
-     * @param {MemoryBankCreateManyAndReturnArgs} args - Arguments to create many MemoryBanks.
-     * @example
-     * // Create many MemoryBanks
-     * const memoryBank = await prisma.memoryBank.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many MemoryBanks and only return the `id`
-     * const memoryBankWithIdOnly = await prisma.memoryBank.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends MemoryBankCreateManyAndReturnArgs>(args?: SelectSubset<T, MemoryBankCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MemoryBankPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a MemoryBank.
-     * @param {MemoryBankDeleteArgs} args - Arguments to delete one MemoryBank.
-     * @example
-     * // Delete one MemoryBank
-     * const MemoryBank = await prisma.memoryBank.delete({
-     *   where: {
-     *     // ... filter to delete one MemoryBank
-     *   }
-     * })
-     * 
-     */
-    delete<T extends MemoryBankDeleteArgs>(args: SelectSubset<T, MemoryBankDeleteArgs<ExtArgs>>): Prisma__MemoryBankClient<$Result.GetResult<Prisma.$MemoryBankPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one MemoryBank.
-     * @param {MemoryBankUpdateArgs} args - Arguments to update one MemoryBank.
-     * @example
-     * // Update one MemoryBank
-     * const memoryBank = await prisma.memoryBank.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends MemoryBankUpdateArgs>(args: SelectSubset<T, MemoryBankUpdateArgs<ExtArgs>>): Prisma__MemoryBankClient<$Result.GetResult<Prisma.$MemoryBankPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more MemoryBanks.
-     * @param {MemoryBankDeleteManyArgs} args - Arguments to filter MemoryBanks to delete.
-     * @example
-     * // Delete a few MemoryBanks
-     * const { count } = await prisma.memoryBank.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends MemoryBankDeleteManyArgs>(args?: SelectSubset<T, MemoryBankDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more MemoryBanks.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {MemoryBankUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many MemoryBanks
-     * const memoryBank = await prisma.memoryBank.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends MemoryBankUpdateManyArgs>(args: SelectSubset<T, MemoryBankUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more MemoryBanks and returns the data updated in the database.
-     * @param {MemoryBankUpdateManyAndReturnArgs} args - Arguments to update many MemoryBanks.
-     * @example
-     * // Update many MemoryBanks
-     * const memoryBank = await prisma.memoryBank.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more MemoryBanks and only return the `id`
-     * const memoryBankWithIdOnly = await prisma.memoryBank.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends MemoryBankUpdateManyAndReturnArgs>(args: SelectSubset<T, MemoryBankUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MemoryBankPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one MemoryBank.
-     * @param {MemoryBankUpsertArgs} args - Arguments to update or create a MemoryBank.
-     * @example
-     * // Update or create a MemoryBank
-     * const memoryBank = await prisma.memoryBank.upsert({
-     *   create: {
-     *     // ... data to create a MemoryBank
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the MemoryBank we want to update
-     *   }
-     * })
-     */
-    upsert<T extends MemoryBankUpsertArgs>(args: SelectSubset<T, MemoryBankUpsertArgs<ExtArgs>>): Prisma__MemoryBankClient<$Result.GetResult<Prisma.$MemoryBankPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of MemoryBanks.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {MemoryBankCountArgs} args - Arguments to filter MemoryBanks to count.
-     * @example
-     * // Count the number of MemoryBanks
-     * const count = await prisma.memoryBank.count({
-     *   where: {
-     *     // ... the filter for the MemoryBanks we want to count
-     *   }
-     * })
-    **/
-    count<T extends MemoryBankCountArgs>(
-      args?: Subset<T, MemoryBankCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], MemoryBankCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a MemoryBank.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {MemoryBankAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends MemoryBankAggregateArgs>(args: Subset<T, MemoryBankAggregateArgs>): Prisma.PrismaPromise<GetMemoryBankAggregateType<T>>
-
-    /**
-     * Group by MemoryBank.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {MemoryBankGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends MemoryBankGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: MemoryBankGroupByArgs['orderBy'] }
-        : { orderBy?: MemoryBankGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, MemoryBankGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMemoryBankGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the MemoryBank model
-   */
-  readonly fields: MemoryBankFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for MemoryBank.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__MemoryBankClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the MemoryBank model
-   */
-  interface MemoryBankFieldRefs {
-    readonly id: FieldRef<"MemoryBank", 'Int'>
-    readonly fileType: FieldRef<"MemoryBank", 'String'>
-    readonly section: FieldRef<"MemoryBank", 'String'>
-    readonly content: FieldRef<"MemoryBank", 'String'>
-    readonly lineStart: FieldRef<"MemoryBank", 'Int'>
-    readonly lineEnd: FieldRef<"MemoryBank", 'Int'>
-    readonly lastUpdated: FieldRef<"MemoryBank", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * MemoryBank findUnique
-   */
-  export type MemoryBankFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the MemoryBank
-     */
-    select?: MemoryBankSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the MemoryBank
-     */
-    omit?: MemoryBankOmit<ExtArgs> | null
-    /**
-     * Filter, which MemoryBank to fetch.
-     */
-    where: MemoryBankWhereUniqueInput
-  }
-
-  /**
-   * MemoryBank findUniqueOrThrow
-   */
-  export type MemoryBankFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the MemoryBank
-     */
-    select?: MemoryBankSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the MemoryBank
-     */
-    omit?: MemoryBankOmit<ExtArgs> | null
-    /**
-     * Filter, which MemoryBank to fetch.
-     */
-    where: MemoryBankWhereUniqueInput
-  }
-
-  /**
-   * MemoryBank findFirst
-   */
-  export type MemoryBankFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the MemoryBank
-     */
-    select?: MemoryBankSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the MemoryBank
-     */
-    omit?: MemoryBankOmit<ExtArgs> | null
-    /**
-     * Filter, which MemoryBank to fetch.
-     */
-    where?: MemoryBankWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of MemoryBanks to fetch.
-     */
-    orderBy?: MemoryBankOrderByWithRelationInput | MemoryBankOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for MemoryBanks.
-     */
-    cursor?: MemoryBankWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` MemoryBanks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` MemoryBanks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of MemoryBanks.
-     */
-    distinct?: MemoryBankScalarFieldEnum | MemoryBankScalarFieldEnum[]
-  }
-
-  /**
-   * MemoryBank findFirstOrThrow
-   */
-  export type MemoryBankFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the MemoryBank
-     */
-    select?: MemoryBankSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the MemoryBank
-     */
-    omit?: MemoryBankOmit<ExtArgs> | null
-    /**
-     * Filter, which MemoryBank to fetch.
-     */
-    where?: MemoryBankWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of MemoryBanks to fetch.
-     */
-    orderBy?: MemoryBankOrderByWithRelationInput | MemoryBankOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for MemoryBanks.
-     */
-    cursor?: MemoryBankWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` MemoryBanks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` MemoryBanks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of MemoryBanks.
-     */
-    distinct?: MemoryBankScalarFieldEnum | MemoryBankScalarFieldEnum[]
-  }
-
-  /**
-   * MemoryBank findMany
-   */
-  export type MemoryBankFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the MemoryBank
-     */
-    select?: MemoryBankSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the MemoryBank
-     */
-    omit?: MemoryBankOmit<ExtArgs> | null
-    /**
-     * Filter, which MemoryBanks to fetch.
-     */
-    where?: MemoryBankWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of MemoryBanks to fetch.
-     */
-    orderBy?: MemoryBankOrderByWithRelationInput | MemoryBankOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing MemoryBanks.
-     */
-    cursor?: MemoryBankWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` MemoryBanks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` MemoryBanks.
-     */
-    skip?: number
-    distinct?: MemoryBankScalarFieldEnum | MemoryBankScalarFieldEnum[]
-  }
-
-  /**
-   * MemoryBank create
-   */
-  export type MemoryBankCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the MemoryBank
-     */
-    select?: MemoryBankSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the MemoryBank
-     */
-    omit?: MemoryBankOmit<ExtArgs> | null
-    /**
-     * The data needed to create a MemoryBank.
-     */
-    data: XOR<MemoryBankCreateInput, MemoryBankUncheckedCreateInput>
-  }
-
-  /**
-   * MemoryBank createMany
-   */
-  export type MemoryBankCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many MemoryBanks.
-     */
-    data: MemoryBankCreateManyInput | MemoryBankCreateManyInput[]
-  }
-
-  /**
-   * MemoryBank createManyAndReturn
-   */
-  export type MemoryBankCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the MemoryBank
-     */
-    select?: MemoryBankSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the MemoryBank
-     */
-    omit?: MemoryBankOmit<ExtArgs> | null
-    /**
-     * The data used to create many MemoryBanks.
-     */
-    data: MemoryBankCreateManyInput | MemoryBankCreateManyInput[]
-  }
-
-  /**
-   * MemoryBank update
-   */
-  export type MemoryBankUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the MemoryBank
-     */
-    select?: MemoryBankSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the MemoryBank
-     */
-    omit?: MemoryBankOmit<ExtArgs> | null
-    /**
-     * The data needed to update a MemoryBank.
-     */
-    data: XOR<MemoryBankUpdateInput, MemoryBankUncheckedUpdateInput>
-    /**
-     * Choose, which MemoryBank to update.
-     */
-    where: MemoryBankWhereUniqueInput
-  }
-
-  /**
-   * MemoryBank updateMany
-   */
-  export type MemoryBankUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update MemoryBanks.
-     */
-    data: XOR<MemoryBankUpdateManyMutationInput, MemoryBankUncheckedUpdateManyInput>
-    /**
-     * Filter which MemoryBanks to update
-     */
-    where?: MemoryBankWhereInput
-    /**
-     * Limit how many MemoryBanks to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * MemoryBank updateManyAndReturn
-   */
-  export type MemoryBankUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the MemoryBank
-     */
-    select?: MemoryBankSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the MemoryBank
-     */
-    omit?: MemoryBankOmit<ExtArgs> | null
-    /**
-     * The data used to update MemoryBanks.
-     */
-    data: XOR<MemoryBankUpdateManyMutationInput, MemoryBankUncheckedUpdateManyInput>
-    /**
-     * Filter which MemoryBanks to update
-     */
-    where?: MemoryBankWhereInput
-    /**
-     * Limit how many MemoryBanks to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * MemoryBank upsert
-   */
-  export type MemoryBankUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the MemoryBank
-     */
-    select?: MemoryBankSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the MemoryBank
-     */
-    omit?: MemoryBankOmit<ExtArgs> | null
-    /**
-     * The filter to search for the MemoryBank to update in case it exists.
-     */
-    where: MemoryBankWhereUniqueInput
-    /**
-     * In case the MemoryBank found by the `where` argument doesn't exist, create a new MemoryBank with this data.
-     */
-    create: XOR<MemoryBankCreateInput, MemoryBankUncheckedCreateInput>
-    /**
-     * In case the MemoryBank was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<MemoryBankUpdateInput, MemoryBankUncheckedUpdateInput>
-  }
-
-  /**
-   * MemoryBank delete
-   */
-  export type MemoryBankDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the MemoryBank
-     */
-    select?: MemoryBankSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the MemoryBank
-     */
-    omit?: MemoryBankOmit<ExtArgs> | null
-    /**
-     * Filter which MemoryBank to delete.
-     */
-    where: MemoryBankWhereUniqueInput
-  }
-
-  /**
-   * MemoryBank deleteMany
-   */
-  export type MemoryBankDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which MemoryBanks to delete
-     */
-    where?: MemoryBankWhereInput
-    /**
-     * Limit how many MemoryBanks to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * MemoryBank without action
-   */
-  export type MemoryBankDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the MemoryBank
-     */
-    select?: MemoryBankSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the MemoryBank
-     */
-    omit?: MemoryBankOmit<ExtArgs> | null
-  }
-
-
-  /**
-   * Model Commit
-   */
-
-  export type AggregateCommit = {
-    _count: CommitCountAggregateOutputType | null
-    _avg: CommitAvgAggregateOutputType | null
-    _sum: CommitSumAggregateOutputType | null
-    _min: CommitMinAggregateOutputType | null
-    _max: CommitMaxAggregateOutputType | null
-  }
-
-  export type CommitAvgAggregateOutputType = {
-    id: number | null
-    subtaskId: number | null
-  }
-
-  export type CommitSumAggregateOutputType = {
-    id: number | null
-    subtaskId: number | null
-  }
-
-  export type CommitMinAggregateOutputType = {
-    id: number | null
-    taskId: string | null
-    subtaskId: number | null
-    hash: string | null
-    message: string | null
-    commitTimestamp: Date | null
-    author: string | null
-  }
-
-  export type CommitMaxAggregateOutputType = {
-    id: number | null
-    taskId: string | null
-    subtaskId: number | null
-    hash: string | null
-    message: string | null
-    commitTimestamp: Date | null
-    author: string | null
-  }
-
-  export type CommitCountAggregateOutputType = {
-    id: number
-    taskId: number
-    subtaskId: number
-    hash: number
-    message: number
-    filesChanged: number
-    commitTimestamp: number
-    author: number
-    _all: number
-  }
-
-
-  export type CommitAvgAggregateInputType = {
-    id?: true
-    subtaskId?: true
-  }
-
-  export type CommitSumAggregateInputType = {
-    id?: true
-    subtaskId?: true
-  }
-
-  export type CommitMinAggregateInputType = {
-    id?: true
-    taskId?: true
-    subtaskId?: true
-    hash?: true
-    message?: true
-    commitTimestamp?: true
-    author?: true
-  }
-
-  export type CommitMaxAggregateInputType = {
-    id?: true
-    taskId?: true
-    subtaskId?: true
-    hash?: true
-    message?: true
-    commitTimestamp?: true
-    author?: true
-  }
-
-  export type CommitCountAggregateInputType = {
-    id?: true
-    taskId?: true
-    subtaskId?: true
-    hash?: true
-    message?: true
-    filesChanged?: true
-    commitTimestamp?: true
-    author?: true
-    _all?: true
-  }
-
-  export type CommitAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which Commit to aggregate.
-     */
-    where?: CommitWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Commits to fetch.
-     */
-    orderBy?: CommitOrderByWithRelationInput | CommitOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: CommitWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Commits from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Commits.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned Commits
-    **/
-    _count?: true | CommitCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: CommitAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: CommitSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: CommitMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: CommitMaxAggregateInputType
-  }
-
-  export type GetCommitAggregateType<T extends CommitAggregateArgs> = {
-        [P in keyof T & keyof AggregateCommit]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateCommit[P]>
-      : GetScalarType<T[P], AggregateCommit[P]>
-  }
-
-
-
-
-  export type CommitGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CommitWhereInput
-    orderBy?: CommitOrderByWithAggregationInput | CommitOrderByWithAggregationInput[]
-    by: CommitScalarFieldEnum[] | CommitScalarFieldEnum
-    having?: CommitScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: CommitCountAggregateInputType | true
-    _avg?: CommitAvgAggregateInputType
-    _sum?: CommitSumAggregateInputType
-    _min?: CommitMinAggregateInputType
-    _max?: CommitMaxAggregateInputType
-  }
-
-  export type CommitGroupByOutputType = {
-    id: number
-    taskId: string
-    subtaskId: number | null
-    hash: string
-    message: string
-    filesChanged: JsonValue
-    commitTimestamp: Date
-    author: string
-    _count: CommitCountAggregateOutputType | null
-    _avg: CommitAvgAggregateOutputType | null
-    _sum: CommitSumAggregateOutputType | null
-    _min: CommitMinAggregateOutputType | null
-    _max: CommitMaxAggregateOutputType | null
-  }
-
-  type GetCommitGroupByPayload<T extends CommitGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<CommitGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof CommitGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], CommitGroupByOutputType[P]>
-            : GetScalarType<T[P], CommitGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type CommitSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    taskId?: boolean
-    subtaskId?: boolean
-    hash?: boolean
-    message?: boolean
-    filesChanged?: boolean
-    commitTimestamp?: boolean
-    author?: boolean
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    subtask?: boolean | Commit$subtaskArgs<ExtArgs>
-  }, ExtArgs["result"]["commit"]>
-
-  export type CommitSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    taskId?: boolean
-    subtaskId?: boolean
-    hash?: boolean
-    message?: boolean
-    filesChanged?: boolean
-    commitTimestamp?: boolean
-    author?: boolean
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    subtask?: boolean | Commit$subtaskArgs<ExtArgs>
-  }, ExtArgs["result"]["commit"]>
-
-  export type CommitSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    taskId?: boolean
-    subtaskId?: boolean
-    hash?: boolean
-    message?: boolean
-    filesChanged?: boolean
-    commitTimestamp?: boolean
-    author?: boolean
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    subtask?: boolean | Commit$subtaskArgs<ExtArgs>
-  }, ExtArgs["result"]["commit"]>
-
-  export type CommitSelectScalar = {
-    id?: boolean
-    taskId?: boolean
-    subtaskId?: boolean
-    hash?: boolean
-    message?: boolean
-    filesChanged?: boolean
-    commitTimestamp?: boolean
-    author?: boolean
-  }
-
-  export type CommitOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "taskId" | "subtaskId" | "hash" | "message" | "filesChanged" | "commitTimestamp" | "author", ExtArgs["result"]["commit"]>
-  export type CommitInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    subtask?: boolean | Commit$subtaskArgs<ExtArgs>
-  }
-  export type CommitIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    subtask?: boolean | Commit$subtaskArgs<ExtArgs>
-  }
-  export type CommitIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    subtask?: boolean | Commit$subtaskArgs<ExtArgs>
-  }
-
-  export type $CommitPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Commit"
-    objects: {
-      task: Prisma.$TaskPayload<ExtArgs>
-      subtask: Prisma.$SubtaskPayload<ExtArgs> | null
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      taskId: string
-      subtaskId: number | null
-      hash: string
-      message: string
-      filesChanged: Prisma.JsonValue
-      commitTimestamp: Date
-      author: string
-    }, ExtArgs["result"]["commit"]>
-    composites: {}
-  }
-
-  type CommitGetPayload<S extends boolean | null | undefined | CommitDefaultArgs> = $Result.GetResult<Prisma.$CommitPayload, S>
-
-  type CommitCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<CommitFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: CommitCountAggregateInputType | true
-    }
-
-  export interface CommitDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Commit'], meta: { name: 'Commit' } }
-    /**
-     * Find zero or one Commit that matches the filter.
-     * @param {CommitFindUniqueArgs} args - Arguments to find a Commit
-     * @example
-     * // Get one Commit
-     * const commit = await prisma.commit.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends CommitFindUniqueArgs>(args: SelectSubset<T, CommitFindUniqueArgs<ExtArgs>>): Prisma__CommitClient<$Result.GetResult<Prisma.$CommitPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one Commit that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {CommitFindUniqueOrThrowArgs} args - Arguments to find a Commit
-     * @example
-     * // Get one Commit
-     * const commit = await prisma.commit.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends CommitFindUniqueOrThrowArgs>(args: SelectSubset<T, CommitFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CommitClient<$Result.GetResult<Prisma.$CommitPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Commit that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CommitFindFirstArgs} args - Arguments to find a Commit
-     * @example
-     * // Get one Commit
-     * const commit = await prisma.commit.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends CommitFindFirstArgs>(args?: SelectSubset<T, CommitFindFirstArgs<ExtArgs>>): Prisma__CommitClient<$Result.GetResult<Prisma.$CommitPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Commit that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CommitFindFirstOrThrowArgs} args - Arguments to find a Commit
-     * @example
-     * // Get one Commit
-     * const commit = await prisma.commit.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends CommitFindFirstOrThrowArgs>(args?: SelectSubset<T, CommitFindFirstOrThrowArgs<ExtArgs>>): Prisma__CommitClient<$Result.GetResult<Prisma.$CommitPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more Commits that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CommitFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all Commits
-     * const commits = await prisma.commit.findMany()
-     * 
-     * // Get first 10 Commits
-     * const commits = await prisma.commit.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const commitWithIdOnly = await prisma.commit.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends CommitFindManyArgs>(args?: SelectSubset<T, CommitFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a Commit.
-     * @param {CommitCreateArgs} args - Arguments to create a Commit.
-     * @example
-     * // Create one Commit
-     * const Commit = await prisma.commit.create({
-     *   data: {
-     *     // ... data to create a Commit
-     *   }
-     * })
-     * 
-     */
-    create<T extends CommitCreateArgs>(args: SelectSubset<T, CommitCreateArgs<ExtArgs>>): Prisma__CommitClient<$Result.GetResult<Prisma.$CommitPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many Commits.
-     * @param {CommitCreateManyArgs} args - Arguments to create many Commits.
-     * @example
-     * // Create many Commits
-     * const commit = await prisma.commit.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends CommitCreateManyArgs>(args?: SelectSubset<T, CommitCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many Commits and returns the data saved in the database.
-     * @param {CommitCreateManyAndReturnArgs} args - Arguments to create many Commits.
-     * @example
-     * // Create many Commits
-     * const commit = await prisma.commit.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many Commits and only return the `id`
-     * const commitWithIdOnly = await prisma.commit.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends CommitCreateManyAndReturnArgs>(args?: SelectSubset<T, CommitCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommitPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a Commit.
-     * @param {CommitDeleteArgs} args - Arguments to delete one Commit.
-     * @example
-     * // Delete one Commit
-     * const Commit = await prisma.commit.delete({
-     *   where: {
-     *     // ... filter to delete one Commit
-     *   }
-     * })
-     * 
-     */
-    delete<T extends CommitDeleteArgs>(args: SelectSubset<T, CommitDeleteArgs<ExtArgs>>): Prisma__CommitClient<$Result.GetResult<Prisma.$CommitPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one Commit.
-     * @param {CommitUpdateArgs} args - Arguments to update one Commit.
-     * @example
-     * // Update one Commit
-     * const commit = await prisma.commit.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends CommitUpdateArgs>(args: SelectSubset<T, CommitUpdateArgs<ExtArgs>>): Prisma__CommitClient<$Result.GetResult<Prisma.$CommitPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more Commits.
-     * @param {CommitDeleteManyArgs} args - Arguments to filter Commits to delete.
-     * @example
-     * // Delete a few Commits
-     * const { count } = await prisma.commit.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends CommitDeleteManyArgs>(args?: SelectSubset<T, CommitDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Commits.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CommitUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many Commits
-     * const commit = await prisma.commit.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends CommitUpdateManyArgs>(args: SelectSubset<T, CommitUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Commits and returns the data updated in the database.
-     * @param {CommitUpdateManyAndReturnArgs} args - Arguments to update many Commits.
-     * @example
-     * // Update many Commits
-     * const commit = await prisma.commit.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Commits and only return the `id`
-     * const commitWithIdOnly = await prisma.commit.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends CommitUpdateManyAndReturnArgs>(args: SelectSubset<T, CommitUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommitPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one Commit.
-     * @param {CommitUpsertArgs} args - Arguments to update or create a Commit.
-     * @example
-     * // Update or create a Commit
-     * const commit = await prisma.commit.upsert({
-     *   create: {
-     *     // ... data to create a Commit
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the Commit we want to update
-     *   }
-     * })
-     */
-    upsert<T extends CommitUpsertArgs>(args: SelectSubset<T, CommitUpsertArgs<ExtArgs>>): Prisma__CommitClient<$Result.GetResult<Prisma.$CommitPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of Commits.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CommitCountArgs} args - Arguments to filter Commits to count.
-     * @example
-     * // Count the number of Commits
-     * const count = await prisma.commit.count({
-     *   where: {
-     *     // ... the filter for the Commits we want to count
-     *   }
-     * })
-    **/
-    count<T extends CommitCountArgs>(
-      args?: Subset<T, CommitCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], CommitCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a Commit.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CommitAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends CommitAggregateArgs>(args: Subset<T, CommitAggregateArgs>): Prisma.PrismaPromise<GetCommitAggregateType<T>>
-
-    /**
-     * Group by Commit.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {CommitGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends CommitGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: CommitGroupByArgs['orderBy'] }
-        : { orderBy?: CommitGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, CommitGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCommitGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the Commit model
-   */
-  readonly fields: CommitFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for Commit.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__CommitClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    task<T extends TaskDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TaskDefaultArgs<ExtArgs>>): Prisma__TaskClient<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    subtask<T extends Commit$subtaskArgs<ExtArgs> = {}>(args?: Subset<T, Commit$subtaskArgs<ExtArgs>>): Prisma__SubtaskClient<$Result.GetResult<Prisma.$SubtaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the Commit model
-   */
-  interface CommitFieldRefs {
-    readonly id: FieldRef<"Commit", 'Int'>
-    readonly taskId: FieldRef<"Commit", 'String'>
-    readonly subtaskId: FieldRef<"Commit", 'Int'>
-    readonly hash: FieldRef<"Commit", 'String'>
-    readonly message: FieldRef<"Commit", 'String'>
-    readonly filesChanged: FieldRef<"Commit", 'Json'>
-    readonly commitTimestamp: FieldRef<"Commit", 'DateTime'>
-    readonly author: FieldRef<"Commit", 'String'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * Commit findUnique
-   */
-  export type CommitFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitInclude<ExtArgs> | null
-    /**
-     * Filter, which Commit to fetch.
-     */
-    where: CommitWhereUniqueInput
-  }
-
-  /**
-   * Commit findUniqueOrThrow
-   */
-  export type CommitFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitInclude<ExtArgs> | null
-    /**
-     * Filter, which Commit to fetch.
-     */
-    where: CommitWhereUniqueInput
-  }
-
-  /**
-   * Commit findFirst
-   */
-  export type CommitFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitInclude<ExtArgs> | null
-    /**
-     * Filter, which Commit to fetch.
-     */
-    where?: CommitWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Commits to fetch.
-     */
-    orderBy?: CommitOrderByWithRelationInput | CommitOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for Commits.
-     */
-    cursor?: CommitWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Commits from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Commits.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of Commits.
-     */
-    distinct?: CommitScalarFieldEnum | CommitScalarFieldEnum[]
-  }
-
-  /**
-   * Commit findFirstOrThrow
-   */
-  export type CommitFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitInclude<ExtArgs> | null
-    /**
-     * Filter, which Commit to fetch.
-     */
-    where?: CommitWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Commits to fetch.
-     */
-    orderBy?: CommitOrderByWithRelationInput | CommitOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for Commits.
-     */
-    cursor?: CommitWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Commits from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Commits.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of Commits.
-     */
-    distinct?: CommitScalarFieldEnum | CommitScalarFieldEnum[]
-  }
-
-  /**
-   * Commit findMany
-   */
-  export type CommitFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitInclude<ExtArgs> | null
-    /**
-     * Filter, which Commits to fetch.
-     */
-    where?: CommitWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Commits to fetch.
-     */
-    orderBy?: CommitOrderByWithRelationInput | CommitOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing Commits.
-     */
-    cursor?: CommitWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Commits from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Commits.
-     */
-    skip?: number
-    distinct?: CommitScalarFieldEnum | CommitScalarFieldEnum[]
-  }
-
-  /**
-   * Commit create
-   */
-  export type CommitCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitInclude<ExtArgs> | null
-    /**
-     * The data needed to create a Commit.
-     */
-    data: XOR<CommitCreateInput, CommitUncheckedCreateInput>
-  }
-
-  /**
-   * Commit createMany
-   */
-  export type CommitCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many Commits.
-     */
-    data: CommitCreateManyInput | CommitCreateManyInput[]
-  }
-
-  /**
-   * Commit createManyAndReturn
-   */
-  export type CommitCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * The data used to create many Commits.
-     */
-    data: CommitCreateManyInput | CommitCreateManyInput[]
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * Commit update
-   */
-  export type CommitUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitInclude<ExtArgs> | null
-    /**
-     * The data needed to update a Commit.
-     */
-    data: XOR<CommitUpdateInput, CommitUncheckedUpdateInput>
-    /**
-     * Choose, which Commit to update.
-     */
-    where: CommitWhereUniqueInput
-  }
-
-  /**
-   * Commit updateMany
-   */
-  export type CommitUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update Commits.
-     */
-    data: XOR<CommitUpdateManyMutationInput, CommitUncheckedUpdateManyInput>
-    /**
-     * Filter which Commits to update
-     */
-    where?: CommitWhereInput
-    /**
-     * Limit how many Commits to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Commit updateManyAndReturn
-   */
-  export type CommitUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * The data used to update Commits.
-     */
-    data: XOR<CommitUpdateManyMutationInput, CommitUncheckedUpdateManyInput>
-    /**
-     * Filter which Commits to update
-     */
-    where?: CommitWhereInput
-    /**
-     * Limit how many Commits to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * Commit upsert
-   */
-  export type CommitUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitInclude<ExtArgs> | null
-    /**
-     * The filter to search for the Commit to update in case it exists.
-     */
-    where: CommitWhereUniqueInput
-    /**
-     * In case the Commit found by the `where` argument doesn't exist, create a new Commit with this data.
-     */
-    create: XOR<CommitCreateInput, CommitUncheckedCreateInput>
-    /**
-     * In case the Commit was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<CommitUpdateInput, CommitUncheckedUpdateInput>
-  }
-
-  /**
-   * Commit delete
-   */
-  export type CommitDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitInclude<ExtArgs> | null
-    /**
-     * Filter which Commit to delete.
-     */
-    where: CommitWhereUniqueInput
-  }
-
-  /**
-   * Commit deleteMany
-   */
-  export type CommitDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which Commits to delete
-     */
-    where?: CommitWhereInput
-    /**
-     * Limit how many Commits to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * Commit.subtask
-   */
-  export type Commit$subtaskArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Subtask
-     */
-    select?: SubtaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Subtask
-     */
-    omit?: SubtaskOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: SubtaskInclude<ExtArgs> | null
-    where?: SubtaskWhereInput
-  }
-
-  /**
-   * Commit without action
-   */
-  export type CommitDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Commit
-     */
-    select?: CommitSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Commit
-     */
-    omit?: CommitOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommitInclude<ExtArgs> | null
-  }
-
-
-  /**
    * Model Comment
    */
 
@@ -16254,2034 +13599,6 @@ export namespace Prisma {
 
 
   /**
-   * Model Template
-   */
-
-  export type AggregateTemplate = {
-    _count: TemplateCountAggregateOutputType | null
-    _avg: TemplateAvgAggregateOutputType | null
-    _sum: TemplateSumAggregateOutputType | null
-    _min: TemplateMinAggregateOutputType | null
-    _max: TemplateMaxAggregateOutputType | null
-  }
-
-  export type TemplateAvgAggregateOutputType = {
-    id: number | null
-  }
-
-  export type TemplateSumAggregateOutputType = {
-    id: number | null
-  }
-
-  export type TemplateMinAggregateOutputType = {
-    id: number | null
-    name: string | null
-    content: string | null
-    description: string | null
-    lastUpdated: Date | null
-  }
-
-  export type TemplateMaxAggregateOutputType = {
-    id: number | null
-    name: string | null
-    content: string | null
-    description: string | null
-    lastUpdated: Date | null
-  }
-
-  export type TemplateCountAggregateOutputType = {
-    id: number
-    name: number
-    content: number
-    description: number
-    lastUpdated: number
-    _all: number
-  }
-
-
-  export type TemplateAvgAggregateInputType = {
-    id?: true
-  }
-
-  export type TemplateSumAggregateInputType = {
-    id?: true
-  }
-
-  export type TemplateMinAggregateInputType = {
-    id?: true
-    name?: true
-    content?: true
-    description?: true
-    lastUpdated?: true
-  }
-
-  export type TemplateMaxAggregateInputType = {
-    id?: true
-    name?: true
-    content?: true
-    description?: true
-    lastUpdated?: true
-  }
-
-  export type TemplateCountAggregateInputType = {
-    id?: true
-    name?: true
-    content?: true
-    description?: true
-    lastUpdated?: true
-    _all?: true
-  }
-
-  export type TemplateAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which Template to aggregate.
-     */
-    where?: TemplateWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Templates to fetch.
-     */
-    orderBy?: TemplateOrderByWithRelationInput | TemplateOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: TemplateWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Templates from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Templates.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned Templates
-    **/
-    _count?: true | TemplateCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: TemplateAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: TemplateSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: TemplateMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: TemplateMaxAggregateInputType
-  }
-
-  export type GetTemplateAggregateType<T extends TemplateAggregateArgs> = {
-        [P in keyof T & keyof AggregateTemplate]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateTemplate[P]>
-      : GetScalarType<T[P], AggregateTemplate[P]>
-  }
-
-
-
-
-  export type TemplateGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TemplateWhereInput
-    orderBy?: TemplateOrderByWithAggregationInput | TemplateOrderByWithAggregationInput[]
-    by: TemplateScalarFieldEnum[] | TemplateScalarFieldEnum
-    having?: TemplateScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: TemplateCountAggregateInputType | true
-    _avg?: TemplateAvgAggregateInputType
-    _sum?: TemplateSumAggregateInputType
-    _min?: TemplateMinAggregateInputType
-    _max?: TemplateMaxAggregateInputType
-  }
-
-  export type TemplateGroupByOutputType = {
-    id: number
-    name: string
-    content: string
-    description: string
-    lastUpdated: Date
-    _count: TemplateCountAggregateOutputType | null
-    _avg: TemplateAvgAggregateOutputType | null
-    _sum: TemplateSumAggregateOutputType | null
-    _min: TemplateMinAggregateOutputType | null
-    _max: TemplateMaxAggregateOutputType | null
-  }
-
-  type GetTemplateGroupByPayload<T extends TemplateGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<TemplateGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof TemplateGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], TemplateGroupByOutputType[P]>
-            : GetScalarType<T[P], TemplateGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type TemplateSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    content?: boolean
-    description?: boolean
-    lastUpdated?: boolean
-  }, ExtArgs["result"]["template"]>
-
-  export type TemplateSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    content?: boolean
-    description?: boolean
-    lastUpdated?: boolean
-  }, ExtArgs["result"]["template"]>
-
-  export type TemplateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    content?: boolean
-    description?: boolean
-    lastUpdated?: boolean
-  }, ExtArgs["result"]["template"]>
-
-  export type TemplateSelectScalar = {
-    id?: boolean
-    name?: boolean
-    content?: boolean
-    description?: boolean
-    lastUpdated?: boolean
-  }
-
-  export type TemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "content" | "description" | "lastUpdated", ExtArgs["result"]["template"]>
-
-  export type $TemplatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Template"
-    objects: {}
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      name: string
-      content: string
-      description: string
-      lastUpdated: Date
-    }, ExtArgs["result"]["template"]>
-    composites: {}
-  }
-
-  type TemplateGetPayload<S extends boolean | null | undefined | TemplateDefaultArgs> = $Result.GetResult<Prisma.$TemplatePayload, S>
-
-  type TemplateCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<TemplateFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: TemplateCountAggregateInputType | true
-    }
-
-  export interface TemplateDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Template'], meta: { name: 'Template' } }
-    /**
-     * Find zero or one Template that matches the filter.
-     * @param {TemplateFindUniqueArgs} args - Arguments to find a Template
-     * @example
-     * // Get one Template
-     * const template = await prisma.template.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends TemplateFindUniqueArgs>(args: SelectSubset<T, TemplateFindUniqueArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one Template that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {TemplateFindUniqueOrThrowArgs} args - Arguments to find a Template
-     * @example
-     * // Get one Template
-     * const template = await prisma.template.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends TemplateFindUniqueOrThrowArgs>(args: SelectSubset<T, TemplateFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Template that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplateFindFirstArgs} args - Arguments to find a Template
-     * @example
-     * // Get one Template
-     * const template = await prisma.template.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends TemplateFindFirstArgs>(args?: SelectSubset<T, TemplateFindFirstArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Template that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplateFindFirstOrThrowArgs} args - Arguments to find a Template
-     * @example
-     * // Get one Template
-     * const template = await prisma.template.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends TemplateFindFirstOrThrowArgs>(args?: SelectSubset<T, TemplateFindFirstOrThrowArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more Templates that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplateFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all Templates
-     * const templates = await prisma.template.findMany()
-     * 
-     * // Get first 10 Templates
-     * const templates = await prisma.template.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const templateWithIdOnly = await prisma.template.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends TemplateFindManyArgs>(args?: SelectSubset<T, TemplateFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a Template.
-     * @param {TemplateCreateArgs} args - Arguments to create a Template.
-     * @example
-     * // Create one Template
-     * const Template = await prisma.template.create({
-     *   data: {
-     *     // ... data to create a Template
-     *   }
-     * })
-     * 
-     */
-    create<T extends TemplateCreateArgs>(args: SelectSubset<T, TemplateCreateArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many Templates.
-     * @param {TemplateCreateManyArgs} args - Arguments to create many Templates.
-     * @example
-     * // Create many Templates
-     * const template = await prisma.template.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends TemplateCreateManyArgs>(args?: SelectSubset<T, TemplateCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many Templates and returns the data saved in the database.
-     * @param {TemplateCreateManyAndReturnArgs} args - Arguments to create many Templates.
-     * @example
-     * // Create many Templates
-     * const template = await prisma.template.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many Templates and only return the `id`
-     * const templateWithIdOnly = await prisma.template.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends TemplateCreateManyAndReturnArgs>(args?: SelectSubset<T, TemplateCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a Template.
-     * @param {TemplateDeleteArgs} args - Arguments to delete one Template.
-     * @example
-     * // Delete one Template
-     * const Template = await prisma.template.delete({
-     *   where: {
-     *     // ... filter to delete one Template
-     *   }
-     * })
-     * 
-     */
-    delete<T extends TemplateDeleteArgs>(args: SelectSubset<T, TemplateDeleteArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one Template.
-     * @param {TemplateUpdateArgs} args - Arguments to update one Template.
-     * @example
-     * // Update one Template
-     * const template = await prisma.template.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends TemplateUpdateArgs>(args: SelectSubset<T, TemplateUpdateArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more Templates.
-     * @param {TemplateDeleteManyArgs} args - Arguments to filter Templates to delete.
-     * @example
-     * // Delete a few Templates
-     * const { count } = await prisma.template.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends TemplateDeleteManyArgs>(args?: SelectSubset<T, TemplateDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Templates.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplateUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many Templates
-     * const template = await prisma.template.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends TemplateUpdateManyArgs>(args: SelectSubset<T, TemplateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Templates and returns the data updated in the database.
-     * @param {TemplateUpdateManyAndReturnArgs} args - Arguments to update many Templates.
-     * @example
-     * // Update many Templates
-     * const template = await prisma.template.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Templates and only return the `id`
-     * const templateWithIdOnly = await prisma.template.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends TemplateUpdateManyAndReturnArgs>(args: SelectSubset<T, TemplateUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one Template.
-     * @param {TemplateUpsertArgs} args - Arguments to update or create a Template.
-     * @example
-     * // Update or create a Template
-     * const template = await prisma.template.upsert({
-     *   create: {
-     *     // ... data to create a Template
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the Template we want to update
-     *   }
-     * })
-     */
-    upsert<T extends TemplateUpsertArgs>(args: SelectSubset<T, TemplateUpsertArgs<ExtArgs>>): Prisma__TemplateClient<$Result.GetResult<Prisma.$TemplatePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of Templates.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplateCountArgs} args - Arguments to filter Templates to count.
-     * @example
-     * // Count the number of Templates
-     * const count = await prisma.template.count({
-     *   where: {
-     *     // ... the filter for the Templates we want to count
-     *   }
-     * })
-    **/
-    count<T extends TemplateCountArgs>(
-      args?: Subset<T, TemplateCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], TemplateCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a Template.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplateAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends TemplateAggregateArgs>(args: Subset<T, TemplateAggregateArgs>): Prisma.PrismaPromise<GetTemplateAggregateType<T>>
-
-    /**
-     * Group by Template.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TemplateGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends TemplateGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: TemplateGroupByArgs['orderBy'] }
-        : { orderBy?: TemplateGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, TemplateGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTemplateGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the Template model
-   */
-  readonly fields: TemplateFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for Template.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__TemplateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the Template model
-   */
-  interface TemplateFieldRefs {
-    readonly id: FieldRef<"Template", 'Int'>
-    readonly name: FieldRef<"Template", 'String'>
-    readonly content: FieldRef<"Template", 'String'>
-    readonly description: FieldRef<"Template", 'String'>
-    readonly lastUpdated: FieldRef<"Template", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * Template findUnique
-   */
-  export type TemplateFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Template
-     */
-    select?: TemplateSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Template
-     */
-    omit?: TemplateOmit<ExtArgs> | null
-    /**
-     * Filter, which Template to fetch.
-     */
-    where: TemplateWhereUniqueInput
-  }
-
-  /**
-   * Template findUniqueOrThrow
-   */
-  export type TemplateFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Template
-     */
-    select?: TemplateSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Template
-     */
-    omit?: TemplateOmit<ExtArgs> | null
-    /**
-     * Filter, which Template to fetch.
-     */
-    where: TemplateWhereUniqueInput
-  }
-
-  /**
-   * Template findFirst
-   */
-  export type TemplateFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Template
-     */
-    select?: TemplateSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Template
-     */
-    omit?: TemplateOmit<ExtArgs> | null
-    /**
-     * Filter, which Template to fetch.
-     */
-    where?: TemplateWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Templates to fetch.
-     */
-    orderBy?: TemplateOrderByWithRelationInput | TemplateOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for Templates.
-     */
-    cursor?: TemplateWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Templates from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Templates.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of Templates.
-     */
-    distinct?: TemplateScalarFieldEnum | TemplateScalarFieldEnum[]
-  }
-
-  /**
-   * Template findFirstOrThrow
-   */
-  export type TemplateFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Template
-     */
-    select?: TemplateSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Template
-     */
-    omit?: TemplateOmit<ExtArgs> | null
-    /**
-     * Filter, which Template to fetch.
-     */
-    where?: TemplateWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Templates to fetch.
-     */
-    orderBy?: TemplateOrderByWithRelationInput | TemplateOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for Templates.
-     */
-    cursor?: TemplateWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Templates from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Templates.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of Templates.
-     */
-    distinct?: TemplateScalarFieldEnum | TemplateScalarFieldEnum[]
-  }
-
-  /**
-   * Template findMany
-   */
-  export type TemplateFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Template
-     */
-    select?: TemplateSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Template
-     */
-    omit?: TemplateOmit<ExtArgs> | null
-    /**
-     * Filter, which Templates to fetch.
-     */
-    where?: TemplateWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Templates to fetch.
-     */
-    orderBy?: TemplateOrderByWithRelationInput | TemplateOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing Templates.
-     */
-    cursor?: TemplateWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Templates from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Templates.
-     */
-    skip?: number
-    distinct?: TemplateScalarFieldEnum | TemplateScalarFieldEnum[]
-  }
-
-  /**
-   * Template create
-   */
-  export type TemplateCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Template
-     */
-    select?: TemplateSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Template
-     */
-    omit?: TemplateOmit<ExtArgs> | null
-    /**
-     * The data needed to create a Template.
-     */
-    data: XOR<TemplateCreateInput, TemplateUncheckedCreateInput>
-  }
-
-  /**
-   * Template createMany
-   */
-  export type TemplateCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many Templates.
-     */
-    data: TemplateCreateManyInput | TemplateCreateManyInput[]
-  }
-
-  /**
-   * Template createManyAndReturn
-   */
-  export type TemplateCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Template
-     */
-    select?: TemplateSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Template
-     */
-    omit?: TemplateOmit<ExtArgs> | null
-    /**
-     * The data used to create many Templates.
-     */
-    data: TemplateCreateManyInput | TemplateCreateManyInput[]
-  }
-
-  /**
-   * Template update
-   */
-  export type TemplateUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Template
-     */
-    select?: TemplateSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Template
-     */
-    omit?: TemplateOmit<ExtArgs> | null
-    /**
-     * The data needed to update a Template.
-     */
-    data: XOR<TemplateUpdateInput, TemplateUncheckedUpdateInput>
-    /**
-     * Choose, which Template to update.
-     */
-    where: TemplateWhereUniqueInput
-  }
-
-  /**
-   * Template updateMany
-   */
-  export type TemplateUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update Templates.
-     */
-    data: XOR<TemplateUpdateManyMutationInput, TemplateUncheckedUpdateManyInput>
-    /**
-     * Filter which Templates to update
-     */
-    where?: TemplateWhereInput
-    /**
-     * Limit how many Templates to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Template updateManyAndReturn
-   */
-  export type TemplateUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Template
-     */
-    select?: TemplateSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Template
-     */
-    omit?: TemplateOmit<ExtArgs> | null
-    /**
-     * The data used to update Templates.
-     */
-    data: XOR<TemplateUpdateManyMutationInput, TemplateUncheckedUpdateManyInput>
-    /**
-     * Filter which Templates to update
-     */
-    where?: TemplateWhereInput
-    /**
-     * Limit how many Templates to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Template upsert
-   */
-  export type TemplateUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Template
-     */
-    select?: TemplateSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Template
-     */
-    omit?: TemplateOmit<ExtArgs> | null
-    /**
-     * The filter to search for the Template to update in case it exists.
-     */
-    where: TemplateWhereUniqueInput
-    /**
-     * In case the Template found by the `where` argument doesn't exist, create a new Template with this data.
-     */
-    create: XOR<TemplateCreateInput, TemplateUncheckedCreateInput>
-    /**
-     * In case the Template was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<TemplateUpdateInput, TemplateUncheckedUpdateInput>
-  }
-
-  /**
-   * Template delete
-   */
-  export type TemplateDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Template
-     */
-    select?: TemplateSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Template
-     */
-    omit?: TemplateOmit<ExtArgs> | null
-    /**
-     * Filter which Template to delete.
-     */
-    where: TemplateWhereUniqueInput
-  }
-
-  /**
-   * Template deleteMany
-   */
-  export type TemplateDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which Templates to delete
-     */
-    where?: TemplateWhereInput
-    /**
-     * Limit how many Templates to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * Template without action
-   */
-  export type TemplateDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Template
-     */
-    select?: TemplateSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Template
-     */
-    omit?: TemplateOmit<ExtArgs> | null
-  }
-
-
-  /**
-   * Model SchemaVersion
-   */
-
-  export type AggregateSchemaVersion = {
-    _count: SchemaVersionCountAggregateOutputType | null
-    _avg: SchemaVersionAvgAggregateOutputType | null
-    _sum: SchemaVersionSumAggregateOutputType | null
-    _min: SchemaVersionMinAggregateOutputType | null
-    _max: SchemaVersionMaxAggregateOutputType | null
-  }
-
-  export type SchemaVersionAvgAggregateOutputType = {
-    id: number | null
-  }
-
-  export type SchemaVersionSumAggregateOutputType = {
-    id: number | null
-  }
-
-  export type SchemaVersionMinAggregateOutputType = {
-    id: number | null
-    version: string | null
-    lastUpdated: Date | null
-  }
-
-  export type SchemaVersionMaxAggregateOutputType = {
-    id: number | null
-    version: string | null
-    lastUpdated: Date | null
-  }
-
-  export type SchemaVersionCountAggregateOutputType = {
-    id: number
-    version: number
-    lastUpdated: number
-    _all: number
-  }
-
-
-  export type SchemaVersionAvgAggregateInputType = {
-    id?: true
-  }
-
-  export type SchemaVersionSumAggregateInputType = {
-    id?: true
-  }
-
-  export type SchemaVersionMinAggregateInputType = {
-    id?: true
-    version?: true
-    lastUpdated?: true
-  }
-
-  export type SchemaVersionMaxAggregateInputType = {
-    id?: true
-    version?: true
-    lastUpdated?: true
-  }
-
-  export type SchemaVersionCountAggregateInputType = {
-    id?: true
-    version?: true
-    lastUpdated?: true
-    _all?: true
-  }
-
-  export type SchemaVersionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which SchemaVersion to aggregate.
-     */
-    where?: SchemaVersionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of SchemaVersions to fetch.
-     */
-    orderBy?: SchemaVersionOrderByWithRelationInput | SchemaVersionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: SchemaVersionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` SchemaVersions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` SchemaVersions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned SchemaVersions
-    **/
-    _count?: true | SchemaVersionCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: SchemaVersionAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: SchemaVersionSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: SchemaVersionMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: SchemaVersionMaxAggregateInputType
-  }
-
-  export type GetSchemaVersionAggregateType<T extends SchemaVersionAggregateArgs> = {
-        [P in keyof T & keyof AggregateSchemaVersion]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateSchemaVersion[P]>
-      : GetScalarType<T[P], AggregateSchemaVersion[P]>
-  }
-
-
-
-
-  export type SchemaVersionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: SchemaVersionWhereInput
-    orderBy?: SchemaVersionOrderByWithAggregationInput | SchemaVersionOrderByWithAggregationInput[]
-    by: SchemaVersionScalarFieldEnum[] | SchemaVersionScalarFieldEnum
-    having?: SchemaVersionScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: SchemaVersionCountAggregateInputType | true
-    _avg?: SchemaVersionAvgAggregateInputType
-    _sum?: SchemaVersionSumAggregateInputType
-    _min?: SchemaVersionMinAggregateInputType
-    _max?: SchemaVersionMaxAggregateInputType
-  }
-
-  export type SchemaVersionGroupByOutputType = {
-    id: number
-    version: string
-    lastUpdated: Date
-    _count: SchemaVersionCountAggregateOutputType | null
-    _avg: SchemaVersionAvgAggregateOutputType | null
-    _sum: SchemaVersionSumAggregateOutputType | null
-    _min: SchemaVersionMinAggregateOutputType | null
-    _max: SchemaVersionMaxAggregateOutputType | null
-  }
-
-  type GetSchemaVersionGroupByPayload<T extends SchemaVersionGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<SchemaVersionGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof SchemaVersionGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], SchemaVersionGroupByOutputType[P]>
-            : GetScalarType<T[P], SchemaVersionGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type SchemaVersionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    version?: boolean
-    lastUpdated?: boolean
-  }, ExtArgs["result"]["schemaVersion"]>
-
-  export type SchemaVersionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    version?: boolean
-    lastUpdated?: boolean
-  }, ExtArgs["result"]["schemaVersion"]>
-
-  export type SchemaVersionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    version?: boolean
-    lastUpdated?: boolean
-  }, ExtArgs["result"]["schemaVersion"]>
-
-  export type SchemaVersionSelectScalar = {
-    id?: boolean
-    version?: boolean
-    lastUpdated?: boolean
-  }
-
-  export type SchemaVersionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "version" | "lastUpdated", ExtArgs["result"]["schemaVersion"]>
-
-  export type $SchemaVersionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "SchemaVersion"
-    objects: {}
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      version: string
-      lastUpdated: Date
-    }, ExtArgs["result"]["schemaVersion"]>
-    composites: {}
-  }
-
-  type SchemaVersionGetPayload<S extends boolean | null | undefined | SchemaVersionDefaultArgs> = $Result.GetResult<Prisma.$SchemaVersionPayload, S>
-
-  type SchemaVersionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<SchemaVersionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: SchemaVersionCountAggregateInputType | true
-    }
-
-  export interface SchemaVersionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SchemaVersion'], meta: { name: 'SchemaVersion' } }
-    /**
-     * Find zero or one SchemaVersion that matches the filter.
-     * @param {SchemaVersionFindUniqueArgs} args - Arguments to find a SchemaVersion
-     * @example
-     * // Get one SchemaVersion
-     * const schemaVersion = await prisma.schemaVersion.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends SchemaVersionFindUniqueArgs>(args: SelectSubset<T, SchemaVersionFindUniqueArgs<ExtArgs>>): Prisma__SchemaVersionClient<$Result.GetResult<Prisma.$SchemaVersionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one SchemaVersion that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {SchemaVersionFindUniqueOrThrowArgs} args - Arguments to find a SchemaVersion
-     * @example
-     * // Get one SchemaVersion
-     * const schemaVersion = await prisma.schemaVersion.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends SchemaVersionFindUniqueOrThrowArgs>(args: SelectSubset<T, SchemaVersionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SchemaVersionClient<$Result.GetResult<Prisma.$SchemaVersionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first SchemaVersion that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {SchemaVersionFindFirstArgs} args - Arguments to find a SchemaVersion
-     * @example
-     * // Get one SchemaVersion
-     * const schemaVersion = await prisma.schemaVersion.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends SchemaVersionFindFirstArgs>(args?: SelectSubset<T, SchemaVersionFindFirstArgs<ExtArgs>>): Prisma__SchemaVersionClient<$Result.GetResult<Prisma.$SchemaVersionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first SchemaVersion that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {SchemaVersionFindFirstOrThrowArgs} args - Arguments to find a SchemaVersion
-     * @example
-     * // Get one SchemaVersion
-     * const schemaVersion = await prisma.schemaVersion.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends SchemaVersionFindFirstOrThrowArgs>(args?: SelectSubset<T, SchemaVersionFindFirstOrThrowArgs<ExtArgs>>): Prisma__SchemaVersionClient<$Result.GetResult<Prisma.$SchemaVersionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more SchemaVersions that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {SchemaVersionFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all SchemaVersions
-     * const schemaVersions = await prisma.schemaVersion.findMany()
-     * 
-     * // Get first 10 SchemaVersions
-     * const schemaVersions = await prisma.schemaVersion.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const schemaVersionWithIdOnly = await prisma.schemaVersion.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends SchemaVersionFindManyArgs>(args?: SelectSubset<T, SchemaVersionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SchemaVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a SchemaVersion.
-     * @param {SchemaVersionCreateArgs} args - Arguments to create a SchemaVersion.
-     * @example
-     * // Create one SchemaVersion
-     * const SchemaVersion = await prisma.schemaVersion.create({
-     *   data: {
-     *     // ... data to create a SchemaVersion
-     *   }
-     * })
-     * 
-     */
-    create<T extends SchemaVersionCreateArgs>(args: SelectSubset<T, SchemaVersionCreateArgs<ExtArgs>>): Prisma__SchemaVersionClient<$Result.GetResult<Prisma.$SchemaVersionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many SchemaVersions.
-     * @param {SchemaVersionCreateManyArgs} args - Arguments to create many SchemaVersions.
-     * @example
-     * // Create many SchemaVersions
-     * const schemaVersion = await prisma.schemaVersion.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends SchemaVersionCreateManyArgs>(args?: SelectSubset<T, SchemaVersionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many SchemaVersions and returns the data saved in the database.
-     * @param {SchemaVersionCreateManyAndReturnArgs} args - Arguments to create many SchemaVersions.
-     * @example
-     * // Create many SchemaVersions
-     * const schemaVersion = await prisma.schemaVersion.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many SchemaVersions and only return the `id`
-     * const schemaVersionWithIdOnly = await prisma.schemaVersion.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends SchemaVersionCreateManyAndReturnArgs>(args?: SelectSubset<T, SchemaVersionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SchemaVersionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a SchemaVersion.
-     * @param {SchemaVersionDeleteArgs} args - Arguments to delete one SchemaVersion.
-     * @example
-     * // Delete one SchemaVersion
-     * const SchemaVersion = await prisma.schemaVersion.delete({
-     *   where: {
-     *     // ... filter to delete one SchemaVersion
-     *   }
-     * })
-     * 
-     */
-    delete<T extends SchemaVersionDeleteArgs>(args: SelectSubset<T, SchemaVersionDeleteArgs<ExtArgs>>): Prisma__SchemaVersionClient<$Result.GetResult<Prisma.$SchemaVersionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one SchemaVersion.
-     * @param {SchemaVersionUpdateArgs} args - Arguments to update one SchemaVersion.
-     * @example
-     * // Update one SchemaVersion
-     * const schemaVersion = await prisma.schemaVersion.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends SchemaVersionUpdateArgs>(args: SelectSubset<T, SchemaVersionUpdateArgs<ExtArgs>>): Prisma__SchemaVersionClient<$Result.GetResult<Prisma.$SchemaVersionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more SchemaVersions.
-     * @param {SchemaVersionDeleteManyArgs} args - Arguments to filter SchemaVersions to delete.
-     * @example
-     * // Delete a few SchemaVersions
-     * const { count } = await prisma.schemaVersion.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends SchemaVersionDeleteManyArgs>(args?: SelectSubset<T, SchemaVersionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more SchemaVersions.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {SchemaVersionUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many SchemaVersions
-     * const schemaVersion = await prisma.schemaVersion.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends SchemaVersionUpdateManyArgs>(args: SelectSubset<T, SchemaVersionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more SchemaVersions and returns the data updated in the database.
-     * @param {SchemaVersionUpdateManyAndReturnArgs} args - Arguments to update many SchemaVersions.
-     * @example
-     * // Update many SchemaVersions
-     * const schemaVersion = await prisma.schemaVersion.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more SchemaVersions and only return the `id`
-     * const schemaVersionWithIdOnly = await prisma.schemaVersion.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends SchemaVersionUpdateManyAndReturnArgs>(args: SelectSubset<T, SchemaVersionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SchemaVersionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one SchemaVersion.
-     * @param {SchemaVersionUpsertArgs} args - Arguments to update or create a SchemaVersion.
-     * @example
-     * // Update or create a SchemaVersion
-     * const schemaVersion = await prisma.schemaVersion.upsert({
-     *   create: {
-     *     // ... data to create a SchemaVersion
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the SchemaVersion we want to update
-     *   }
-     * })
-     */
-    upsert<T extends SchemaVersionUpsertArgs>(args: SelectSubset<T, SchemaVersionUpsertArgs<ExtArgs>>): Prisma__SchemaVersionClient<$Result.GetResult<Prisma.$SchemaVersionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of SchemaVersions.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {SchemaVersionCountArgs} args - Arguments to filter SchemaVersions to count.
-     * @example
-     * // Count the number of SchemaVersions
-     * const count = await prisma.schemaVersion.count({
-     *   where: {
-     *     // ... the filter for the SchemaVersions we want to count
-     *   }
-     * })
-    **/
-    count<T extends SchemaVersionCountArgs>(
-      args?: Subset<T, SchemaVersionCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], SchemaVersionCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a SchemaVersion.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {SchemaVersionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends SchemaVersionAggregateArgs>(args: Subset<T, SchemaVersionAggregateArgs>): Prisma.PrismaPromise<GetSchemaVersionAggregateType<T>>
-
-    /**
-     * Group by SchemaVersion.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {SchemaVersionGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends SchemaVersionGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: SchemaVersionGroupByArgs['orderBy'] }
-        : { orderBy?: SchemaVersionGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, SchemaVersionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSchemaVersionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the SchemaVersion model
-   */
-  readonly fields: SchemaVersionFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for SchemaVersion.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__SchemaVersionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the SchemaVersion model
-   */
-  interface SchemaVersionFieldRefs {
-    readonly id: FieldRef<"SchemaVersion", 'Int'>
-    readonly version: FieldRef<"SchemaVersion", 'String'>
-    readonly lastUpdated: FieldRef<"SchemaVersion", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * SchemaVersion findUnique
-   */
-  export type SchemaVersionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the SchemaVersion
-     */
-    select?: SchemaVersionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the SchemaVersion
-     */
-    omit?: SchemaVersionOmit<ExtArgs> | null
-    /**
-     * Filter, which SchemaVersion to fetch.
-     */
-    where: SchemaVersionWhereUniqueInput
-  }
-
-  /**
-   * SchemaVersion findUniqueOrThrow
-   */
-  export type SchemaVersionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the SchemaVersion
-     */
-    select?: SchemaVersionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the SchemaVersion
-     */
-    omit?: SchemaVersionOmit<ExtArgs> | null
-    /**
-     * Filter, which SchemaVersion to fetch.
-     */
-    where: SchemaVersionWhereUniqueInput
-  }
-
-  /**
-   * SchemaVersion findFirst
-   */
-  export type SchemaVersionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the SchemaVersion
-     */
-    select?: SchemaVersionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the SchemaVersion
-     */
-    omit?: SchemaVersionOmit<ExtArgs> | null
-    /**
-     * Filter, which SchemaVersion to fetch.
-     */
-    where?: SchemaVersionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of SchemaVersions to fetch.
-     */
-    orderBy?: SchemaVersionOrderByWithRelationInput | SchemaVersionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for SchemaVersions.
-     */
-    cursor?: SchemaVersionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` SchemaVersions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` SchemaVersions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of SchemaVersions.
-     */
-    distinct?: SchemaVersionScalarFieldEnum | SchemaVersionScalarFieldEnum[]
-  }
-
-  /**
-   * SchemaVersion findFirstOrThrow
-   */
-  export type SchemaVersionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the SchemaVersion
-     */
-    select?: SchemaVersionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the SchemaVersion
-     */
-    omit?: SchemaVersionOmit<ExtArgs> | null
-    /**
-     * Filter, which SchemaVersion to fetch.
-     */
-    where?: SchemaVersionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of SchemaVersions to fetch.
-     */
-    orderBy?: SchemaVersionOrderByWithRelationInput | SchemaVersionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for SchemaVersions.
-     */
-    cursor?: SchemaVersionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` SchemaVersions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` SchemaVersions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of SchemaVersions.
-     */
-    distinct?: SchemaVersionScalarFieldEnum | SchemaVersionScalarFieldEnum[]
-  }
-
-  /**
-   * SchemaVersion findMany
-   */
-  export type SchemaVersionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the SchemaVersion
-     */
-    select?: SchemaVersionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the SchemaVersion
-     */
-    omit?: SchemaVersionOmit<ExtArgs> | null
-    /**
-     * Filter, which SchemaVersions to fetch.
-     */
-    where?: SchemaVersionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of SchemaVersions to fetch.
-     */
-    orderBy?: SchemaVersionOrderByWithRelationInput | SchemaVersionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing SchemaVersions.
-     */
-    cursor?: SchemaVersionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` SchemaVersions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` SchemaVersions.
-     */
-    skip?: number
-    distinct?: SchemaVersionScalarFieldEnum | SchemaVersionScalarFieldEnum[]
-  }
-
-  /**
-   * SchemaVersion create
-   */
-  export type SchemaVersionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the SchemaVersion
-     */
-    select?: SchemaVersionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the SchemaVersion
-     */
-    omit?: SchemaVersionOmit<ExtArgs> | null
-    /**
-     * The data needed to create a SchemaVersion.
-     */
-    data: XOR<SchemaVersionCreateInput, SchemaVersionUncheckedCreateInput>
-  }
-
-  /**
-   * SchemaVersion createMany
-   */
-  export type SchemaVersionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many SchemaVersions.
-     */
-    data: SchemaVersionCreateManyInput | SchemaVersionCreateManyInput[]
-  }
-
-  /**
-   * SchemaVersion createManyAndReturn
-   */
-  export type SchemaVersionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the SchemaVersion
-     */
-    select?: SchemaVersionSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the SchemaVersion
-     */
-    omit?: SchemaVersionOmit<ExtArgs> | null
-    /**
-     * The data used to create many SchemaVersions.
-     */
-    data: SchemaVersionCreateManyInput | SchemaVersionCreateManyInput[]
-  }
-
-  /**
-   * SchemaVersion update
-   */
-  export type SchemaVersionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the SchemaVersion
-     */
-    select?: SchemaVersionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the SchemaVersion
-     */
-    omit?: SchemaVersionOmit<ExtArgs> | null
-    /**
-     * The data needed to update a SchemaVersion.
-     */
-    data: XOR<SchemaVersionUpdateInput, SchemaVersionUncheckedUpdateInput>
-    /**
-     * Choose, which SchemaVersion to update.
-     */
-    where: SchemaVersionWhereUniqueInput
-  }
-
-  /**
-   * SchemaVersion updateMany
-   */
-  export type SchemaVersionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update SchemaVersions.
-     */
-    data: XOR<SchemaVersionUpdateManyMutationInput, SchemaVersionUncheckedUpdateManyInput>
-    /**
-     * Filter which SchemaVersions to update
-     */
-    where?: SchemaVersionWhereInput
-    /**
-     * Limit how many SchemaVersions to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * SchemaVersion updateManyAndReturn
-   */
-  export type SchemaVersionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the SchemaVersion
-     */
-    select?: SchemaVersionSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the SchemaVersion
-     */
-    omit?: SchemaVersionOmit<ExtArgs> | null
-    /**
-     * The data used to update SchemaVersions.
-     */
-    data: XOR<SchemaVersionUpdateManyMutationInput, SchemaVersionUncheckedUpdateManyInput>
-    /**
-     * Filter which SchemaVersions to update
-     */
-    where?: SchemaVersionWhereInput
-    /**
-     * Limit how many SchemaVersions to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * SchemaVersion upsert
-   */
-  export type SchemaVersionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the SchemaVersion
-     */
-    select?: SchemaVersionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the SchemaVersion
-     */
-    omit?: SchemaVersionOmit<ExtArgs> | null
-    /**
-     * The filter to search for the SchemaVersion to update in case it exists.
-     */
-    where: SchemaVersionWhereUniqueInput
-    /**
-     * In case the SchemaVersion found by the `where` argument doesn't exist, create a new SchemaVersion with this data.
-     */
-    create: XOR<SchemaVersionCreateInput, SchemaVersionUncheckedCreateInput>
-    /**
-     * In case the SchemaVersion was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<SchemaVersionUpdateInput, SchemaVersionUncheckedUpdateInput>
-  }
-
-  /**
-   * SchemaVersion delete
-   */
-  export type SchemaVersionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the SchemaVersion
-     */
-    select?: SchemaVersionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the SchemaVersion
-     */
-    omit?: SchemaVersionOmit<ExtArgs> | null
-    /**
-     * Filter which SchemaVersion to delete.
-     */
-    where: SchemaVersionWhereUniqueInput
-  }
-
-  /**
-   * SchemaVersion deleteMany
-   */
-  export type SchemaVersionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which SchemaVersions to delete
-     */
-    where?: SchemaVersionWhereInput
-    /**
-     * Limit how many SchemaVersions to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * SchemaVersion without action
-   */
-  export type SchemaVersionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the SchemaVersion
-     */
-    select?: SchemaVersionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the SchemaVersion
-     */
-    omit?: SchemaVersionOmit<ExtArgs> | null
-  }
-
-
-  /**
    * Enums
    */
 
@@ -18417,33 +13734,6 @@ export namespace Prisma {
   export type CompletionReportScalarFieldEnum = (typeof CompletionReportScalarFieldEnum)[keyof typeof CompletionReportScalarFieldEnum]
 
 
-  export const MemoryBankScalarFieldEnum: {
-    id: 'id',
-    fileType: 'fileType',
-    section: 'section',
-    content: 'content',
-    lineStart: 'lineStart',
-    lineEnd: 'lineEnd',
-    lastUpdated: 'lastUpdated'
-  };
-
-  export type MemoryBankScalarFieldEnum = (typeof MemoryBankScalarFieldEnum)[keyof typeof MemoryBankScalarFieldEnum]
-
-
-  export const CommitScalarFieldEnum: {
-    id: 'id',
-    taskId: 'taskId',
-    subtaskId: 'subtaskId',
-    hash: 'hash',
-    message: 'message',
-    filesChanged: 'filesChanged',
-    commitTimestamp: 'commitTimestamp',
-    author: 'author'
-  };
-
-  export type CommitScalarFieldEnum = (typeof CommitScalarFieldEnum)[keyof typeof CommitScalarFieldEnum]
-
-
   export const CommentScalarFieldEnum: {
     id: 'id',
     taskId: 'taskId',
@@ -18466,26 +13756,6 @@ export namespace Prisma {
   };
 
   export type WorkflowTransitionScalarFieldEnum = (typeof WorkflowTransitionScalarFieldEnum)[keyof typeof WorkflowTransitionScalarFieldEnum]
-
-
-  export const TemplateScalarFieldEnum: {
-    id: 'id',
-    name: 'name',
-    content: 'content',
-    description: 'description',
-    lastUpdated: 'lastUpdated'
-  };
-
-  export type TemplateScalarFieldEnum = (typeof TemplateScalarFieldEnum)[keyof typeof TemplateScalarFieldEnum]
-
-
-  export const SchemaVersionScalarFieldEnum: {
-    id: 'id',
-    version: 'version',
-    lastUpdated: 'lastUpdated'
-  };
-
-  export type SchemaVersionScalarFieldEnum = (typeof SchemaVersionScalarFieldEnum)[keyof typeof SchemaVersionScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -18615,7 +13885,6 @@ export namespace Prisma {
     researchReports?: ResearchReportListRelationFilter
     codeReviews?: CodeReviewListRelationFilter
     completionReports?: CompletionReportListRelationFilter
-    commits?: CommitListRelationFilter
     comments?: CommentListRelationFilter
     workflowTransitions?: WorkflowTransitionListRelationFilter
   }
@@ -18639,7 +13908,6 @@ export namespace Prisma {
     researchReports?: ResearchReportOrderByRelationAggregateInput
     codeReviews?: CodeReviewOrderByRelationAggregateInput
     completionReports?: CompletionReportOrderByRelationAggregateInput
-    commits?: CommitOrderByRelationAggregateInput
     comments?: CommentOrderByRelationAggregateInput
     workflowTransitions?: WorkflowTransitionOrderByRelationAggregateInput
   }
@@ -18666,7 +13934,6 @@ export namespace Prisma {
     researchReports?: ResearchReportListRelationFilter
     codeReviews?: CodeReviewListRelationFilter
     completionReports?: CompletionReportListRelationFilter
-    commits?: CommitListRelationFilter
     comments?: CommentListRelationFilter
     workflowTransitions?: WorkflowTransitionListRelationFilter
   }, "taskId">
@@ -18872,7 +14139,6 @@ export namespace Prisma {
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     plan?: XOR<ImplementationPlanScalarRelationFilter, ImplementationPlanWhereInput>
     delegationRecords?: DelegationRecordListRelationFilter
-    commits?: CommitListRelationFilter
     comments?: CommentListRelationFilter
   }
 
@@ -18893,7 +14159,6 @@ export namespace Prisma {
     task?: TaskOrderByWithRelationInput
     plan?: ImplementationPlanOrderByWithRelationInput
     delegationRecords?: DelegationRecordOrderByRelationAggregateInput
-    commits?: CommitOrderByRelationAggregateInput
     comments?: CommentOrderByRelationAggregateInput
   }
 
@@ -18917,7 +14182,6 @@ export namespace Prisma {
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     plan?: XOR<ImplementationPlanScalarRelationFilter, ImplementationPlanWhereInput>
     delegationRecords?: DelegationRecordListRelationFilter
-    commits?: CommitListRelationFilter
     comments?: CommentListRelationFilter
   }, "id">
 
@@ -19277,145 +14541,6 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"CompletionReport"> | Date | string
   }
 
-  export type MemoryBankWhereInput = {
-    AND?: MemoryBankWhereInput | MemoryBankWhereInput[]
-    OR?: MemoryBankWhereInput[]
-    NOT?: MemoryBankWhereInput | MemoryBankWhereInput[]
-    id?: IntFilter<"MemoryBank"> | number
-    fileType?: StringFilter<"MemoryBank"> | string
-    section?: StringFilter<"MemoryBank"> | string
-    content?: StringFilter<"MemoryBank"> | string
-    lineStart?: IntNullableFilter<"MemoryBank"> | number | null
-    lineEnd?: IntNullableFilter<"MemoryBank"> | number | null
-    lastUpdated?: DateTimeFilter<"MemoryBank"> | Date | string
-  }
-
-  export type MemoryBankOrderByWithRelationInput = {
-    id?: SortOrder
-    fileType?: SortOrder
-    section?: SortOrder
-    content?: SortOrder
-    lineStart?: SortOrderInput | SortOrder
-    lineEnd?: SortOrderInput | SortOrder
-    lastUpdated?: SortOrder
-  }
-
-  export type MemoryBankWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    AND?: MemoryBankWhereInput | MemoryBankWhereInput[]
-    OR?: MemoryBankWhereInput[]
-    NOT?: MemoryBankWhereInput | MemoryBankWhereInput[]
-    fileType?: StringFilter<"MemoryBank"> | string
-    section?: StringFilter<"MemoryBank"> | string
-    content?: StringFilter<"MemoryBank"> | string
-    lineStart?: IntNullableFilter<"MemoryBank"> | number | null
-    lineEnd?: IntNullableFilter<"MemoryBank"> | number | null
-    lastUpdated?: DateTimeFilter<"MemoryBank"> | Date | string
-  }, "id">
-
-  export type MemoryBankOrderByWithAggregationInput = {
-    id?: SortOrder
-    fileType?: SortOrder
-    section?: SortOrder
-    content?: SortOrder
-    lineStart?: SortOrderInput | SortOrder
-    lineEnd?: SortOrderInput | SortOrder
-    lastUpdated?: SortOrder
-    _count?: MemoryBankCountOrderByAggregateInput
-    _avg?: MemoryBankAvgOrderByAggregateInput
-    _max?: MemoryBankMaxOrderByAggregateInput
-    _min?: MemoryBankMinOrderByAggregateInput
-    _sum?: MemoryBankSumOrderByAggregateInput
-  }
-
-  export type MemoryBankScalarWhereWithAggregatesInput = {
-    AND?: MemoryBankScalarWhereWithAggregatesInput | MemoryBankScalarWhereWithAggregatesInput[]
-    OR?: MemoryBankScalarWhereWithAggregatesInput[]
-    NOT?: MemoryBankScalarWhereWithAggregatesInput | MemoryBankScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"MemoryBank"> | number
-    fileType?: StringWithAggregatesFilter<"MemoryBank"> | string
-    section?: StringWithAggregatesFilter<"MemoryBank"> | string
-    content?: StringWithAggregatesFilter<"MemoryBank"> | string
-    lineStart?: IntNullableWithAggregatesFilter<"MemoryBank"> | number | null
-    lineEnd?: IntNullableWithAggregatesFilter<"MemoryBank"> | number | null
-    lastUpdated?: DateTimeWithAggregatesFilter<"MemoryBank"> | Date | string
-  }
-
-  export type CommitWhereInput = {
-    AND?: CommitWhereInput | CommitWhereInput[]
-    OR?: CommitWhereInput[]
-    NOT?: CommitWhereInput | CommitWhereInput[]
-    id?: IntFilter<"Commit"> | number
-    taskId?: StringFilter<"Commit"> | string
-    subtaskId?: IntNullableFilter<"Commit"> | number | null
-    hash?: StringFilter<"Commit"> | string
-    message?: StringFilter<"Commit"> | string
-    filesChanged?: JsonFilter<"Commit">
-    commitTimestamp?: DateTimeFilter<"Commit"> | Date | string
-    author?: StringFilter<"Commit"> | string
-    task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
-    subtask?: XOR<SubtaskNullableScalarRelationFilter, SubtaskWhereInput> | null
-  }
-
-  export type CommitOrderByWithRelationInput = {
-    id?: SortOrder
-    taskId?: SortOrder
-    subtaskId?: SortOrderInput | SortOrder
-    hash?: SortOrder
-    message?: SortOrder
-    filesChanged?: SortOrder
-    commitTimestamp?: SortOrder
-    author?: SortOrder
-    task?: TaskOrderByWithRelationInput
-    subtask?: SubtaskOrderByWithRelationInput
-  }
-
-  export type CommitWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    hash?: string
-    AND?: CommitWhereInput | CommitWhereInput[]
-    OR?: CommitWhereInput[]
-    NOT?: CommitWhereInput | CommitWhereInput[]
-    taskId?: StringFilter<"Commit"> | string
-    subtaskId?: IntNullableFilter<"Commit"> | number | null
-    message?: StringFilter<"Commit"> | string
-    filesChanged?: JsonFilter<"Commit">
-    commitTimestamp?: DateTimeFilter<"Commit"> | Date | string
-    author?: StringFilter<"Commit"> | string
-    task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
-    subtask?: XOR<SubtaskNullableScalarRelationFilter, SubtaskWhereInput> | null
-  }, "id" | "hash">
-
-  export type CommitOrderByWithAggregationInput = {
-    id?: SortOrder
-    taskId?: SortOrder
-    subtaskId?: SortOrderInput | SortOrder
-    hash?: SortOrder
-    message?: SortOrder
-    filesChanged?: SortOrder
-    commitTimestamp?: SortOrder
-    author?: SortOrder
-    _count?: CommitCountOrderByAggregateInput
-    _avg?: CommitAvgOrderByAggregateInput
-    _max?: CommitMaxOrderByAggregateInput
-    _min?: CommitMinOrderByAggregateInput
-    _sum?: CommitSumOrderByAggregateInput
-  }
-
-  export type CommitScalarWhereWithAggregatesInput = {
-    AND?: CommitScalarWhereWithAggregatesInput | CommitScalarWhereWithAggregatesInput[]
-    OR?: CommitScalarWhereWithAggregatesInput[]
-    NOT?: CommitScalarWhereWithAggregatesInput | CommitScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"Commit"> | number
-    taskId?: StringWithAggregatesFilter<"Commit"> | string
-    subtaskId?: IntNullableWithAggregatesFilter<"Commit"> | number | null
-    hash?: StringWithAggregatesFilter<"Commit"> | string
-    message?: StringWithAggregatesFilter<"Commit"> | string
-    filesChanged?: JsonWithAggregatesFilter<"Commit">
-    commitTimestamp?: DateTimeWithAggregatesFilter<"Commit"> | Date | string
-    author?: StringWithAggregatesFilter<"Commit"> | string
-  }
-
   export type CommentWhereInput = {
     AND?: CommentWhereInput | CommentWhereInput[]
     OR?: CommentWhereInput[]
@@ -19543,104 +14668,6 @@ export namespace Prisma {
     reason?: StringNullableWithAggregatesFilter<"WorkflowTransition"> | string | null
   }
 
-  export type TemplateWhereInput = {
-    AND?: TemplateWhereInput | TemplateWhereInput[]
-    OR?: TemplateWhereInput[]
-    NOT?: TemplateWhereInput | TemplateWhereInput[]
-    id?: IntFilter<"Template"> | number
-    name?: StringFilter<"Template"> | string
-    content?: StringFilter<"Template"> | string
-    description?: StringFilter<"Template"> | string
-    lastUpdated?: DateTimeFilter<"Template"> | Date | string
-  }
-
-  export type TemplateOrderByWithRelationInput = {
-    id?: SortOrder
-    name?: SortOrder
-    content?: SortOrder
-    description?: SortOrder
-    lastUpdated?: SortOrder
-  }
-
-  export type TemplateWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    name?: string
-    AND?: TemplateWhereInput | TemplateWhereInput[]
-    OR?: TemplateWhereInput[]
-    NOT?: TemplateWhereInput | TemplateWhereInput[]
-    content?: StringFilter<"Template"> | string
-    description?: StringFilter<"Template"> | string
-    lastUpdated?: DateTimeFilter<"Template"> | Date | string
-  }, "id" | "name">
-
-  export type TemplateOrderByWithAggregationInput = {
-    id?: SortOrder
-    name?: SortOrder
-    content?: SortOrder
-    description?: SortOrder
-    lastUpdated?: SortOrder
-    _count?: TemplateCountOrderByAggregateInput
-    _avg?: TemplateAvgOrderByAggregateInput
-    _max?: TemplateMaxOrderByAggregateInput
-    _min?: TemplateMinOrderByAggregateInput
-    _sum?: TemplateSumOrderByAggregateInput
-  }
-
-  export type TemplateScalarWhereWithAggregatesInput = {
-    AND?: TemplateScalarWhereWithAggregatesInput | TemplateScalarWhereWithAggregatesInput[]
-    OR?: TemplateScalarWhereWithAggregatesInput[]
-    NOT?: TemplateScalarWhereWithAggregatesInput | TemplateScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"Template"> | number
-    name?: StringWithAggregatesFilter<"Template"> | string
-    content?: StringWithAggregatesFilter<"Template"> | string
-    description?: StringWithAggregatesFilter<"Template"> | string
-    lastUpdated?: DateTimeWithAggregatesFilter<"Template"> | Date | string
-  }
-
-  export type SchemaVersionWhereInput = {
-    AND?: SchemaVersionWhereInput | SchemaVersionWhereInput[]
-    OR?: SchemaVersionWhereInput[]
-    NOT?: SchemaVersionWhereInput | SchemaVersionWhereInput[]
-    id?: IntFilter<"SchemaVersion"> | number
-    version?: StringFilter<"SchemaVersion"> | string
-    lastUpdated?: DateTimeFilter<"SchemaVersion"> | Date | string
-  }
-
-  export type SchemaVersionOrderByWithRelationInput = {
-    id?: SortOrder
-    version?: SortOrder
-    lastUpdated?: SortOrder
-  }
-
-  export type SchemaVersionWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    AND?: SchemaVersionWhereInput | SchemaVersionWhereInput[]
-    OR?: SchemaVersionWhereInput[]
-    NOT?: SchemaVersionWhereInput | SchemaVersionWhereInput[]
-    version?: StringFilter<"SchemaVersion"> | string
-    lastUpdated?: DateTimeFilter<"SchemaVersion"> | Date | string
-  }, "id">
-
-  export type SchemaVersionOrderByWithAggregationInput = {
-    id?: SortOrder
-    version?: SortOrder
-    lastUpdated?: SortOrder
-    _count?: SchemaVersionCountOrderByAggregateInput
-    _avg?: SchemaVersionAvgOrderByAggregateInput
-    _max?: SchemaVersionMaxOrderByAggregateInput
-    _min?: SchemaVersionMinOrderByAggregateInput
-    _sum?: SchemaVersionSumOrderByAggregateInput
-  }
-
-  export type SchemaVersionScalarWhereWithAggregatesInput = {
-    AND?: SchemaVersionScalarWhereWithAggregatesInput | SchemaVersionScalarWhereWithAggregatesInput[]
-    OR?: SchemaVersionScalarWhereWithAggregatesInput[]
-    NOT?: SchemaVersionScalarWhereWithAggregatesInput | SchemaVersionScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"SchemaVersion"> | number
-    version?: StringWithAggregatesFilter<"SchemaVersion"> | string
-    lastUpdated?: DateTimeWithAggregatesFilter<"SchemaVersion"> | Date | string
-  }
-
   export type TaskCreateInput = {
     taskId: string
     name: string
@@ -19660,7 +14687,6 @@ export namespace Prisma {
     researchReports?: ResearchReportCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
-    commits?: CommitCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
   }
@@ -19684,7 +14710,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
   }
@@ -19708,7 +14733,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
-    commits?: CommitUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
   }
@@ -19732,7 +14756,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
   }
@@ -19946,7 +14969,6 @@ export namespace Prisma {
     task: TaskCreateNestedOneWithoutSubtasksInput
     plan: ImplementationPlanCreateNestedOneWithoutSubtasksInput
     delegationRecords?: DelegationRecordCreateNestedManyWithoutSubtaskInput
-    commits?: CommitCreateNestedManyWithoutSubtaskInput
     comments?: CommentCreateNestedManyWithoutSubtaskInput
   }
 
@@ -19965,7 +14987,6 @@ export namespace Prisma {
     batchId?: string | null
     batchTitle?: string | null
     delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutSubtaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutSubtaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutSubtaskInput
   }
 
@@ -19983,7 +15004,6 @@ export namespace Prisma {
     task?: TaskUpdateOneRequiredWithoutSubtasksNestedInput
     plan?: ImplementationPlanUpdateOneRequiredWithoutSubtasksNestedInput
     delegationRecords?: DelegationRecordUpdateManyWithoutSubtaskNestedInput
-    commits?: CommitUpdateManyWithoutSubtaskNestedInput
     comments?: CommentUpdateManyWithoutSubtaskNestedInput
   }
 
@@ -20002,7 +15022,6 @@ export namespace Prisma {
     batchId?: NullableStringFieldUpdateOperationsInput | string | null
     batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutSubtaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutSubtaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutSubtaskNestedInput
   }
 
@@ -20377,145 +15396,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type MemoryBankCreateInput = {
-    fileType: string
-    section: string
-    content: string
-    lineStart?: number | null
-    lineEnd?: number | null
-    lastUpdated?: Date | string
-  }
-
-  export type MemoryBankUncheckedCreateInput = {
-    id?: number
-    fileType: string
-    section: string
-    content: string
-    lineStart?: number | null
-    lineEnd?: number | null
-    lastUpdated?: Date | string
-  }
-
-  export type MemoryBankUpdateInput = {
-    fileType?: StringFieldUpdateOperationsInput | string
-    section?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    lineStart?: NullableIntFieldUpdateOperationsInput | number | null
-    lineEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type MemoryBankUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    fileType?: StringFieldUpdateOperationsInput | string
-    section?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    lineStart?: NullableIntFieldUpdateOperationsInput | number | null
-    lineEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type MemoryBankCreateManyInput = {
-    id?: number
-    fileType: string
-    section: string
-    content: string
-    lineStart?: number | null
-    lineEnd?: number | null
-    lastUpdated?: Date | string
-  }
-
-  export type MemoryBankUpdateManyMutationInput = {
-    fileType?: StringFieldUpdateOperationsInput | string
-    section?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    lineStart?: NullableIntFieldUpdateOperationsInput | number | null
-    lineEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type MemoryBankUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    fileType?: StringFieldUpdateOperationsInput | string
-    section?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    lineStart?: NullableIntFieldUpdateOperationsInput | number | null
-    lineEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type CommitCreateInput = {
-    hash: string
-    message: string
-    filesChanged: JsonNullValueInput | InputJsonValue
-    commitTimestamp: Date | string
-    author: string
-    task: TaskCreateNestedOneWithoutCommitsInput
-    subtask?: SubtaskCreateNestedOneWithoutCommitsInput
-  }
-
-  export type CommitUncheckedCreateInput = {
-    id?: number
-    taskId: string
-    subtaskId?: number | null
-    hash: string
-    message: string
-    filesChanged: JsonNullValueInput | InputJsonValue
-    commitTimestamp: Date | string
-    author: string
-  }
-
-  export type CommitUpdateInput = {
-    hash?: StringFieldUpdateOperationsInput | string
-    message?: StringFieldUpdateOperationsInput | string
-    filesChanged?: JsonNullValueInput | InputJsonValue
-    commitTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    author?: StringFieldUpdateOperationsInput | string
-    task?: TaskUpdateOneRequiredWithoutCommitsNestedInput
-    subtask?: SubtaskUpdateOneWithoutCommitsNestedInput
-  }
-
-  export type CommitUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    taskId?: StringFieldUpdateOperationsInput | string
-    subtaskId?: NullableIntFieldUpdateOperationsInput | number | null
-    hash?: StringFieldUpdateOperationsInput | string
-    message?: StringFieldUpdateOperationsInput | string
-    filesChanged?: JsonNullValueInput | InputJsonValue
-    commitTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    author?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type CommitCreateManyInput = {
-    id?: number
-    taskId: string
-    subtaskId?: number | null
-    hash: string
-    message: string
-    filesChanged: JsonNullValueInput | InputJsonValue
-    commitTimestamp: Date | string
-    author: string
-  }
-
-  export type CommitUpdateManyMutationInput = {
-    hash?: StringFieldUpdateOperationsInput | string
-    message?: StringFieldUpdateOperationsInput | string
-    filesChanged?: JsonNullValueInput | InputJsonValue
-    commitTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    author?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type CommitUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    taskId?: StringFieldUpdateOperationsInput | string
-    subtaskId?: NullableIntFieldUpdateOperationsInput | number | null
-    hash?: StringFieldUpdateOperationsInput | string
-    message?: StringFieldUpdateOperationsInput | string
-    filesChanged?: JsonNullValueInput | InputJsonValue
-    commitTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    author?: StringFieldUpdateOperationsInput | string
-  }
-
   export type CommentCreateInput = {
     mode: string
     content: string
@@ -20631,101 +15511,6 @@ export namespace Prisma {
     toMode?: StringFieldUpdateOperationsInput | string
     transitionTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type TemplateCreateInput = {
-    name: string
-    content: string
-    description: string
-    lastUpdated?: Date | string
-  }
-
-  export type TemplateUncheckedCreateInput = {
-    id?: number
-    name: string
-    content: string
-    description: string
-    lastUpdated?: Date | string
-  }
-
-  export type TemplateUpdateInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
-    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type TemplateUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
-    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type TemplateCreateManyInput = {
-    id?: number
-    name: string
-    content: string
-    description: string
-    lastUpdated?: Date | string
-  }
-
-  export type TemplateUpdateManyMutationInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
-    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type TemplateUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
-    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type SchemaVersionCreateInput = {
-    id?: number
-    version: string
-    lastUpdated?: Date | string
-  }
-
-  export type SchemaVersionUncheckedCreateInput = {
-    id?: number
-    version: string
-    lastUpdated?: Date | string
-  }
-
-  export type SchemaVersionUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    version?: StringFieldUpdateOperationsInput | string
-    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type SchemaVersionUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    version?: StringFieldUpdateOperationsInput | string
-    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type SchemaVersionCreateManyInput = {
-    id?: number
-    version: string
-    lastUpdated?: Date | string
-  }
-
-  export type SchemaVersionUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    version?: StringFieldUpdateOperationsInput | string
-    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type SchemaVersionUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    version?: StringFieldUpdateOperationsInput | string
-    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -20848,12 +15633,6 @@ export namespace Prisma {
     none?: CompletionReportWhereInput
   }
 
-  export type CommitListRelationFilter = {
-    every?: CommitWhereInput
-    some?: CommitWhereInput
-    none?: CommitWhereInput
-  }
-
   export type CommentListRelationFilter = {
     every?: CommentWhereInput
     some?: CommentWhereInput
@@ -20892,10 +15671,6 @@ export namespace Prisma {
   }
 
   export type CompletionReportOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type CommitOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -21453,89 +16228,6 @@ export namespace Prisma {
     id?: SortOrder
   }
 
-  export type MemoryBankCountOrderByAggregateInput = {
-    id?: SortOrder
-    fileType?: SortOrder
-    section?: SortOrder
-    content?: SortOrder
-    lineStart?: SortOrder
-    lineEnd?: SortOrder
-    lastUpdated?: SortOrder
-  }
-
-  export type MemoryBankAvgOrderByAggregateInput = {
-    id?: SortOrder
-    lineStart?: SortOrder
-    lineEnd?: SortOrder
-  }
-
-  export type MemoryBankMaxOrderByAggregateInput = {
-    id?: SortOrder
-    fileType?: SortOrder
-    section?: SortOrder
-    content?: SortOrder
-    lineStart?: SortOrder
-    lineEnd?: SortOrder
-    lastUpdated?: SortOrder
-  }
-
-  export type MemoryBankMinOrderByAggregateInput = {
-    id?: SortOrder
-    fileType?: SortOrder
-    section?: SortOrder
-    content?: SortOrder
-    lineStart?: SortOrder
-    lineEnd?: SortOrder
-    lastUpdated?: SortOrder
-  }
-
-  export type MemoryBankSumOrderByAggregateInput = {
-    id?: SortOrder
-    lineStart?: SortOrder
-    lineEnd?: SortOrder
-  }
-
-  export type CommitCountOrderByAggregateInput = {
-    id?: SortOrder
-    taskId?: SortOrder
-    subtaskId?: SortOrder
-    hash?: SortOrder
-    message?: SortOrder
-    filesChanged?: SortOrder
-    commitTimestamp?: SortOrder
-    author?: SortOrder
-  }
-
-  export type CommitAvgOrderByAggregateInput = {
-    id?: SortOrder
-    subtaskId?: SortOrder
-  }
-
-  export type CommitMaxOrderByAggregateInput = {
-    id?: SortOrder
-    taskId?: SortOrder
-    subtaskId?: SortOrder
-    hash?: SortOrder
-    message?: SortOrder
-    commitTimestamp?: SortOrder
-    author?: SortOrder
-  }
-
-  export type CommitMinOrderByAggregateInput = {
-    id?: SortOrder
-    taskId?: SortOrder
-    subtaskId?: SortOrder
-    hash?: SortOrder
-    message?: SortOrder
-    commitTimestamp?: SortOrder
-    author?: SortOrder
-  }
-
-  export type CommitSumOrderByAggregateInput = {
-    id?: SortOrder
-    subtaskId?: SortOrder
-  }
-
   export type CommentCountOrderByAggregateInput = {
     id?: SortOrder
     taskId?: SortOrder
@@ -21608,64 +16300,6 @@ export namespace Prisma {
     id?: SortOrder
   }
 
-  export type TemplateCountOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    content?: SortOrder
-    description?: SortOrder
-    lastUpdated?: SortOrder
-  }
-
-  export type TemplateAvgOrderByAggregateInput = {
-    id?: SortOrder
-  }
-
-  export type TemplateMaxOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    content?: SortOrder
-    description?: SortOrder
-    lastUpdated?: SortOrder
-  }
-
-  export type TemplateMinOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    content?: SortOrder
-    description?: SortOrder
-    lastUpdated?: SortOrder
-  }
-
-  export type TemplateSumOrderByAggregateInput = {
-    id?: SortOrder
-  }
-
-  export type SchemaVersionCountOrderByAggregateInput = {
-    id?: SortOrder
-    version?: SortOrder
-    lastUpdated?: SortOrder
-  }
-
-  export type SchemaVersionAvgOrderByAggregateInput = {
-    id?: SortOrder
-  }
-
-  export type SchemaVersionMaxOrderByAggregateInput = {
-    id?: SortOrder
-    version?: SortOrder
-    lastUpdated?: SortOrder
-  }
-
-  export type SchemaVersionMinOrderByAggregateInput = {
-    id?: SortOrder
-    version?: SortOrder
-    lastUpdated?: SortOrder
-  }
-
-  export type SchemaVersionSumOrderByAggregateInput = {
-    id?: SortOrder
-  }
-
   export type TaskDescriptionCreateNestedOneWithoutTaskInput = {
     create?: XOR<TaskDescriptionCreateWithoutTaskInput, TaskDescriptionUncheckedCreateWithoutTaskInput>
     connectOrCreate?: TaskDescriptionCreateOrConnectWithoutTaskInput
@@ -21712,13 +16346,6 @@ export namespace Prisma {
     connectOrCreate?: CompletionReportCreateOrConnectWithoutTaskInput | CompletionReportCreateOrConnectWithoutTaskInput[]
     createMany?: CompletionReportCreateManyTaskInputEnvelope
     connect?: CompletionReportWhereUniqueInput | CompletionReportWhereUniqueInput[]
-  }
-
-  export type CommitCreateNestedManyWithoutTaskInput = {
-    create?: XOR<CommitCreateWithoutTaskInput, CommitUncheckedCreateWithoutTaskInput> | CommitCreateWithoutTaskInput[] | CommitUncheckedCreateWithoutTaskInput[]
-    connectOrCreate?: CommitCreateOrConnectWithoutTaskInput | CommitCreateOrConnectWithoutTaskInput[]
-    createMany?: CommitCreateManyTaskInputEnvelope
-    connect?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
   }
 
   export type CommentCreateNestedManyWithoutTaskInput = {
@@ -21781,13 +16408,6 @@ export namespace Prisma {
     connectOrCreate?: CompletionReportCreateOrConnectWithoutTaskInput | CompletionReportCreateOrConnectWithoutTaskInput[]
     createMany?: CompletionReportCreateManyTaskInputEnvelope
     connect?: CompletionReportWhereUniqueInput | CompletionReportWhereUniqueInput[]
-  }
-
-  export type CommitUncheckedCreateNestedManyWithoutTaskInput = {
-    create?: XOR<CommitCreateWithoutTaskInput, CommitUncheckedCreateWithoutTaskInput> | CommitCreateWithoutTaskInput[] | CommitUncheckedCreateWithoutTaskInput[]
-    connectOrCreate?: CommitCreateOrConnectWithoutTaskInput | CommitCreateOrConnectWithoutTaskInput[]
-    createMany?: CommitCreateManyTaskInputEnvelope
-    connect?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
   }
 
   export type CommentUncheckedCreateNestedManyWithoutTaskInput = {
@@ -21922,20 +16542,6 @@ export namespace Prisma {
     deleteMany?: CompletionReportScalarWhereInput | CompletionReportScalarWhereInput[]
   }
 
-  export type CommitUpdateManyWithoutTaskNestedInput = {
-    create?: XOR<CommitCreateWithoutTaskInput, CommitUncheckedCreateWithoutTaskInput> | CommitCreateWithoutTaskInput[] | CommitUncheckedCreateWithoutTaskInput[]
-    connectOrCreate?: CommitCreateOrConnectWithoutTaskInput | CommitCreateOrConnectWithoutTaskInput[]
-    upsert?: CommitUpsertWithWhereUniqueWithoutTaskInput | CommitUpsertWithWhereUniqueWithoutTaskInput[]
-    createMany?: CommitCreateManyTaskInputEnvelope
-    set?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    disconnect?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    delete?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    connect?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    update?: CommitUpdateWithWhereUniqueWithoutTaskInput | CommitUpdateWithWhereUniqueWithoutTaskInput[]
-    updateMany?: CommitUpdateManyWithWhereWithoutTaskInput | CommitUpdateManyWithWhereWithoutTaskInput[]
-    deleteMany?: CommitScalarWhereInput | CommitScalarWhereInput[]
-  }
-
   export type CommentUpdateManyWithoutTaskNestedInput = {
     create?: XOR<CommentCreateWithoutTaskInput, CommentUncheckedCreateWithoutTaskInput> | CommentCreateWithoutTaskInput[] | CommentUncheckedCreateWithoutTaskInput[]
     connectOrCreate?: CommentCreateOrConnectWithoutTaskInput | CommentCreateOrConnectWithoutTaskInput[]
@@ -22058,20 +16664,6 @@ export namespace Prisma {
     deleteMany?: CompletionReportScalarWhereInput | CompletionReportScalarWhereInput[]
   }
 
-  export type CommitUncheckedUpdateManyWithoutTaskNestedInput = {
-    create?: XOR<CommitCreateWithoutTaskInput, CommitUncheckedCreateWithoutTaskInput> | CommitCreateWithoutTaskInput[] | CommitUncheckedCreateWithoutTaskInput[]
-    connectOrCreate?: CommitCreateOrConnectWithoutTaskInput | CommitCreateOrConnectWithoutTaskInput[]
-    upsert?: CommitUpsertWithWhereUniqueWithoutTaskInput | CommitUpsertWithWhereUniqueWithoutTaskInput[]
-    createMany?: CommitCreateManyTaskInputEnvelope
-    set?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    disconnect?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    delete?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    connect?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    update?: CommitUpdateWithWhereUniqueWithoutTaskInput | CommitUpdateWithWhereUniqueWithoutTaskInput[]
-    updateMany?: CommitUpdateManyWithWhereWithoutTaskInput | CommitUpdateManyWithWhereWithoutTaskInput[]
-    deleteMany?: CommitScalarWhereInput | CommitScalarWhereInput[]
-  }
-
   export type CommentUncheckedUpdateManyWithoutTaskNestedInput = {
     create?: XOR<CommentCreateWithoutTaskInput, CommentUncheckedCreateWithoutTaskInput> | CommentCreateWithoutTaskInput[] | CommentUncheckedCreateWithoutTaskInput[]
     connectOrCreate?: CommentCreateOrConnectWithoutTaskInput | CommentCreateOrConnectWithoutTaskInput[]
@@ -22189,13 +16781,6 @@ export namespace Prisma {
     connect?: DelegationRecordWhereUniqueInput | DelegationRecordWhereUniqueInput[]
   }
 
-  export type CommitCreateNestedManyWithoutSubtaskInput = {
-    create?: XOR<CommitCreateWithoutSubtaskInput, CommitUncheckedCreateWithoutSubtaskInput> | CommitCreateWithoutSubtaskInput[] | CommitUncheckedCreateWithoutSubtaskInput[]
-    connectOrCreate?: CommitCreateOrConnectWithoutSubtaskInput | CommitCreateOrConnectWithoutSubtaskInput[]
-    createMany?: CommitCreateManySubtaskInputEnvelope
-    connect?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-  }
-
   export type CommentCreateNestedManyWithoutSubtaskInput = {
     create?: XOR<CommentCreateWithoutSubtaskInput, CommentUncheckedCreateWithoutSubtaskInput> | CommentCreateWithoutSubtaskInput[] | CommentUncheckedCreateWithoutSubtaskInput[]
     connectOrCreate?: CommentCreateOrConnectWithoutSubtaskInput | CommentCreateOrConnectWithoutSubtaskInput[]
@@ -22208,13 +16793,6 @@ export namespace Prisma {
     connectOrCreate?: DelegationRecordCreateOrConnectWithoutSubtaskInput | DelegationRecordCreateOrConnectWithoutSubtaskInput[]
     createMany?: DelegationRecordCreateManySubtaskInputEnvelope
     connect?: DelegationRecordWhereUniqueInput | DelegationRecordWhereUniqueInput[]
-  }
-
-  export type CommitUncheckedCreateNestedManyWithoutSubtaskInput = {
-    create?: XOR<CommitCreateWithoutSubtaskInput, CommitUncheckedCreateWithoutSubtaskInput> | CommitCreateWithoutSubtaskInput[] | CommitUncheckedCreateWithoutSubtaskInput[]
-    connectOrCreate?: CommitCreateOrConnectWithoutSubtaskInput | CommitCreateOrConnectWithoutSubtaskInput[]
-    createMany?: CommitCreateManySubtaskInputEnvelope
-    connect?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
   }
 
   export type CommentUncheckedCreateNestedManyWithoutSubtaskInput = {
@@ -22254,20 +16832,6 @@ export namespace Prisma {
     deleteMany?: DelegationRecordScalarWhereInput | DelegationRecordScalarWhereInput[]
   }
 
-  export type CommitUpdateManyWithoutSubtaskNestedInput = {
-    create?: XOR<CommitCreateWithoutSubtaskInput, CommitUncheckedCreateWithoutSubtaskInput> | CommitCreateWithoutSubtaskInput[] | CommitUncheckedCreateWithoutSubtaskInput[]
-    connectOrCreate?: CommitCreateOrConnectWithoutSubtaskInput | CommitCreateOrConnectWithoutSubtaskInput[]
-    upsert?: CommitUpsertWithWhereUniqueWithoutSubtaskInput | CommitUpsertWithWhereUniqueWithoutSubtaskInput[]
-    createMany?: CommitCreateManySubtaskInputEnvelope
-    set?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    disconnect?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    delete?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    connect?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    update?: CommitUpdateWithWhereUniqueWithoutSubtaskInput | CommitUpdateWithWhereUniqueWithoutSubtaskInput[]
-    updateMany?: CommitUpdateManyWithWhereWithoutSubtaskInput | CommitUpdateManyWithWhereWithoutSubtaskInput[]
-    deleteMany?: CommitScalarWhereInput | CommitScalarWhereInput[]
-  }
-
   export type CommentUpdateManyWithoutSubtaskNestedInput = {
     create?: XOR<CommentCreateWithoutSubtaskInput, CommentUncheckedCreateWithoutSubtaskInput> | CommentCreateWithoutSubtaskInput[] | CommentUncheckedCreateWithoutSubtaskInput[]
     connectOrCreate?: CommentCreateOrConnectWithoutSubtaskInput | CommentCreateOrConnectWithoutSubtaskInput[]
@@ -22294,20 +16858,6 @@ export namespace Prisma {
     update?: DelegationRecordUpdateWithWhereUniqueWithoutSubtaskInput | DelegationRecordUpdateWithWhereUniqueWithoutSubtaskInput[]
     updateMany?: DelegationRecordUpdateManyWithWhereWithoutSubtaskInput | DelegationRecordUpdateManyWithWhereWithoutSubtaskInput[]
     deleteMany?: DelegationRecordScalarWhereInput | DelegationRecordScalarWhereInput[]
-  }
-
-  export type CommitUncheckedUpdateManyWithoutSubtaskNestedInput = {
-    create?: XOR<CommitCreateWithoutSubtaskInput, CommitUncheckedCreateWithoutSubtaskInput> | CommitCreateWithoutSubtaskInput[] | CommitUncheckedCreateWithoutSubtaskInput[]
-    connectOrCreate?: CommitCreateOrConnectWithoutSubtaskInput | CommitCreateOrConnectWithoutSubtaskInput[]
-    upsert?: CommitUpsertWithWhereUniqueWithoutSubtaskInput | CommitUpsertWithWhereUniqueWithoutSubtaskInput[]
-    createMany?: CommitCreateManySubtaskInputEnvelope
-    set?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    disconnect?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    delete?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    connect?: CommitWhereUniqueInput | CommitWhereUniqueInput[]
-    update?: CommitUpdateWithWhereUniqueWithoutSubtaskInput | CommitUpdateWithWhereUniqueWithoutSubtaskInput[]
-    updateMany?: CommitUpdateManyWithWhereWithoutSubtaskInput | CommitUpdateManyWithWhereWithoutSubtaskInput[]
-    deleteMany?: CommitScalarWhereInput | CommitScalarWhereInput[]
   }
 
   export type CommentUncheckedUpdateManyWithoutSubtaskNestedInput = {
@@ -22406,36 +16956,6 @@ export namespace Prisma {
     upsert?: TaskUpsertWithoutCompletionReportsInput
     connect?: TaskWhereUniqueInput
     update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutCompletionReportsInput, TaskUpdateWithoutCompletionReportsInput>, TaskUncheckedUpdateWithoutCompletionReportsInput>
-  }
-
-  export type TaskCreateNestedOneWithoutCommitsInput = {
-    create?: XOR<TaskCreateWithoutCommitsInput, TaskUncheckedCreateWithoutCommitsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutCommitsInput
-    connect?: TaskWhereUniqueInput
-  }
-
-  export type SubtaskCreateNestedOneWithoutCommitsInput = {
-    create?: XOR<SubtaskCreateWithoutCommitsInput, SubtaskUncheckedCreateWithoutCommitsInput>
-    connectOrCreate?: SubtaskCreateOrConnectWithoutCommitsInput
-    connect?: SubtaskWhereUniqueInput
-  }
-
-  export type TaskUpdateOneRequiredWithoutCommitsNestedInput = {
-    create?: XOR<TaskCreateWithoutCommitsInput, TaskUncheckedCreateWithoutCommitsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutCommitsInput
-    upsert?: TaskUpsertWithoutCommitsInput
-    connect?: TaskWhereUniqueInput
-    update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutCommitsInput, TaskUpdateWithoutCommitsInput>, TaskUncheckedUpdateWithoutCommitsInput>
-  }
-
-  export type SubtaskUpdateOneWithoutCommitsNestedInput = {
-    create?: XOR<SubtaskCreateWithoutCommitsInput, SubtaskUncheckedCreateWithoutCommitsInput>
-    connectOrCreate?: SubtaskCreateOrConnectWithoutCommitsInput
-    upsert?: SubtaskUpsertWithoutCommitsInput
-    disconnect?: SubtaskWhereInput | boolean
-    delete?: SubtaskWhereInput | boolean
-    connect?: SubtaskWhereUniqueInput
-    update?: XOR<XOR<SubtaskUpdateToOneWithWhereWithoutCommitsInput, SubtaskUpdateWithoutCommitsInput>, SubtaskUncheckedUpdateWithoutCommitsInput>
   }
 
   export type TaskCreateNestedOneWithoutCommentsInput = {
@@ -22787,7 +17307,6 @@ export namespace Prisma {
     batchTitle?: string | null
     plan: ImplementationPlanCreateNestedOneWithoutSubtasksInput
     delegationRecords?: DelegationRecordCreateNestedManyWithoutSubtaskInput
-    commits?: CommitCreateNestedManyWithoutSubtaskInput
     comments?: CommentCreateNestedManyWithoutSubtaskInput
   }
 
@@ -22805,7 +17324,6 @@ export namespace Prisma {
     batchId?: string | null
     batchTitle?: string | null
     delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutSubtaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutSubtaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutSubtaskInput
   }
 
@@ -22938,34 +17456,6 @@ export namespace Prisma {
 
   export type CompletionReportCreateManyTaskInputEnvelope = {
     data: CompletionReportCreateManyTaskInput | CompletionReportCreateManyTaskInput[]
-  }
-
-  export type CommitCreateWithoutTaskInput = {
-    hash: string
-    message: string
-    filesChanged: JsonNullValueInput | InputJsonValue
-    commitTimestamp: Date | string
-    author: string
-    subtask?: SubtaskCreateNestedOneWithoutCommitsInput
-  }
-
-  export type CommitUncheckedCreateWithoutTaskInput = {
-    id?: number
-    subtaskId?: number | null
-    hash: string
-    message: string
-    filesChanged: JsonNullValueInput | InputJsonValue
-    commitTimestamp: Date | string
-    author: string
-  }
-
-  export type CommitCreateOrConnectWithoutTaskInput = {
-    where: CommitWhereUniqueInput
-    create: XOR<CommitCreateWithoutTaskInput, CommitUncheckedCreateWithoutTaskInput>
-  }
-
-  export type CommitCreateManyTaskInputEnvelope = {
-    data: CommitCreateManyTaskInput | CommitCreateManyTaskInput[]
   }
 
   export type CommentCreateWithoutTaskInput = {
@@ -23236,36 +17726,6 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"CompletionReport"> | Date | string
   }
 
-  export type CommitUpsertWithWhereUniqueWithoutTaskInput = {
-    where: CommitWhereUniqueInput
-    update: XOR<CommitUpdateWithoutTaskInput, CommitUncheckedUpdateWithoutTaskInput>
-    create: XOR<CommitCreateWithoutTaskInput, CommitUncheckedCreateWithoutTaskInput>
-  }
-
-  export type CommitUpdateWithWhereUniqueWithoutTaskInput = {
-    where: CommitWhereUniqueInput
-    data: XOR<CommitUpdateWithoutTaskInput, CommitUncheckedUpdateWithoutTaskInput>
-  }
-
-  export type CommitUpdateManyWithWhereWithoutTaskInput = {
-    where: CommitScalarWhereInput
-    data: XOR<CommitUpdateManyMutationInput, CommitUncheckedUpdateManyWithoutTaskInput>
-  }
-
-  export type CommitScalarWhereInput = {
-    AND?: CommitScalarWhereInput | CommitScalarWhereInput[]
-    OR?: CommitScalarWhereInput[]
-    NOT?: CommitScalarWhereInput | CommitScalarWhereInput[]
-    id?: IntFilter<"Commit"> | number
-    taskId?: StringFilter<"Commit"> | string
-    subtaskId?: IntNullableFilter<"Commit"> | number | null
-    hash?: StringFilter<"Commit"> | string
-    message?: StringFilter<"Commit"> | string
-    filesChanged?: JsonFilter<"Commit">
-    commitTimestamp?: DateTimeFilter<"Commit"> | Date | string
-    author?: StringFilter<"Commit"> | string
-  }
-
   export type CommentUpsertWithWhereUniqueWithoutTaskInput = {
     where: CommentWhereUniqueInput
     update: XOR<CommentUpdateWithoutTaskInput, CommentUncheckedUpdateWithoutTaskInput>
@@ -23340,7 +17800,6 @@ export namespace Prisma {
     researchReports?: ResearchReportCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
-    commits?: CommitCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
   }
@@ -23363,7 +17822,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
   }
@@ -23402,7 +17860,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
-    commits?: CommitUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
   }
@@ -23425,7 +17882,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
   }
@@ -23448,7 +17904,6 @@ export namespace Prisma {
     researchReports?: ResearchReportCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
-    commits?: CommitCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
   }
@@ -23471,7 +17926,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
   }
@@ -23494,7 +17948,6 @@ export namespace Prisma {
     batchTitle?: string | null
     task: TaskCreateNestedOneWithoutSubtasksInput
     delegationRecords?: DelegationRecordCreateNestedManyWithoutSubtaskInput
-    commits?: CommitCreateNestedManyWithoutSubtaskInput
     comments?: CommentCreateNestedManyWithoutSubtaskInput
   }
 
@@ -23512,7 +17965,6 @@ export namespace Prisma {
     batchId?: string | null
     batchTitle?: string | null
     delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutSubtaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutSubtaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutSubtaskInput
   }
 
@@ -23554,7 +18006,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
-    commits?: CommitUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
   }
@@ -23577,7 +18028,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
   }
@@ -23616,7 +18066,6 @@ export namespace Prisma {
     researchReports?: ResearchReportCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
-    commits?: CommitCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
   }
@@ -23639,7 +18088,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
   }
@@ -23709,34 +18157,6 @@ export namespace Prisma {
     data: DelegationRecordCreateManySubtaskInput | DelegationRecordCreateManySubtaskInput[]
   }
 
-  export type CommitCreateWithoutSubtaskInput = {
-    hash: string
-    message: string
-    filesChanged: JsonNullValueInput | InputJsonValue
-    commitTimestamp: Date | string
-    author: string
-    task: TaskCreateNestedOneWithoutCommitsInput
-  }
-
-  export type CommitUncheckedCreateWithoutSubtaskInput = {
-    id?: number
-    taskId: string
-    hash: string
-    message: string
-    filesChanged: JsonNullValueInput | InputJsonValue
-    commitTimestamp: Date | string
-    author: string
-  }
-
-  export type CommitCreateOrConnectWithoutSubtaskInput = {
-    where: CommitWhereUniqueInput
-    create: XOR<CommitCreateWithoutSubtaskInput, CommitUncheckedCreateWithoutSubtaskInput>
-  }
-
-  export type CommitCreateManySubtaskInputEnvelope = {
-    data: CommitCreateManySubtaskInput | CommitCreateManySubtaskInput[]
-  }
-
   export type CommentCreateWithoutSubtaskInput = {
     mode: string
     content: string
@@ -23790,7 +18210,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
-    commits?: CommitUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
   }
@@ -23813,7 +18232,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
   }
@@ -23868,22 +18286,6 @@ export namespace Prisma {
     data: XOR<DelegationRecordUpdateManyMutationInput, DelegationRecordUncheckedUpdateManyWithoutSubtaskInput>
   }
 
-  export type CommitUpsertWithWhereUniqueWithoutSubtaskInput = {
-    where: CommitWhereUniqueInput
-    update: XOR<CommitUpdateWithoutSubtaskInput, CommitUncheckedUpdateWithoutSubtaskInput>
-    create: XOR<CommitCreateWithoutSubtaskInput, CommitUncheckedCreateWithoutSubtaskInput>
-  }
-
-  export type CommitUpdateWithWhereUniqueWithoutSubtaskInput = {
-    where: CommitWhereUniqueInput
-    data: XOR<CommitUpdateWithoutSubtaskInput, CommitUncheckedUpdateWithoutSubtaskInput>
-  }
-
-  export type CommitUpdateManyWithWhereWithoutSubtaskInput = {
-    where: CommitScalarWhereInput
-    data: XOR<CommitUpdateManyMutationInput, CommitUncheckedUpdateManyWithoutSubtaskInput>
-  }
-
   export type CommentUpsertWithWhereUniqueWithoutSubtaskInput = {
     where: CommentWhereUniqueInput
     update: XOR<CommentUpdateWithoutSubtaskInput, CommentUncheckedUpdateWithoutSubtaskInput>
@@ -23918,7 +18320,6 @@ export namespace Prisma {
     researchReports?: ResearchReportCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
-    commits?: CommitCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
   }
@@ -23941,7 +18342,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
   }
@@ -23964,7 +18364,6 @@ export namespace Prisma {
     batchTitle?: string | null
     task: TaskCreateNestedOneWithoutSubtasksInput
     plan: ImplementationPlanCreateNestedOneWithoutSubtasksInput
-    commits?: CommitCreateNestedManyWithoutSubtaskInput
     comments?: CommentCreateNestedManyWithoutSubtaskInput
   }
 
@@ -23982,7 +18381,6 @@ export namespace Prisma {
     completedAt?: Date | string | null
     batchId?: string | null
     batchTitle?: string | null
-    commits?: CommitUncheckedCreateNestedManyWithoutSubtaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutSubtaskInput
   }
 
@@ -24020,7 +18418,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
-    commits?: CommitUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
   }
@@ -24043,7 +18440,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
   }
@@ -24072,7 +18468,6 @@ export namespace Prisma {
     batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     task?: TaskUpdateOneRequiredWithoutSubtasksNestedInput
     plan?: ImplementationPlanUpdateOneRequiredWithoutSubtasksNestedInput
-    commits?: CommitUpdateManyWithoutSubtaskNestedInput
     comments?: CommentUpdateManyWithoutSubtaskNestedInput
   }
 
@@ -24090,7 +18485,6 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     batchId?: NullableStringFieldUpdateOperationsInput | string | null
     batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    commits?: CommitUncheckedUpdateManyWithoutSubtaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutSubtaskNestedInput
   }
 
@@ -24112,7 +18506,6 @@ export namespace Prisma {
     delegationRecords?: DelegationRecordCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
-    commits?: CommitCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
   }
@@ -24135,7 +18528,6 @@ export namespace Prisma {
     delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
   }
@@ -24174,7 +18566,6 @@ export namespace Prisma {
     delegationRecords?: DelegationRecordUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
-    commits?: CommitUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
   }
@@ -24197,7 +18588,6 @@ export namespace Prisma {
     delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
   }
@@ -24220,7 +18610,6 @@ export namespace Prisma {
     delegationRecords?: DelegationRecordCreateNestedManyWithoutTaskInput
     researchReports?: ResearchReportCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
-    commits?: CommitCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
   }
@@ -24243,7 +18632,6 @@ export namespace Prisma {
     delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutTaskInput
     researchReports?: ResearchReportUncheckedCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
   }
@@ -24282,7 +18670,6 @@ export namespace Prisma {
     delegationRecords?: DelegationRecordUpdateManyWithoutTaskNestedInput
     researchReports?: ResearchReportUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
-    commits?: CommitUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
   }
@@ -24305,7 +18692,6 @@ export namespace Prisma {
     delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutTaskNestedInput
     researchReports?: ResearchReportUncheckedUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
   }
@@ -24328,7 +18714,6 @@ export namespace Prisma {
     delegationRecords?: DelegationRecordCreateNestedManyWithoutTaskInput
     researchReports?: ResearchReportCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
-    commits?: CommitCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
   }
@@ -24351,7 +18736,6 @@ export namespace Prisma {
     delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutTaskInput
     researchReports?: ResearchReportUncheckedCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
   }
@@ -24390,7 +18774,6 @@ export namespace Prisma {
     delegationRecords?: DelegationRecordUpdateManyWithoutTaskNestedInput
     researchReports?: ResearchReportUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
-    commits?: CommitUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
   }
@@ -24413,203 +18796,8 @@ export namespace Prisma {
     delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutTaskNestedInput
     researchReports?: ResearchReportUncheckedUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
-  }
-
-  export type TaskCreateWithoutCommitsInput = {
-    taskId: string
-    name: string
-    status: string
-    creationDate?: Date | string
-    completionDate?: Date | string | null
-    owner?: string | null
-    currentMode?: string | null
-    priority?: string | null
-    dependencies?: NullableJsonNullValueInput | InputJsonValue
-    redelegationCount?: number
-    gitBranch?: string | null
-    taskDescription?: TaskDescriptionCreateNestedOneWithoutTaskInput
-    implementationPlans?: ImplementationPlanCreateNestedManyWithoutTaskInput
-    subtasks?: SubtaskCreateNestedManyWithoutTaskInput
-    delegationRecords?: DelegationRecordCreateNestedManyWithoutTaskInput
-    researchReports?: ResearchReportCreateNestedManyWithoutTaskInput
-    codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
-    completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
-    comments?: CommentCreateNestedManyWithoutTaskInput
-    workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
-  }
-
-  export type TaskUncheckedCreateWithoutCommitsInput = {
-    taskId: string
-    name: string
-    status: string
-    creationDate?: Date | string
-    completionDate?: Date | string | null
-    owner?: string | null
-    currentMode?: string | null
-    priority?: string | null
-    dependencies?: NullableJsonNullValueInput | InputJsonValue
-    redelegationCount?: number
-    gitBranch?: string | null
-    taskDescription?: TaskDescriptionUncheckedCreateNestedOneWithoutTaskInput
-    implementationPlans?: ImplementationPlanUncheckedCreateNestedManyWithoutTaskInput
-    subtasks?: SubtaskUncheckedCreateNestedManyWithoutTaskInput
-    delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutTaskInput
-    researchReports?: ResearchReportUncheckedCreateNestedManyWithoutTaskInput
-    codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
-    completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
-    comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
-    workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
-  }
-
-  export type TaskCreateOrConnectWithoutCommitsInput = {
-    where: TaskWhereUniqueInput
-    create: XOR<TaskCreateWithoutCommitsInput, TaskUncheckedCreateWithoutCommitsInput>
-  }
-
-  export type SubtaskCreateWithoutCommitsInput = {
-    name: string
-    description: string
-    sequenceNumber: number
-    status: string
-    assignedTo?: string | null
-    estimatedDuration?: string | null
-    startedAt?: Date | string | null
-    completedAt?: Date | string | null
-    batchId?: string | null
-    batchTitle?: string | null
-    task: TaskCreateNestedOneWithoutSubtasksInput
-    plan: ImplementationPlanCreateNestedOneWithoutSubtasksInput
-    delegationRecords?: DelegationRecordCreateNestedManyWithoutSubtaskInput
-    comments?: CommentCreateNestedManyWithoutSubtaskInput
-  }
-
-  export type SubtaskUncheckedCreateWithoutCommitsInput = {
-    id?: number
-    taskId: string
-    planId: number
-    name: string
-    description: string
-    sequenceNumber: number
-    status: string
-    assignedTo?: string | null
-    estimatedDuration?: string | null
-    startedAt?: Date | string | null
-    completedAt?: Date | string | null
-    batchId?: string | null
-    batchTitle?: string | null
-    delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutSubtaskInput
-    comments?: CommentUncheckedCreateNestedManyWithoutSubtaskInput
-  }
-
-  export type SubtaskCreateOrConnectWithoutCommitsInput = {
-    where: SubtaskWhereUniqueInput
-    create: XOR<SubtaskCreateWithoutCommitsInput, SubtaskUncheckedCreateWithoutCommitsInput>
-  }
-
-  export type TaskUpsertWithoutCommitsInput = {
-    update: XOR<TaskUpdateWithoutCommitsInput, TaskUncheckedUpdateWithoutCommitsInput>
-    create: XOR<TaskCreateWithoutCommitsInput, TaskUncheckedCreateWithoutCommitsInput>
-    where?: TaskWhereInput
-  }
-
-  export type TaskUpdateToOneWithWhereWithoutCommitsInput = {
-    where?: TaskWhereInput
-    data: XOR<TaskUpdateWithoutCommitsInput, TaskUncheckedUpdateWithoutCommitsInput>
-  }
-
-  export type TaskUpdateWithoutCommitsInput = {
-    taskId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    creationDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    completionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    owner?: NullableStringFieldUpdateOperationsInput | string | null
-    currentMode?: NullableStringFieldUpdateOperationsInput | string | null
-    priority?: NullableStringFieldUpdateOperationsInput | string | null
-    dependencies?: NullableJsonNullValueInput | InputJsonValue
-    redelegationCount?: IntFieldUpdateOperationsInput | number
-    gitBranch?: NullableStringFieldUpdateOperationsInput | string | null
-    taskDescription?: TaskDescriptionUpdateOneWithoutTaskNestedInput
-    implementationPlans?: ImplementationPlanUpdateManyWithoutTaskNestedInput
-    subtasks?: SubtaskUpdateManyWithoutTaskNestedInput
-    delegationRecords?: DelegationRecordUpdateManyWithoutTaskNestedInput
-    researchReports?: ResearchReportUpdateManyWithoutTaskNestedInput
-    codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
-    completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
-    comments?: CommentUpdateManyWithoutTaskNestedInput
-    workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
-  }
-
-  export type TaskUncheckedUpdateWithoutCommitsInput = {
-    taskId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    creationDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    completionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    owner?: NullableStringFieldUpdateOperationsInput | string | null
-    currentMode?: NullableStringFieldUpdateOperationsInput | string | null
-    priority?: NullableStringFieldUpdateOperationsInput | string | null
-    dependencies?: NullableJsonNullValueInput | InputJsonValue
-    redelegationCount?: IntFieldUpdateOperationsInput | number
-    gitBranch?: NullableStringFieldUpdateOperationsInput | string | null
-    taskDescription?: TaskDescriptionUncheckedUpdateOneWithoutTaskNestedInput
-    implementationPlans?: ImplementationPlanUncheckedUpdateManyWithoutTaskNestedInput
-    subtasks?: SubtaskUncheckedUpdateManyWithoutTaskNestedInput
-    delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutTaskNestedInput
-    researchReports?: ResearchReportUncheckedUpdateManyWithoutTaskNestedInput
-    codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
-    completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
-    comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
-    workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
-  }
-
-  export type SubtaskUpsertWithoutCommitsInput = {
-    update: XOR<SubtaskUpdateWithoutCommitsInput, SubtaskUncheckedUpdateWithoutCommitsInput>
-    create: XOR<SubtaskCreateWithoutCommitsInput, SubtaskUncheckedCreateWithoutCommitsInput>
-    where?: SubtaskWhereInput
-  }
-
-  export type SubtaskUpdateToOneWithWhereWithoutCommitsInput = {
-    where?: SubtaskWhereInput
-    data: XOR<SubtaskUpdateWithoutCommitsInput, SubtaskUncheckedUpdateWithoutCommitsInput>
-  }
-
-  export type SubtaskUpdateWithoutCommitsInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
-    sequenceNumber?: IntFieldUpdateOperationsInput | number
-    status?: StringFieldUpdateOperationsInput | string
-    assignedTo?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
-    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    batchId?: NullableStringFieldUpdateOperationsInput | string | null
-    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    task?: TaskUpdateOneRequiredWithoutSubtasksNestedInput
-    plan?: ImplementationPlanUpdateOneRequiredWithoutSubtasksNestedInput
-    delegationRecords?: DelegationRecordUpdateManyWithoutSubtaskNestedInput
-    comments?: CommentUpdateManyWithoutSubtaskNestedInput
-  }
-
-  export type SubtaskUncheckedUpdateWithoutCommitsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    taskId?: StringFieldUpdateOperationsInput | string
-    planId?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
-    sequenceNumber?: IntFieldUpdateOperationsInput | number
-    status?: StringFieldUpdateOperationsInput | string
-    assignedTo?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedDuration?: NullableStringFieldUpdateOperationsInput | string | null
-    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    batchId?: NullableStringFieldUpdateOperationsInput | string | null
-    batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutSubtaskNestedInput
-    comments?: CommentUncheckedUpdateManyWithoutSubtaskNestedInput
   }
 
   export type TaskCreateWithoutCommentsInput = {
@@ -24631,7 +18819,6 @@ export namespace Prisma {
     researchReports?: ResearchReportCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
-    commits?: CommitCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
   }
 
@@ -24654,7 +18841,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
   }
 
@@ -24677,7 +18863,6 @@ export namespace Prisma {
     task: TaskCreateNestedOneWithoutSubtasksInput
     plan: ImplementationPlanCreateNestedOneWithoutSubtasksInput
     delegationRecords?: DelegationRecordCreateNestedManyWithoutSubtaskInput
-    commits?: CommitCreateNestedManyWithoutSubtaskInput
   }
 
   export type SubtaskUncheckedCreateWithoutCommentsInput = {
@@ -24695,7 +18880,6 @@ export namespace Prisma {
     batchId?: string | null
     batchTitle?: string | null
     delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutSubtaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutSubtaskInput
   }
 
   export type SubtaskCreateOrConnectWithoutCommentsInput = {
@@ -24733,7 +18917,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
-    commits?: CommitUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
   }
 
@@ -24756,7 +18939,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
   }
 
@@ -24785,7 +18967,6 @@ export namespace Prisma {
     task?: TaskUpdateOneRequiredWithoutSubtasksNestedInput
     plan?: ImplementationPlanUpdateOneRequiredWithoutSubtasksNestedInput
     delegationRecords?: DelegationRecordUpdateManyWithoutSubtaskNestedInput
-    commits?: CommitUpdateManyWithoutSubtaskNestedInput
   }
 
   export type SubtaskUncheckedUpdateWithoutCommentsInput = {
@@ -24803,7 +18984,6 @@ export namespace Prisma {
     batchId?: NullableStringFieldUpdateOperationsInput | string | null
     batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutSubtaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutSubtaskNestedInput
   }
 
   export type TaskCreateWithoutWorkflowTransitionsInput = {
@@ -24825,7 +19005,6 @@ export namespace Prisma {
     researchReports?: ResearchReportCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
-    commits?: CommitCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
   }
 
@@ -24848,7 +19027,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedCreateNestedManyWithoutTaskInput
     codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
-    commits?: CommitUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
   }
 
@@ -24887,7 +19065,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
-    commits?: CommitUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
   }
 
@@ -24910,7 +19087,6 @@ export namespace Prisma {
     researchReports?: ResearchReportUncheckedUpdateManyWithoutTaskNestedInput
     codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
   }
 
@@ -24985,16 +19161,6 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
-  export type CommitCreateManyTaskInput = {
-    id?: number
-    subtaskId?: number | null
-    hash: string
-    message: string
-    filesChanged: JsonNullValueInput | InputJsonValue
-    commitTimestamp: Date | string
-    author: string
-  }
-
   export type CommentCreateManyTaskInput = {
     id?: number
     subtaskId?: number | null
@@ -25058,7 +19224,6 @@ export namespace Prisma {
     batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     plan?: ImplementationPlanUpdateOneRequiredWithoutSubtasksNestedInput
     delegationRecords?: DelegationRecordUpdateManyWithoutSubtaskNestedInput
-    commits?: CommitUpdateManyWithoutSubtaskNestedInput
     comments?: CommentUpdateManyWithoutSubtaskNestedInput
   }
 
@@ -25076,7 +19241,6 @@ export namespace Prisma {
     batchId?: NullableStringFieldUpdateOperationsInput | string | null
     batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutSubtaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutSubtaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutSubtaskNestedInput
   }
 
@@ -25226,35 +19390,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type CommitUpdateWithoutTaskInput = {
-    hash?: StringFieldUpdateOperationsInput | string
-    message?: StringFieldUpdateOperationsInput | string
-    filesChanged?: JsonNullValueInput | InputJsonValue
-    commitTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    author?: StringFieldUpdateOperationsInput | string
-    subtask?: SubtaskUpdateOneWithoutCommitsNestedInput
-  }
-
-  export type CommitUncheckedUpdateWithoutTaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    subtaskId?: NullableIntFieldUpdateOperationsInput | number | null
-    hash?: StringFieldUpdateOperationsInput | string
-    message?: StringFieldUpdateOperationsInput | string
-    filesChanged?: JsonNullValueInput | InputJsonValue
-    commitTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    author?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type CommitUncheckedUpdateManyWithoutTaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    subtaskId?: NullableIntFieldUpdateOperationsInput | number | null
-    hash?: StringFieldUpdateOperationsInput | string
-    message?: StringFieldUpdateOperationsInput | string
-    filesChanged?: JsonNullValueInput | InputJsonValue
-    commitTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    author?: StringFieldUpdateOperationsInput | string
-  }
-
   export type CommentUpdateWithoutTaskInput = {
     mode?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
@@ -25329,7 +19464,6 @@ export namespace Prisma {
     batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     task?: TaskUpdateOneRequiredWithoutSubtasksNestedInput
     delegationRecords?: DelegationRecordUpdateManyWithoutSubtaskNestedInput
-    commits?: CommitUpdateManyWithoutSubtaskNestedInput
     comments?: CommentUpdateManyWithoutSubtaskNestedInput
   }
 
@@ -25347,7 +19481,6 @@ export namespace Prisma {
     batchId?: NullableStringFieldUpdateOperationsInput | string | null
     batchTitle?: NullableStringFieldUpdateOperationsInput | string | null
     delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutSubtaskNestedInput
-    commits?: CommitUncheckedUpdateManyWithoutSubtaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutSubtaskNestedInput
   }
 
@@ -25376,16 +19509,6 @@ export namespace Prisma {
     success?: boolean | null
     rejectionReason?: string | null
     redelegationCount?: number
-  }
-
-  export type CommitCreateManySubtaskInput = {
-    id?: number
-    taskId: string
-    hash: string
-    message: string
-    filesChanged: JsonNullValueInput | InputJsonValue
-    commitTimestamp: Date | string
-    author: string
   }
 
   export type CommentCreateManySubtaskInput = {
@@ -25429,35 +19552,6 @@ export namespace Prisma {
     success?: NullableBoolFieldUpdateOperationsInput | boolean | null
     rejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
     redelegationCount?: IntFieldUpdateOperationsInput | number
-  }
-
-  export type CommitUpdateWithoutSubtaskInput = {
-    hash?: StringFieldUpdateOperationsInput | string
-    message?: StringFieldUpdateOperationsInput | string
-    filesChanged?: JsonNullValueInput | InputJsonValue
-    commitTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    author?: StringFieldUpdateOperationsInput | string
-    task?: TaskUpdateOneRequiredWithoutCommitsNestedInput
-  }
-
-  export type CommitUncheckedUpdateWithoutSubtaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    taskId?: StringFieldUpdateOperationsInput | string
-    hash?: StringFieldUpdateOperationsInput | string
-    message?: StringFieldUpdateOperationsInput | string
-    filesChanged?: JsonNullValueInput | InputJsonValue
-    commitTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    author?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type CommitUncheckedUpdateManyWithoutSubtaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    taskId?: StringFieldUpdateOperationsInput | string
-    hash?: StringFieldUpdateOperationsInput | string
-    message?: StringFieldUpdateOperationsInput | string
-    filesChanged?: JsonNullValueInput | InputJsonValue
-    commitTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    author?: StringFieldUpdateOperationsInput | string
   }
 
   export type CommentUpdateWithoutSubtaskInput = {

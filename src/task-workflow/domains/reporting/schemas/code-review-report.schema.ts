@@ -47,6 +47,7 @@ export type CodeReviewReport = z.infer<typeof CodeReviewReportSchema>;
 // ✅ FIXED: Update schema using database ID structure
 export const UpdateCodeReviewReportInputSchema = z
   .object({
+    reportId: z.number().int().describe('Database ID of the report to update'),
     status: CodeReviewStatusSchema.optional(),
     summary: z.string().min(1).optional(),
     strengths: z.string().optional(),
@@ -55,9 +56,17 @@ export const UpdateCodeReviewReportInputSchema = z
     manualTestingResults: z.string().optional(),
     requiredChanges: z.string().optional(),
   })
-  .refine((data) => Object.keys(data).length > 0, {
-    message: 'At least one field to update must be provided.',
-  });
+  .refine(
+    (data) => {
+      // Ensure reportId is always provided and at least one update field exists
+      const { reportId, ...updateFields } = data;
+      return reportId && Object.keys(updateFields).length > 0;
+    },
+    {
+      message:
+        'reportId is required and at least one field to update must be provided.',
+    },
+  );
 
 export type UpdateCodeReviewReportInput = z.infer<
   typeof UpdateCodeReviewReportInputSchema

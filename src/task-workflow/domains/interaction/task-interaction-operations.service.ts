@@ -1,22 +1,16 @@
 import {
-  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
-import { ProcessCommandService } from './process-command.service';
 import { AddTaskNoteSchema } from './schemas/add-task-note.schema';
-import { ProcessCommandSchema } from './schemas/process-command.schema';
 import { TaskCommentService } from './task-comment.service';
 
 @Injectable()
 export class TaskInteractionOperationsService {
-  constructor(
-    private readonly taskCommentService: TaskCommentService,
-    private readonly processCommandService: ProcessCommandService,
-  ) {}
+  constructor(private readonly taskCommentService: TaskCommentService) {}
 
   // Tools will be migrated here
   @Tool({
@@ -49,36 +43,6 @@ export class TaskInteractionOperationsService {
       );
       throw new InternalServerErrorException(
         `TaskInteractionOperationsService: Could not add note to task '${params.taskId}'.`,
-      );
-    }
-  }
-
-  @Tool({
-    name: 'process_command',
-    description: 'Processes slash commands for workflow management.',
-    parameters: ProcessCommandSchema,
-  })
-  async processCommand(
-    params: z.infer<typeof ProcessCommandSchema>,
-  ): Promise<any> {
-    // This service method directly returns the result from the business service,
-    // assuming it is already in the correct MCP response format or doesn't need one.
-    try {
-      return await this.processCommandService.processCommand(params);
-    } catch (error) {
-      if (
-        error instanceof BadRequestException ||
-        error instanceof NotFoundException ||
-        error instanceof InternalServerErrorException
-      ) {
-        throw error;
-      }
-      console.error(
-        `TaskInteractionOperationsService Error in processCommand for command '${params.command_string}':`,
-        error,
-      );
-      throw new InternalServerErrorException(
-        `TaskInteractionOperationsService: Could not process command '${params.command_string}'. Error: ${(error as Error).message}`,
       );
     }
   }

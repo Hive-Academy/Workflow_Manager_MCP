@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest'; // Assuming @Tool decorator is available
 import { CodeReview, CompletionReport, ResearchReport } from 'generated/prisma';
 
@@ -7,7 +7,6 @@ import { CodeReviewReportService } from './code-review-report.service';
 import { CompletionReportService } from './completion-report.service';
 import { ResearchReportService } from './research-report.service';
 import {
-  CodeReviewReport,
   CreateCodeReviewReportInput,
   CreateCodeReviewReportInputSchema,
   UpdateCodeReviewReportInput,
@@ -18,15 +17,12 @@ import {
 import {
   CreateCompletionReportInput,
   CreateCompletionReportInputSchema,
-  UpdateCompletionReportInputSchema,
 } from './schemas/completion-report.schema';
 import {
   CreateResearchReportInput,
   CreateResearchReportInputSchema,
   GetResearchReportInput,
   GetResearchReportInputSchema,
-  UpdateResearchReportInput,
-  UpdateResearchReportInputSchema,
 } from './schemas/research-report.schema';
 
 // FIXED: Use the corrected schemas from the schema file
@@ -35,17 +31,55 @@ import {
 // Define complex input schemas for CompletionReport tools
 const GetCompletionReportInputSchema = z
   .object({
-    reportId: z.string().uuid().optional(),
+    reportId: z
+      .string()
+      .describe('String representation of report ID')
+      .optional(),
     taskId: z.string().optional(),
   })
   .refine((data) => data.reportId || data.taskId, {
     message: 'Either reportId or taskId must be provided',
   });
 
-const UpdateCompletionReportToolInputSchema =
-  UpdateCompletionReportInputSchema.extend({
-    reportId: z.string().uuid(),
-  });
+const UpdateCompletionReportToolInputSchema = z
+  .object({
+    reportId: z.string().describe('String representation of report ID'),
+    summary: z.string().min(1).optional(),
+    filesModified: z.any().optional(),
+    delegationSummary: z.string().min(1).optional(),
+    acceptanceCriteriaVerification: z.any().optional(),
+  })
+  .refine(
+    (data) => {
+      const { reportId, ...updateFields } = data;
+      return reportId && Object.keys(updateFields).length > 0;
+    },
+    {
+      message:
+        'reportId is required and at least one field to update must be provided.',
+    },
+  );
+
+// ✅ FIXED: Enhanced research report update schema with reportId
+const UpdateResearchReportToolInputSchema = z
+  .object({
+    reportId: z.number().int().describe('Database ID of the report to update'),
+    title: z.string().min(1).optional(),
+    summary: z.string().min(1).optional(),
+    findings: z.string().min(1).optional(),
+    recommendations: z.string().optional(),
+    references: z.any().optional(),
+  })
+  .refine(
+    (data) => {
+      const { reportId, ...updateFields } = data;
+      return reportId && Object.keys(updateFields).length > 0;
+    },
+    {
+      message:
+        'reportId is required and at least one field to update must be provided.',
+    },
+  );
 
 // FIXED: No longer needed - schema is now aligned with database
 // Return Prisma model directly as it matches the corrected schema
@@ -84,7 +118,7 @@ export class ReportOperationsService {
 
     if (input.reportId) {
       reportData = await this.researchReportService.getResearchReportById(
-        input.reportId,
+        input.reportId.toString(),
       );
       if (!reportData) {
         return {
@@ -159,8 +193,8 @@ export class ReportOperationsService {
     return {
       content: [
         {
-          type: 'json',
-          json: reportData,
+          type: 'text',
+          text: JSON.stringify(reportData, null, 2),
         },
       ],
     };
@@ -169,19 +203,18 @@ export class ReportOperationsService {
   @Tool({
     name: 'update_research_report',
     description: 'Updates an existing research report.',
-    parameters:
-      UpdateResearchReportInputSchema as ZodSchema<UpdateResearchReportInput>,
+    parameters: UpdateResearchReportToolInputSchema as ZodSchema<
+      z.infer<typeof UpdateResearchReportToolInputSchema>
+    >,
   })
   async updateResearchReport(
-    input: UpdateResearchReportInput,
+    input: z.infer<typeof UpdateResearchReportToolInputSchema>,
   ): Promise<ResearchReport> {
-    const { reportId } = input;
-    if (typeof reportId !== 'string') {
-      throw new Error(
-        'reportId must be a string and included in the input for updateResearchReport',
-      );
-    }
-    return this.researchReportService.updateResearchReport(reportId, input);
+    const { reportId, ...updateData } = input;
+    return this.researchReportService.updateResearchReport(
+      reportId.toString(),
+      updateData,
+    );
   }
 
   // --- CodeReviewReport Tools ---
@@ -207,18 +240,68 @@ export class ReportOperationsService {
       GetCodeReviewReportInputSchema as ZodSchema<GetCodeReviewReportInput>,
   })
   async getCodeReviewReport(input: GetCodeReviewReportInput): Promise<any> {
-    // FIXED: Use the updated service method that handles input properly
-    const result =
-      await this.codeReviewReportService.getCodeReviewReport(input);
+    const contextIdentifier = 'code-review-report';
+    let reportData: CodeReview | CodeReview[] | null = null;
 
-    return {
-      content: [
-        {
-          type: 'json',
-          json: result,
-        },
-      ],
-    };
+    try {
+      const result =
+        await this.codeReviewReportService.getCodeReviewReport(input);
+      reportData = result;
+
+      // Handle empty array case for taskId queries
+      if (Array.isArray(reportData) && reportData.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier}s found for taskId ${input.taskId}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true,
+                contextHash: null,
+                contextType: contextIdentifier,
+                taskId: input.taskId,
+              }),
+            },
+          ],
+        };
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(reportData, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        const identifier = input.reportId || input.taskId;
+        const identifierType = input.reportId ? 'reportId' : 'taskId';
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No ${contextIdentifier} found for ${identifierType} ${identifier}.`,
+            },
+            {
+              type: 'text',
+              text: JSON.stringify({
+                notFound: true,
+                contextHash: null,
+                contextType: contextIdentifier,
+                [identifierType]: identifier,
+              }),
+            },
+          ],
+        };
+      }
+      throw error;
+    }
   }
 
   @Tool({
@@ -334,8 +417,8 @@ export class ReportOperationsService {
     return {
       content: [
         {
-          type: 'json',
-          json: reportData,
+          type: 'text',
+          text: JSON.stringify(reportData, null, 2),
         },
       ],
     };

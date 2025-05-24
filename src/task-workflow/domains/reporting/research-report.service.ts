@@ -35,7 +35,7 @@ export class ResearchReportService {
         title: data.title,
         summary: data.summary,
         findings: data.findings,
-        recommendations: data.recommendations as string,
+        recommendations: data.recommendations,
         references: data.references
           ? (data.references as Prisma.InputJsonValue)
           : Prisma.JsonNull,
@@ -108,7 +108,7 @@ export class ResearchReportService {
     data: UpdateResearchReportInput,
   ): Promise<ResearchReport> {
     const reportId = this.parseReportId(reportIdString);
-    const { reportId: _, ...updateData } = data;
+    const updateData = data;
 
     if (Object.keys(updateData).length === 0) {
       throw new BadRequestException('No data provided for update.');

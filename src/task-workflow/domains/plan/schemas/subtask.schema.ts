@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import {
-  StatusCodeSchema,
-  RoleCodeSchema,
+  TaskStatusSchema,
+  WorkflowRoleSchema,
 } from 'src/task-workflow/types/token-refs.schema';
 
 // ✅ FIXED: Core subtask schema aligned with database structure
@@ -53,10 +53,10 @@ export const CreateSubtaskInputSchema = z.object({
     .string()
     .describe('A detailed description of what the subtask entails'),
   sequenceNumber: z.number().int().describe('Sequence number for ordering'),
-  status: StatusCodeSchema.default('NS').describe(
+  status: TaskStatusSchema.default('not-started').describe(
     'Current status of the subtask',
   ),
-  assignedTo: RoleCodeSchema.optional().describe(
+  assignedTo: WorkflowRoleSchema.optional().describe(
     'The role assigned to this subtask',
   ),
   estimatedDuration: z
@@ -81,8 +81,8 @@ export const UpdateSubtaskInputSchema = z
     name: z.string().optional(),
     description: z.string().optional(),
     sequenceNumber: z.number().int().optional(),
-    status: StatusCodeSchema.optional(),
-    assignedTo: RoleCodeSchema.optional(),
+    status: TaskStatusSchema.optional(),
+    assignedTo: WorkflowRoleSchema.optional(),
     estimatedDuration: z.string().optional(),
     startedAt: z.date().optional(),
     completedAt: z.date().optional(),

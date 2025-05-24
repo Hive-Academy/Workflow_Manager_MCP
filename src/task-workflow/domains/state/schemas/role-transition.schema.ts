@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { RoleCodeSchema } from 'src/task-workflow/types/token-refs.schema';
+import { WorkflowRoleSchema } from 'src/task-workflow/types/token-refs.schema';
 
 // ✅ FIXED: Role transition schema aligned with WorkflowTransition model
 export const RoleTransitionSchema = z.object({
   taskId: z.string().describe('The ID of the task being transitioned'),
-  fromRole: RoleCodeSchema.describe('The role transitioning from'),
-  toRole: RoleCodeSchema.describe('The role transitioning to'),
+  fromRole: WorkflowRoleSchema.describe('The role transitioning from'),
+  toRole: WorkflowRoleSchema.describe('The role transitioning to'),
   summary: z
     .string()
     .optional()

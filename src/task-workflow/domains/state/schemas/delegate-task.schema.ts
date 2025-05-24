@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { RoleCodeSchema } from 'src/task-workflow/types/token-refs.schema';
+import { WorkflowRoleSchema } from 'src/task-workflow/types/token-refs.schema';
 
 // ✅ FIXED: Input schema for delegating tasks (maps to DelegationRecord model)
 export const DelegateTaskSchema = z.object({
   taskId: z.string().describe('The ID of the task to delegate'),
-  fromMode: RoleCodeSchema.describe('The mode delegating the task'),
-  toMode: RoleCodeSchema.describe('The mode receiving the delegation'),
+  fromMode: WorkflowRoleSchema.describe('The mode delegating the task'),
+  toMode: WorkflowRoleSchema.describe('The mode receiving the delegation'),
   message: z.string().min(1).describe('Delegation message or context'),
   subtaskId: z
     .number()

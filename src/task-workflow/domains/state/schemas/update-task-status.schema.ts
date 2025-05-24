@@ -1,22 +1,16 @@
 import { z } from 'zod';
 import {
-  TOKEN_MAPS,
-  StatusCodeSchema,
-  RoleCodeSchema,
+  TaskStatusSchema,
+  WorkflowRoleSchema,
 } from 'src/task-workflow/types/token-refs.schema';
 
 // ✅ ENHANCED: Update task status schema with proper preprocessing
 export const UpdateTaskStatusSchema = z.object({
   taskId: z.string().describe('The ID of the task to update'),
-  status: z
-    .union([StatusCodeSchema, z.string()])
-    .describe('The new status for the task (shorthand or full name)'),
-  currentMode: z
-    .union([RoleCodeSchema, z.string()])
-    .optional()
-    .describe(
-      'The new current mode/owner of the task (shorthand or full name)',
-    ),
+  status: TaskStatusSchema.describe('The new status for the task'),
+  currentMode: WorkflowRoleSchema.optional().describe(
+    'The new current mode/owner of the task',
+  ),
   notes: z
     .string()
     .optional()

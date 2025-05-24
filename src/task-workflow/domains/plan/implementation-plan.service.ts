@@ -1,115 +1,69 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 
 import { Prisma, Subtask as PrismaSubtaskType } from 'generated/prisma';
-import {
-  ImplementationPlanStorage,
-  ImplementationPlanResponse,
-  ImplementationPlanDatabaseSchema,
-} from './schemas/implementation-plan.schema';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ImplementationPlanInput } from './schemas/implementation-plan.schema';
-import {
-  AddSubtaskToBatchParams,
-  SubtaskInputLegacy,
-} from './schemas/add-subtask-to-batch.schema';
-import {
-  SubtaskResponse,
-  SubtaskLegacy,
-  SubtaskInput,
-} from './schemas/subtask.schema';
-import { UpdateSubtaskStatusParams } from './schemas/update-subtask-status.schema';
+
+import { AddSubtaskToBatchParams } from './schemas/add-subtask-to-batch.schema';
 import { CheckBatchStatusParams } from './schemas/check-batch-status.schema';
-import { TOKEN_MAPS } from 'src/task-workflow/types/token-refs.schema';
+import {
+  CreateImplementationPlanInput,
+  ImplementationPlanResponse,
+} from './schemas/implementation-plan.schema';
+import { CreateSubtaskInput, Subtask } from './schemas/subtask.schema';
+import { UpdateSubtaskStatusParams } from './schemas/update-subtask-status.schema';
 
 @Injectable()
 export class ImplementationPlanService {
   constructor(private readonly prisma: PrismaService) {}
 
   // Helper method to convert database subtask to API response format
-  private mapDbSubtaskToResponse(
-    dbSubtask: PrismaSubtaskType,
-    originalInput?: SubtaskInput,
-    logicalIdCounter?: number,
-  ): SubtaskResponse {
-    // Generate logical ID if not provided
-    const logicalId =
-      originalInput?.id ||
-      `ST-${String(logicalIdCounter || dbSubtask.sequenceNumber).padStart(3, '0')}`;
-
-    // Convert status from DB format to schema format
-    const statusCode =
-      Object.entries(TOKEN_MAPS.status).find(
-        ([code, fullName]) => fullName === dbSubtask.status,
-      )?.[0] || dbSubtask.status;
-
-    // Convert assignedTo from DB format to schema format
-    const roleCode =
-      Object.entries(TOKEN_MAPS.role).find(
-        ([code, fullName]) => fullName === dbSubtask.assignedTo,
-      )?.[0] || dbSubtask.assignedTo;
+  private mapDbSubtaskToResponse(dbSubtask: PrismaSubtaskType): Subtask {
+    // Database stores full names, return as-is
+    const statusCode = dbSubtask.status;
+    const roleCode = dbSubtask.assignedTo;
 
     return {
-      id: logicalId,
-      databaseId: dbSubtask.id, // Use correct field name from Prisma
-      title: dbSubtask.name,
+      id: dbSubtask.id,
+      taskId: dbSubtask.taskId,
+      planId: dbSubtask.planId,
+      name: dbSubtask.name,
       description: dbSubtask.description,
-      status: statusCode as any,
-      assignedTo: roleCode as any,
-      dependencies: originalInput?.dependencies || [],
-      acceptanceCriteria: originalInput?.acceptanceCriteria || [],
-      estimatedHours: dbSubtask.estimatedDuration
-        ? parseFloat(dbSubtask.estimatedDuration)
-        : originalInput?.estimatedHours,
-      actualHours: this.calculateActualHours(
-        dbSubtask.startedAt,
-        dbSubtask.completedAt,
-      ),
-      relatedDocs: originalInput?.relatedDocs || [],
-      notes: originalInput?.notes || [],
       sequenceNumber: dbSubtask.sequenceNumber,
-      _batchInfo:
-        dbSubtask.batchId && dbSubtask.batchTitle
-          ? {
-              id: dbSubtask.batchId,
-              title: dbSubtask.batchTitle,
-            }
-          : undefined,
-      startedAt: dbSubtask.startedAt || undefined, // Convert null to undefined
-      completedAt: dbSubtask.completedAt || undefined, // Convert null to undefined
+      status: statusCode,
+      assignedTo: roleCode || undefined,
+      estimatedDuration: dbSubtask.estimatedDuration || undefined,
+      startedAt: dbSubtask.startedAt || undefined,
+      completedAt: dbSubtask.completedAt || undefined,
+      batchId: dbSubtask.batchId || undefined,
+      batchTitle: dbSubtask.batchTitle || undefined,
     };
   }
 
   // Helper method to convert input to database format
   private mapInputToDbData(
-    input: SubtaskInput,
+    input: CreateSubtaskInput,
     batchId?: string,
     batchTitle?: string,
   ) {
-    // Convert status from schema format to DB format
-    const statusFull =
-      TOKEN_MAPS.status[input.status as keyof typeof TOKEN_MAPS.status] ||
-      input.status ||
-      'not-started';
+    // Use status directly since database is clean
+    const statusFull = input.status || 'not-started';
 
-    // Convert assignedTo from schema format to DB format
-    const assignedToFull = input.assignedTo
-      ? TOKEN_MAPS.role[input.assignedTo as keyof typeof TOKEN_MAPS.role] ||
-        input.assignedTo
-      : undefined;
+    // Use role directly since database is clean
+    const assignedToFull = input.assignedTo;
 
     return {
-      name: input.title,
+      name: input.name,
       description: input.description,
       status: statusFull,
-      sequenceNumber: input.sequenceNumber || 0, // Will be set properly in creation
+      sequenceNumber: input.sequenceNumber || 0,
       assignedTo: assignedToFull,
-      estimatedDuration: input.estimatedHours?.toString(),
-      batchId: batchId || input._batchInfo?.id,
-      batchTitle: batchTitle || input._batchInfo?.title,
+      estimatedDuration: input.estimatedDuration,
+      batchId: batchId || input.batchId,
+      batchTitle: batchTitle || input.batchTitle,
     };
   }
 
@@ -125,7 +79,7 @@ export class ImplementationPlanService {
 
   async createOrUpdatePlan(
     taskId: string,
-    planInput: ImplementationPlanInput,
+    planInput: CreateImplementationPlanInput,
   ): Promise<ImplementationPlanResponse> {
     const taskExists = await this.prisma.task.findUnique({ where: { taskId } });
     if (!taskExists) {
@@ -133,26 +87,43 @@ export class ImplementationPlanService {
     }
 
     const prismaSubtasksToCreate: Prisma.SubtaskCreateWithoutPlanInput[] = [];
-    const inputSubtaskMapping: Map<number, SubtaskInput> = new Map();
     let currentSequence = 0;
 
     // Process all batches and their subtasks
-    for (const batch of planInput.batches) {
-      for (const stInput of batch.subtasks) {
-        currentSequence++;
+    if (planInput.batches) {
+      for (const batch of planInput.batches) {
+        // Create subtasks for this batch
+        for (const subtaskInput of batch.subtasks) {
+          currentSequence++;
 
-        // Store the mapping for later reference
-        inputSubtaskMapping.set(currentSequence, stInput);
+          // Create a complete subtask input with batch information
+          const completeSubtaskInput: CreateSubtaskInput = {
+            taskId: taskId,
+            planId: 0, // Will be set when creating the plan
+            name: subtaskInput.name,
+            description: subtaskInput.description,
+            sequenceNumber: subtaskInput.sequenceNumber || currentSequence,
+            status: subtaskInput.status || 'not-started',
+            assignedTo: subtaskInput.assignedTo,
+            estimatedDuration: subtaskInput.estimatedDuration,
+            batchId: batch.id,
+            batchTitle: batch.title,
+          };
 
-        const dbData = this.mapInputToDbData(stInput, batch.id, batch.title);
+          const dbData = this.mapInputToDbData(
+            completeSubtaskInput,
+            batch.id,
+            batch.title,
+          );
 
-        const fullDbData: Prisma.SubtaskCreateWithoutPlanInput = {
-          ...dbData,
-          sequenceNumber: currentSequence,
-          task: { connect: { taskId: taskId } },
-        };
+          const fullDbData: Prisma.SubtaskCreateWithoutPlanInput = {
+            ...dbData,
+            sequenceNumber: currentSequence,
+            task: { connect: { taskId: taskId } },
+          };
 
-        prismaSubtasksToCreate.push(fullDbData);
+          prismaSubtasksToCreate.push(fullDbData);
+        }
       }
     }
 
@@ -172,33 +143,41 @@ export class ImplementationPlanService {
     });
 
     // Convert database result to API response format
-    const responseSubtasks: SubtaskResponse[] = createdPlanFromDb.subtasks.map(
-      (dbSubtask) => {
-        const originalInput = inputSubtaskMapping.get(dbSubtask.sequenceNumber);
-        return this.mapDbSubtaskToResponse(
-          dbSubtask,
-          originalInput,
-          dbSubtask.sequenceNumber,
-        );
-      },
+    const responseSubtasks: Subtask[] = createdPlanFromDb.subtasks.map(
+      (dbSubtask) => this.mapDbSubtaskToResponse(dbSubtask),
     );
+
+    // Calculate computed fields
+    const totalSubtasks = responseSubtasks.length;
+    const completedSubtasks = responseSubtasks.filter(
+      (s) => s.status === 'completed',
+    ).length;
+
+    // Group subtasks into batches for response
+    const batches = await this.getBatchesForTask(taskId);
 
     return {
       id: createdPlanFromDb.id,
       taskId: createdPlanFromDb.taskId,
-      title:
-        planInput.title ||
-        taskExists.name ||
-        `Implementation Plan for ${taskId}`,
       overview: createdPlanFromDb.overview,
       approach: createdPlanFromDb.approach,
       technicalDecisions: createdPlanFromDb.technicalDecisions,
       filesToModify: createdPlanFromDb.filesToModify as string[],
-      version: '1.0.0',
-      status: 'NS' as any,
+      status:
+        completedSubtasks === totalSubtasks && totalSubtasks > 0
+          ? 'completed'
+          : 'not-started',
       subtasks: responseSubtasks,
-      generalNotes: planInput.generalNotes,
-      linkedTd: planInput.linkedTd,
+      totalSubtasks,
+      completedSubtasks,
+      batches: batches.map((batch) => ({
+        id: batch.batchId,
+        title: batch.batchTitle,
+        subtaskCount: batch.totalSubtasks,
+        completedSubtasks: batch.completedSubtasks,
+        status: batch.isComplete ? 'completed' : 'in-progress',
+        subtasks: responseSubtasks.filter((s) => s.batchId === batch.batchId),
+      })),
       createdAt: createdPlanFromDb.createdAt,
       updatedAt: createdPlanFromDb.updatedAt,
       createdBy: createdPlanFromDb.createdBy,
@@ -215,38 +194,48 @@ export class ImplementationPlanService {
     if (!planFromDb) return null;
 
     // Convert all subtasks to response format
-    const responseSubtasks: SubtaskResponse[] = planFromDb.subtasks.map(
-      (dbSubtask) => {
-        return this.mapDbSubtaskToResponse(
-          dbSubtask,
-          undefined,
-          dbSubtask.sequenceNumber,
-        );
-      },
-    );
+    const responseSubtasks: Subtask[] = planFromDb.subtasks.map((dbSubtask) => {
+      return this.mapDbSubtaskToResponse(dbSubtask);
+    });
+
+    // Calculate computed fields
+    const totalSubtasks = responseSubtasks.length;
+    const completedSubtasks = responseSubtasks.filter(
+      (s) => s.status === 'completed',
+    ).length;
+
+    // Group subtasks into batches for response
+    const batches = await this.getBatchesForTask(taskId);
 
     return {
       id: planFromDb.id,
       taskId: planFromDb.taskId,
-      title: planFromDb.overview || `Plan for ${planFromDb.taskId}`,
       overview: planFromDb.overview,
       approach: planFromDb.approach,
       technicalDecisions: planFromDb.technicalDecisions,
       filesToModify: planFromDb.filesToModify as string[],
-      version: '1.0.0',
-      status: 'NS' as any,
+      status:
+        completedSubtasks === totalSubtasks && totalSubtasks > 0
+          ? 'completed'
+          : 'not-started',
       subtasks: responseSubtasks,
-      generalNotes: [],
-      linkedTd: undefined,
+      totalSubtasks,
+      completedSubtasks,
+      batches: batches.map((batch) => ({
+        id: batch.batchId,
+        title: batch.batchTitle,
+        subtaskCount: batch.totalSubtasks,
+        completedSubtasks: batch.completedSubtasks,
+        status: batch.isComplete ? 'completed' : 'in-progress',
+        subtasks: responseSubtasks.filter((s) => s.batchId === batch.batchId),
+      })),
       createdAt: planFromDb.createdAt,
       updatedAt: planFromDb.updatedAt,
       createdBy: planFromDb.createdBy,
     };
   }
 
-  async addSubtaskToBatch(
-    params: AddSubtaskToBatchParams,
-  ): Promise<SubtaskResponse> {
+  async addSubtaskToBatch(params: AddSubtaskToBatchParams): Promise<Subtask> {
     const { taskId, batchId, subtask: subtaskData } = params;
 
     const planFromDb = await this.prisma.implementationPlan.findFirst({
@@ -265,11 +254,21 @@ export class ImplementationPlanService {
     });
     const newSequenceNumber = currentSubtaskCount + 1;
 
-    const dbData = this.mapInputToDbData(
-      subtaskData,
-      batchId,
-      subtaskData._batchInfo?.title || batchId,
-    );
+    // Create the subtask data with required fields
+    const subtaskInput: CreateSubtaskInput = {
+      taskId: taskId,
+      planId: planFromDb.id,
+      name: subtaskData.name,
+      description: subtaskData.description,
+      sequenceNumber: newSequenceNumber,
+      status: subtaskData.status,
+      assignedTo: subtaskData.assignedTo,
+      estimatedDuration: subtaskData.estimatedDuration,
+      batchId: batchId,
+      batchTitle: batchId, // Use batchId as default title
+    };
+
+    const dbData = this.mapInputToDbData(subtaskInput, batchId, batchId);
 
     const createData: Prisma.SubtaskCreateInput = {
       ...dbData,
@@ -282,21 +281,36 @@ export class ImplementationPlanService {
       data: createData,
     });
 
-    return this.mapDbSubtaskToResponse(
-      createdDbSubtask,
-      subtaskData,
-      newSequenceNumber,
-    );
+    return this.mapDbSubtaskToResponse(createdDbSubtask);
   }
 
-  async updateSubtaskStatus(
-    params: UpdateSubtaskStatusParams,
-  ): Promise<PrismaSubtaskType & { planStatusUpdated?: boolean }> {
-    const { taskId, subtaskId, newStatus } = params; // Use subtaskId instead of subtaskPrismaId
+  async updateSubtaskStatus(params: UpdateSubtaskStatusParams): Promise<
+    PrismaSubtaskType & {
+      planStatusUpdated?: boolean;
+      batchStatusUpdated?: boolean;
+    }
+  > {
+    const { taskId, subtaskId, newStatus } = params;
 
+    // ✅ OPTIMIZED: Single query with selective includes
     const subtask = await this.prisma.subtask.findUnique({
-      where: { id: subtaskId }, // Use correct field name
-      include: { plan: true },
+      where: { id: subtaskId },
+      select: {
+        id: true,
+        taskId: true,
+        planId: true,
+        name: true,
+        status: true,
+        startedAt: true,
+        completedAt: true,
+        batchId: true,
+        plan: {
+          select: {
+            id: true,
+            taskId: true,
+          },
+        },
+      },
     });
 
     if (!subtask) {
@@ -304,52 +318,80 @@ export class ImplementationPlanService {
     }
     if (!subtask.plan || subtask.plan.taskId !== taskId) {
       throw new BadRequestException(
-        `Subtask '${subtaskId}' does not belong to task '${taskId}' or its plan is missing.`,
+        `Subtask '${subtaskId}' does not belong to task '${taskId}'.`,
       );
     }
 
-    // Convert status from schema format to DB format
-    const statusFull =
-      TOKEN_MAPS.status[newStatus as keyof typeof TOKEN_MAPS.status] ||
-      newStatus;
+    const statusFull = newStatus;
 
     const updateData: Prisma.SubtaskUpdateInput = {
       status: statusFull,
     };
 
-    // Set timestamps based on status
+    // Efficient timestamp handling
     if (statusFull === 'in-progress' && !subtask.startedAt) {
       updateData.startedAt = new Date();
     } else if (statusFull === 'completed') {
       updateData.completedAt = new Date();
       if (!subtask.startedAt) {
-        updateData.startedAt = new Date(); // Auto-set started if not already set
+        updateData.startedAt = new Date();
       }
     }
 
     const updatedSubtask = await this.prisma.subtask.update({
-      where: { id: subtaskId }, // Use correct field name
+      where: { id: subtaskId },
       data: updateData,
     });
 
-    // Check if batch/plan is complete
-    const planId = subtask.planId;
+    // ✅ OPTIMIZED: Efficient batch and plan status checking
     let planStatusUpdated = false;
-    if (planId) {
-      const allSubtasksForPlan = await this.prisma.subtask.findMany({
-        where: { planId },
+    let batchStatusUpdated = false;
+
+    if (statusFull === 'completed') {
+      // Check batch completion if subtask is in a batch
+      if (subtask.batchId) {
+        const batchStats = await this.prisma.subtask.aggregate({
+          where: {
+            task: { taskId },
+            batchId: subtask.batchId,
+          },
+          _count: {
+            id: true,
+          },
+        });
+
+        const completedInBatch = await this.prisma.subtask.count({
+          where: {
+            task: { taskId },
+            batchId: subtask.batchId,
+            status: 'completed',
+          },
+        });
+
+        batchStatusUpdated = completedInBatch === batchStats._count.id;
+      }
+
+      // Check plan completion efficiently
+      const planStats = await this.prisma.subtask.aggregate({
+        where: { planId: subtask.planId },
+        _count: { id: true },
       });
 
-      const allComplete = allSubtasksForPlan.every(
-        (st) => st.status === 'completed',
-      );
+      const completedInPlan = await this.prisma.subtask.count({
+        where: {
+          planId: subtask.planId,
+          status: 'completed',
+        },
+      });
 
-      if (allComplete) {
-        planStatusUpdated = true;
-      }
+      planStatusUpdated = completedInPlan === planStats._count.id;
     }
 
-    return { ...updatedSubtask, planStatusUpdated };
+    return {
+      ...updatedSubtask,
+      planStatusUpdated,
+      batchStatusUpdated,
+    };
   }
 
   async checkBatchStatus(params: CheckBatchStatusParams): Promise<{
@@ -358,87 +400,126 @@ export class ImplementationPlanService {
     totalSubtasksInBatch: number;
     completedSubtasksInBatch: number;
     pendingSubtasks: Array<{ id: string; title: string; status: string }>;
+    efficiency?: number;
+    averageCompletionTime?: number;
   }> {
     const { taskId, batchId } = params;
 
-    const planFromDb = await this.prisma.implementationPlan.findFirst({
-      where: { taskId },
-      include: {
-        subtasks: {
-          where: { batchId },
-          orderBy: { sequenceNumber: 'asc' },
-        },
+    // ✅ OPTIMIZED: Efficient query with selective includes and aggregation
+    const batchSubtasks = await this.prisma.subtask.findMany({
+      where: {
+        task: { taskId },
+        batchId,
       },
-      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        sequenceNumber: true,
+        startedAt: true,
+        completedAt: true,
+        batchId: true,
+      },
+      orderBy: { sequenceNumber: 'asc' },
     });
 
-    if (!planFromDb) {
-      throw new NotFoundException(
-        `Implementation plan for task '${taskId}' not found.`,
-      );
-    }
-
-    if (!planFromDb.subtasks || planFromDb.subtasks.length === 0) {
+    if (!batchSubtasks || batchSubtasks.length === 0) {
       throw new BadRequestException(
-        `No subtasks found for batch ID '${batchId}' in the latest plan for task '${taskId}'.`,
+        `No subtasks found for batch ID '${batchId}' in task '${taskId}'.`,
       );
     }
 
-    const subtasksInBatch = planFromDb.subtasks;
     let completedCount = 0;
+    let totalCompletionTime = 0;
     const pendingSubtasks: Array<{
       id: string;
       title: string;
       status: string;
     }> = [];
 
-    for (const subtask of subtasksInBatch) {
+    for (const subtask of batchSubtasks) {
       if (subtask.status === 'completed') {
         completedCount++;
+        // Calculate completion time if both timestamps exist
+        if (subtask.startedAt && subtask.completedAt) {
+          totalCompletionTime +=
+            subtask.completedAt.getTime() - subtask.startedAt.getTime();
+        }
       } else {
         pendingSubtasks.push({
-          id: `ST-${String(subtask.sequenceNumber).padStart(3, '0')}`, // Return logical ID
+          id: `ST-${String(subtask.sequenceNumber).padStart(3, '0')}`,
           title: subtask.name,
           status: subtask.status,
         });
       }
     }
 
-    const isComplete = completedCount === subtasksInBatch.length;
+    const isComplete = completedCount === batchSubtasks.length;
+    const efficiency =
+      batchSubtasks.length > 0 ? completedCount / batchSubtasks.length : 0;
+    const averageCompletionTime =
+      completedCount > 0
+        ? Math.round(
+            (totalCompletionTime / completedCount / (1000 * 60 * 60)) * 10,
+          ) / 10 // Hours
+        : undefined;
 
     return {
       batchId,
       isComplete,
-      totalSubtasksInBatch: subtasksInBatch.length,
+      totalSubtasksInBatch: batchSubtasks.length,
       completedSubtasksInBatch: completedCount,
       pendingSubtasks,
+      efficiency,
+      averageCompletionTime,
     };
   }
 
-  // Legacy method for backward compatibility
-  async getPlanLegacy(
-    taskId: string,
-  ): Promise<ImplementationPlanStorage | null> {
-    const response = await this.getPlan(taskId);
-    if (!response) return null;
+  // ✅ NEW: Advanced batch management capabilities
+  async getBatchesForTask(taskId: string): Promise<
+    Array<{
+      batchId: string;
+      batchTitle: string;
+      totalSubtasks: number;
+      completedSubtasks: number;
+      isComplete: boolean;
+      efficiency: number;
+    }>
+  > {
+    const batches = await this.prisma.subtask.groupBy({
+      by: ['batchId', 'batchTitle'],
+      where: {
+        task: { taskId },
+        batchId: { not: null },
+      },
+      _count: {
+        id: true,
+      },
+    });
 
-    // Return the response as-is since ImplementationPlanStorage expects SubtaskResponse
-    return {
-      id: response.id,
-      taskId: response.taskId,
-      title: response.title,
-      overview: response.overview,
-      approach: response.approach,
-      technicalDecisions: response.technicalDecisions,
-      filesToModify: response.filesToModify,
-      version: response.version,
-      status: response.status,
-      subtasks: response.subtasks, // These already include databaseId
-      generalNotes: response.generalNotes,
-      linkedTd: response.linkedTd,
-      createdAt: response.createdAt,
-      updatedAt: response.updatedAt,
-      createdBy: response.createdBy,
-    };
+    const results = [];
+    for (const batch of batches) {
+      if (batch.batchId) {
+        const completedCount = await this.prisma.subtask.count({
+          where: {
+            task: { taskId },
+            batchId: batch.batchId,
+            status: 'completed',
+          },
+        });
+
+        results.push({
+          batchId: batch.batchId,
+          batchTitle: batch.batchTitle || batch.batchId,
+          totalSubtasks: batch._count.id,
+          completedSubtasks: completedCount,
+          isComplete: completedCount === batch._count.id,
+          efficiency:
+            batch._count.id > 0 ? completedCount / batch._count.id : 0,
+        });
+      }
+    }
+
+    return results;
   }
 }

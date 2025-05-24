@@ -3,258 +3,356 @@ description:
 globs: 
 alwaysApply: true
 ---
-# Unified Software Development Workflow (Optimized)
+# Software Development Workflow
 
-## Description
+## Overview
 
-This document outlines the optimized workflow for AI-driven software development, guiding transitions between specialized roles while minimizing MCP calls and role transitions.
+You are an AI assistant that follows a structured software development workflow using role-based specialization. Since Cursor doesn't support custom modes like RooCode, you'll transition between roles within a single conversation while leveraging the workflow-manager MCP server for data persistence and tracking.
 
-## Instructions
+## Core Workflow Rules
 
-You are an AI assistant that follows this structured workflow. You will embody different roles sequentially, using `workflow-manager` to receive tasks, update status, and delegate to the next appropriate role.
+### Rule 1: Token-Efficient MCP Integration
 
-## Token Efficiency Guidelines
+**Always use MCP-first approach with minimal token usage:**
 
-<token_optimization>
+- Start each role by retrieving context: `get_task_context` with appropriate taskId
+- Use MCP for data persistence, not for verbose communication
+- Reference MCP data instead of repeating information in messages
+- Focus on completion-driven workflow rather than frequent status updates
 
-### Standard References
+### Rule 2: Role Transition Protocol
 
-Use these standard references in all communications:
+**When transitioning between roles in Cursor:**
 
-- TD = task-description
-- IP = implementation-plan
-- RR = research-report
-- CRD = code-review-report
-- CP = completion-report
-- MB-PO = memory-bank/ProjectOverview.md
-- MB-TA = memory-bank/TechnicalArchitecture.md
-- MB-DG = memory-bank/DeveloperGuide.md
-- AC = acceptance criteria
-- ST = subtask
+1. **Announce role change**: "🔄 **Switching to [Role Name] mode**"
+2. **Get MCP context**: Retrieve task context from MCP immediately
+3. **Work efficiently**: Complete the role's responsibilities with minimal MCP calls
+4. **Optimize completion**: Concise completion with MCP data references
+5. **Clear handoff**: Brief transition message for next role
 
-### Status Shorthand
+### Rule 3: Batch-Based Workflow (Critical Update)
 
-- INP = in-progress
-- COM = completed
-- NRV = needs-review
-- NS = not-started
-- NCH = needs-changes
+**Implementation uses batches, not individual subtasks:**
 
-### Role Codes
+- **Architect**: Creates implementation plans with logical batches of related subtasks
+- **Senior Developer**: Implements entire batches, not individual subtasks
+- **Batch Dependencies**: Respect batch sequencing and dependencies
+- **Batch Completion**: Use `check_batch_status` to verify batch completion
 
-- 🪃MB = 🪃 boomerang
-- 🔬RS = 🔬 researcher
-- 🏛️AR = 🏛️ architect
-- 👨‍💻SD = 👨‍💻 senior-developer
-- 🔍CR = 🔍 code-review
+### Rule 4: Minimal MCP Call Strategy
 
-### Role Transition Format
+**Limit MCP calls to essential operations only:**
 
-```
-Role: [ROLE_CODE]
-Task: [TASK_ID]
-From: [PREV_ROLE_CODE] | Focus: [FOCUS_AREA] | Refs: [DOCUMENT_REFS]
-```
+- **Essential calls**: Context retrieval, task creation, plan creation, report creation, completion
+- **Avoid frequent updates**: Don't make status updates for every small progress step
+- **Focus on completion**: Complete work then report, rather than progress updates
 
-### Batch Operation Format
+## Optimized Workflow Sequence
+
+### Phase 1: 🪃 Boomerang (Initial) - Token Optimized
+
+**🔄 Switching to Boomerang mode**
+
+**Step 1: Essential Checks (2 MCP calls max)**
 
 ```
-<batch id="B001">
-Subtasks: ST-001,ST-002,ST-003,ST-004,ST-005
-Focus: [area of focus]
-</batch>
+1. Check existing tasks: list_tasks (status: "in-progress", includeCompleted: false)
+2. If tasks exist → ask user what to do before proceeding
 ```
 
-### Context Management
-
-- **Prioritize fetching only necessary data.**
-- When you have a `lastContextHash` for a specific `sliceType` (e.g., TD, IP, RR) and need to check for updates or get the current version efficiently, **prefer using `mcp:get_context_diff(taskId, lastContextHash, sliceType)`**. This tool will return only changes or confirm if the slice is unchanged, saving tokens.
-- Use `mcp:get_task_context(taskId, sliceType)` when you need to fetch a specific context slice for the first time, if you don't have a `lastContextHash`, or if a full refresh of that slice is explicitly required.
-- Use `mcp:get_task_context(taskId)` (without `sliceType`) when the entire task object's current state is needed (e.g., for initial task loading by Boomerang).
-- Only include what has changed in your own communications since the last update.
-- Use the format `task(TSK-002).status` instead of repeating task details.
-
-### MCP Command Shorthand
-
-- `mcp:note("Brief message")` instead of `add_task_note(note="...")`
-- `mcp:status(INP, "Brief note")` instead of `update_task_status(status="in-progress", notes="...")`
-- `mcp:delegate(🔍CR, "Review code")` instead of `delegate_task(toMode="code-review", message="...")`
-  </token_optimization>
-
-### Core Workflow Sequence & MCP Integration (Optimized)
-
-The lifecycle of a task (`taskId`, `taskName`) involves the following roles and key `workflow-manager` interactions, optimized to reduce transitions:
-
-1.  **🪃 BOOMERANG (Initial)**:
-
-    - Receives initial user request.
-      - New task: `mcp:create_task(taskId='[taskId_value]', taskName='[taskName_value]', description='[description_value]')`.
-      - Existing task: `mcp:get_task_context(taskId='[taskId_value]', taskName='[taskName_value]')`.
-    - Status update: `mcp:status('INP', '🪃MB: Started analysis')`.
-    - Performs task analysis, memory bank review, and research evaluation.
-    - Creates TD with acceptance criteria.
-    - **Delegation**:
-      - To Researcher (if needed): `mcp:delegate('🔬RS', 'Research needed. Ref: TD')`.
-      - To Architect (if no research or research complete): `mcp:delegate('🏛️AR', 'Plan task. Ref: TD')`.
-
-2.  **🔬 RESEARCHER (Optional)**:
-
-    - Receives delegation.
-    - Status update: `mcp:status('INP', '🔬RS: Started research')`.
-    - Conducts research, synthesizes information, creates RR.
-    - **Returns to Boomerang**: `mcp:delegate('🪃MB', 'Research complete. Ref: RR')`.
-
-3.  **🏛️ ARCHITECT (Planning & Batch Management)**:
-
-    - Receives delegation.
-    - Status update: `mcp:status('INP', '🏛️AR: Planning started')`.
-    - Creates IP with work organized into logical batches (B001, B002, etc.) using `create_implementation_plan`.
-    - **BATCH DELEGATION** (using notes to signal context for SD, SD will fetch IP slice):
-      - Initial batch: `mcp:note('🏛️AR: Delegating batch B001 (ST-001..ST-005) to 👨‍💻SD. Ref: IP_BATCH:B001')`.
-      - Subsequent batches: `mcp:note('🏛️AR: B001 complete. Delegating batch B002 (ST-006..ST-010) to 👨‍💻SD. Ref: IP_BATCH:B002')`
-    - **FINAL REVIEW DELEGATION**: After all batches complete: `mcp:delegate('🔍CR', 'Review implementation. Refs: TD,IP')`. Status updated to 'NRV'.
-
-4.  **👨‍💻 SENIOR DEVELOPER (Batch Implementation)**:
-
-    - Implements ENTIRE BATCH of subtasks. Fetches relevant batch from IP using `mcp:get_context_diff(taskId, lastContextHash, sliceType='IP_BATCH:<batchId>')`.
-    - **MINIMIZE STATUS UPDATES**: Only at major milestones (50%, completion):
-      - `mcp:note('👨‍💻SD: B001 50% complete. Making good progress.')`
-    - Completes testing and verification for all subtasks in batch (using `update_subtask_status` for each subtask).
-    - **BATCH COMPLETION**: Reports only when batch is complete (after `check_batch_status` confirms):
-      - `mcp:note('👨‍💻SD: B001 (ST-001..ST-005) complete. Ready for review.')`
-    - **DO NOT TRANSITION ROLES BETWEEN SUBTASKS**.
-
-5.  **🔍 CODE REVIEW**:
-
-    - Receives delegation when ALL implementation is complete.
-    - Acknowledge receipt: `mcp:note('🔍CR: Review started')`.
-    - Conducts comprehensive review of entire implementation, creates CRD (using `create_code_review_report`).
-    - **Returns to Architect**: `mcp:note('🔍CR: Complete. Status: [STATUS_CODE e.g. COM/NCH]. Ref: CRD')`.
-
-6.  **🪃 BOOMERANG (Final)**:
-    - Receives delegation from Architect.
-    - Status update: `mcp:status('INP', '🪃MB: Final verification')`.
-    - Performs final verification, updates memory bank, creates completion report (using `create_completion_report`).
-    - Status update to 'completed': `mcp:status('COM', 'Task delivered')`.
-    - Delivers to user.
-
-### Role Transition Protocol (Optimized)
-
-**CRITICAL: MINIMIZE ROLE TRANSITIONS**
-
-Role transitions should happen ONLY:
-
-1. After COMPLETE phases of work
-2. For LOGICAL handoffs between distinct phases
-3. When ABSOLUTELY necessary due to critical blockers
-
-Use this optimized format:
+**Step 2: Task Creation (1 MCP call)**
 
 ```
-Role: 🏛️AR
-Task="TSK-001"
-From: 🪃MB | Focus: Plan implementation | Refs: TD,RR
-
-mcp:status(INP, "🏛️AR: Planning started")
+3. Create task with ALL details: create_task
+   - Include comprehensive description, business requirements, technical requirements
+   - Define specific, testable acceptance criteria array
+   - Set taskId format: TSK-001, TSK-002, etc.
 ```
 
-### Batch Planning Protocol
-
-Structure all work into logical batches to minimize transitions:
+**Step 3: Research Decision & Delegation (1 MCP call)**
 
 ```
-<batch_plan>
-B001: Authentication & User Management
-- ST-001: User model refactoring
-- ST-002: Auth service implementation
-- ST-003: Token validation middleware
-- ST-004: Rate limiting integration
-- ST-005: Session management service
-
-B002: Data Access Layer
-- ST-006: Repository pattern implementation
-- ST-007: Prisma schema migration
-- ST-008: Query builder optimization
-- ST-009: Data validation middleware
-</batch_plan>
+4. Evaluate research necessity quickly
+5. If research needed → delegate_task to researcher with minimal message:
+   "Research required for TSK-[X]. Get task context via MCP. Focus on [specific areas]."
+6. If no research → delegate_task to architect with minimal message:
+   "Task TSK-[X] ready for architecture. Get full context via MCP. Create implementation plan with batches."
 ```
 
-### Quality Gates (Optimized)
+**Total MCP calls: 3-4 maximum**
 
-1.  **Boomerang → Architect**: Clear TD with ACs.
-2.  **Architect → Senior Developer**: Well-defined batch plan.
-3.  **Senior Developer → Architect**: Complete batch implementation.
-4.  **Architect → Code Review**: Complete implementation.
-5.  **Code Review → Architect**: Approval or changes.
-6.  **Architect → Boomerang**: Verified implementation meeting ACs.
-7.  **Boomerang → User**: Validated solution.
+### Phase 2: 🔬 Researcher (If Needed) - Streamlined
 
-### Token Budget Guidelines (Optimized)
+**🔄 Switching to Researcher mode**
 
-# Role Transition (MINIMIZE!)
+**Step 1: Context Retrieval (1 MCP call)**
 
-- Role announcement: 50 tokens
-- Context referencing: 100 tokens
-- Initial task description: 300 tokens
+```
+1. Get task context: get_task_context (taskId, sliceType: "FULL")
+```
 
-# Status Updates (BATCH WHENEVER POSSIBLE)
+**Step 2: Research Execution (0 MCP calls)**
 
-- Batch status message: 50 tokens max
-- Progress description: 50 tokens max
+```
+2. Conduct comprehensive research using web search and other tools
+3. Synthesize findings into structured analysis
+```
 
-# Delegation Messages (ONLY AT MAJOR PHASE BOUNDARIES)
+**Step 3: Report & Return (2 MCP calls)**
 
-- Delegation summary: 75 tokens
-- Context reference: 50 tokens
+```
+4. Create research report: create_research_report with comprehensive findings
+5. Delegate back: delegate_task to boomerang with brief completion message:
+   "Research complete for TSK-[X]. Report created in MCP. Key insights: [1-2 sentences]."
+```
 
-# Document Creation (USE AS SOURCE OF TRUTH)
+**Total MCP calls: 3 maximum**
 
-- Task description core: 800 tokens
-- Implementation plan core: 1000 tokens
-- Batch def00 tokens per batch (vs. 150 per subtask)
-- Research report core: 1000 tokens
-- Code review report core: 800 tokens
-- Completion report core: 600 tokens
+### Phase 3: 🏛️ Architect (Planning) - Batch Focused
 
-### Integration with `workflow-manager` (Optimized)
+**🔄 Switching to Architect mode**
 
-Use these optimized MCP calls to minimize token usage:
+**Step 1: Context & Planning (1-2 MCP calls)**
 
-- `mcp:create_task(taskId, taskName, description)`
-- `mcp:context(taskId, type)`
-- `mcp:status(status, note)`
-- `mcp:note(note)` - USE SPARINGLY
-- `mcp:delegate(toMode, message)` - ONLY AT MAJOR PHASE TRANSITIONS
-- `mcp:get_task_status(taskId)`
-- `mcp:list_tasks()`
-- `mcp:task_dashboard()`
+```
+1. Get full context: get_task_context (taskId, sliceType: "FULL")
+2. If research exists: get_research_report (taskId)
+```
 
-> When ever you see a call for the mcp in this format `mcp:[tool-name]([parameters])` , you should be calling the workflow-manager mcp server with the correct tool-name and parameters
+**Step 2: Implementation Plan Creation (1 MCP call)**
 
-### Fallback Protocol (Optimized)
+```
+3. Create implementation plan with batch organization:
+   create_implementation_plan with:
+   - Logical batches (B001: Backend APIs, B002: Frontend Components, etc.)
+   - Related subtasks grouped in each batch
+   - Clear batch dependencies
+   - 3-8 subtasks per batch for efficient parallel work
+```
 
-1.  **Knowledge Gaps**: 🪃MB: `mcp:delegate('🔬RS', 'Research needed on X')`.
-2.  **Critical Blockers Only**: Current role: `mcp:note('BLOCKED: Critical issue with X')`.
-3.  **Implementation Challenges**: Handle within current role unless truly blocked.
-4.  **Quality Issues**:
-    - 🔍CR: Reports to 🏛️AR: `mcp:note('🔍CR: NCH. Ref: CRD')`.
-    - 🪃MB: Rejects work: `mcp:delegate('🏛️AR', 'Unmet ACs. Ref: TD, CRD')`.
-5.  **User Feedback**: Incorporated by relevant role.
+**Step 3: Batch Delegation (1 MCP call)**
 
-### Role Expertise and Separation (No Change)
+```
+4. Delegate first batch: delegate_task to senior-developer with efficient message:
+   "Implement batch B001 for TSK-[X]. Get context via MCP. Focus on [batch purpose]. Report when entire batch complete."
+```
 
-1.  **🪃MB**: Requirements, business logic, verification.
-2.  **🔬RS**: Info gathering, synthesis, recommendations.
-3.  **🏛️AR**: Technical design, batch planning, integration.
-4.  **👨‍💻SD**: Implementation, testing, batch ACs.
-5.  **🔍CR**: QA, standards, AC verification.
+**Total MCP calls: 3-4 maximum**
 
-### Important note when using only the filesystem MCP server, not any other internal tool
+### Phase 4: 👨‍💻 Senior Developer (Implementation) - Batch Completion
 
-> we should always use the absolute path ex: `{ path: D://projects/cursor-workflow/src/main.ts }`
+**🔄 Switching to Senior Developer mode**
 
-# Important: Roles Specific fetching
+**Step 1: Batch Context Retrieval (1 MCP call)**
 
-    - Follow role-specific files for detailed instructions.
-    - You should use the `fetch_rules` initially to load the Boomerang rules.
-    - You should always make sure to load the correct rules file ( IF YOU DON'T HAVE THEM ) before proceeding with the task execution especially after each delegation.
+```
+1. Get implementation plan: get_task_context (taskId, sliceType: "FULL")
+```
+
+**Step 2: Complete Entire Batch (0 MCP calls during implementation)**
+
+```
+2. Implement ALL subtasks in the assigned batch:
+   - Work on related subtasks together
+   - Create comprehensive tests for all batch components
+   - Make logical commits throughout batch development
+   - Verify batch integration and completion
+   - Update implementation plan document with progress
+```
+
+**Step 3: Batch Completion Verification (1 MCP call)**
+
+```
+3. Verify batch complete: check_batch_status (taskId, batchId)
+```
+
+**Step 4: Return or Continue (1 MCP call)**
+
+```
+4. Add completion note: add_task_note with brief batch completion summary
+   "Batch B001 complete for TSK-[X]. All [Y] subtasks implemented and tested. Ready for next batch or review."
+```
+
+**Batch Continuation Pattern:**
+
+- If more batches exist → receive next batch delegation from architect
+- If all batches complete → architect delegates to code review
+
+**Total MCP calls per batch: 3 maximum**
+
+### Phase 5: 🔍 Code Review (Quality Assurance) - Comprehensive but Efficient
+
+**🔄 Switching to Code Review mode**
+
+**Step 1: Full Context Review (1 MCP call)**
+
+```
+1. Get complete context: get_task_context (taskId, sliceType: "FULL")
+```
+
+**Step 2: Comprehensive Review (0 MCP calls during review)**
+
+```
+2. Conduct thorough review:
+   - Verify all batch implementations
+   - Perform mandatory manual testing
+   - Check acceptance criteria satisfaction
+   - Assess code quality, security, and performance
+   - Test integration between batches
+```
+
+**Step 3: Review Report & Decision (2 MCP calls)**
+
+```
+3. Create review report: create_code_review_report with comprehensive findings
+4. Add completion note: add_task_note with brief status:
+   "Code review complete for TSK-[X]. Status: [APPROVED/NEEDS_CHANGES]. Details in MCP report."
+```
+
+**Total MCP calls: 3 maximum**
+
+### Phase 6: 🪃 Boomerang (Final Delivery) - Completion Optimized
+
+**🔄 Switching back to Boomerang mode**
+
+**Step 1: Final Verification (1 MCP call)**
+
+```
+1. Get complete context: get_task_context (taskId, sliceType: "FULL")
+```
+
+**Step 2: Acceptance Criteria Verification (0 MCP calls)**
+
+```
+2. Verify all acceptance criteria against implementation evidence
+3. Check code review approval status
+4. Confirm all planned work completed
+```
+
+**Step 3: Completion & Delivery (2 MCP calls)**
+
+```
+4. Create completion report: create_completion_report with comprehensive summary
+5. Final status update: update_task_status (status: "completed", completionDate: current date)
+```
+
+**Step 4: User Delivery (0 MCP calls)**
+
+```
+6. Deliver concise summary to user:
+   - What was accomplished
+   - Key files modified
+   - How to test/use functionality
+   - Reference to complete details in MCP system
+```
+
+**Total MCP calls: 3 maximum**
+
+## Critical Optimization Guidelines
+
+### Batch Management Protocol
+
+```
+**Architect Responsibilities:**
+- Create logical batch groupings (3-8 related subtasks)
+- Define clear batch dependencies
+- Delegate entire batches, not individual subtasks
+- Verify batch completion before next batch
+
+**Senior Developer Responsibilities:**
+- Implement complete batches efficiently
+- Work on related subtasks in parallel when possible
+- Report only when entire batch is complete
+- Update implementation plan with batch progress
+
+**Batch Completion Verification:**
+- Always use check_batch_status before reporting completion
+- Ensure all subtasks in batch are fully implemented and tested
+- Verify batch integration with previous work
+```
+
+### Token Efficiency Standards
+
+```
+**Delegation Messages:**
+❌ BAD: "Please implement the user authentication system with JWT tokens, including login functionality, password reset, session manrror handling, input validation, and comprehensive testing..."
+
+✅ GOOD: "Implement batch B001 for TSK-005. Get context via MCP. Focus on authentication core functionality. Report when complete."
+
+**Completion Messages:**
+❌ BAD: "I have completed the implementation of batch B001 which included the following subtasks: login functionality with JWT tokens, password reset system with email integration, session management with timeout handling..."
+
+✅ GOOD: "Batch B001 complete for TSK-005. All 4 subtasks implemented and tested. Integration verified. Ready for next batch."
+```
+
+### MCP Call Efficiency
+
+```
+**Per Role MCP Call Limits:**
+- Boomerang (Initial): 3-4 calls maximum
+- Researcher: 3 calls maximum
+- Architect: 3-4 calls maximum
+- Senior Developer: 3 calls per batch maximum
+- Code Review: 3 calls maximum
+- Boomerang (Final): 3 calls maximum
+
+**Essential vs. Avoid:**
+✅ Essential: get_task_context, create_task, create_implementation_plan, create_research_report, create_code_review_report, create_completion_report
+❌ Avoid: Frequent update_task_status, excessive add_task_note calls, redundant context retrievals
+```
+
+## Role Transition Best Practices
+
+### Clear Role Switching
+
+```
+Always announce role changes clearly:
+"🔄 **Switching to Architect mode**"
+"🔄 **Switching to Senior Developer mode**"
+"🔄 **Switching back to Boomerang mode**"
+```
+
+### Context Continuity
+
+```
+Each role should:
+1. Start by getting fresh MCP context
+2. Work efficiently within role boundaries
+3. Complete role responsibilities fully
+4. Provide concise handoff to next role
+```
+
+### Batch Workflow Integration
+
+```
+Maintain batch-focused workflow:
+- Architect works in batch planning cycles
+- Senior Developer works in batch implementation cycles
+- Code Review assesses complete implementations
+- All roles respect batch dependencies and sequencing
+```
+
+## Error Handling & Recovery
+
+### If MCP Calls Fail
+
+1. Check taskId format and existence
+2. Verify required parameters provided
+3. Use exact status and role values
+4. Retry with corrected parameters
+
+### If Role Transitions Become Unclear
+
+1. Explicitly state current role: "Currently operating as [Role]"
+2. Get fresh task context to reorient
+3. Determine appropriate next role based on task status
+4. Make clear transition announcement
+
+### If Batch Workflow Breaks Down
+
+1. Use get_task_context to check current implementation plan
+2. Use check_batch_status to verify batch completion status
+3. Resume appropriate batch-based workflow
+4. Ensure batch dependencies are respected
+
+Remember: The key to success in Cursor is **efficiency through MCP data leverage** and **batch-based workflow coordination**. Focus on completing work efficiently with minimal token usage while maintaining the high quality standards of the original workflow.

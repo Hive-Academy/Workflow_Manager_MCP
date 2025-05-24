@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { BatchResponseSchema, CreateBatchInputSchema } from './batch.schema';
 import { SubtaskSchema } from './subtask.schema';
-import { StatusCodeSchema } from 'src/task-workflow/types/token-refs.schema';
+import { TaskStatusSchema } from 'src/task-workflow/types/token-refs.schema';
 
 // ✅ FIXED: Database representation schema (what comes from Prisma)
 export const ImplementationPlanDatabaseSchema = z.object({
@@ -68,7 +68,7 @@ export const ImplementationPlanResponseSchema = z.object({
   createdBy: z.string().describe('User/role who created the plan'),
 
   // Computed fields
-  status: StatusCodeSchema.describe('Overall status derived from subtasks'),
+  status: TaskStatusSchema.describe('Overall status derived from subtasks'),
   totalSubtasks: z.number().int().describe('Total number of subtasks'),
   completedSubtasks: z.number().int().describe('Number of completed subtasks'),
 

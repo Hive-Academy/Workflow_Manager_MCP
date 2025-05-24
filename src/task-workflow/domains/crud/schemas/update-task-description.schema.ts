@@ -27,6 +27,9 @@ export type UpdateTaskDescriptionParams = z.infer<
   typeof UpdateTaskDescriptionSchema
 >;
 
+// Add the expected alias for backward compatibility
+export type UpdateTaskDescriptionInput = UpdateTaskDescriptionParams;
+
 // ✅ FIXED: Response schema matching TaskDescription database structure
 export const TaskDescriptionResponseSchema = z.object({
   taskId: z.string().describe('Primary key matching task ID'),

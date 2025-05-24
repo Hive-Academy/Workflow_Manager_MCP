@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
+import { TaskStatus } from 'src/task-workflow/types/token-refs.schema';
 import { TaskCommentService } from '../interaction/task-comment.service';
 import { ContextManagementService } from '../query/context-management.service';
 import { TaskQueryService } from '../query/task-query.service';
@@ -175,7 +176,7 @@ export class TaskStateOperationsService {
     params: z.infer<typeof RoleTransitionSchema>,
   ): Promise<any> {
     try {
-      const { roleId, taskId, fromRole, focus, refs, contextHash } = params;
+      const { taskId, fromRole, toRole, summary, reason } = params;
 
       const taskState = await this.taskStateService.getTaskStatus({ taskId });
       if (!taskState) {
@@ -191,20 +192,24 @@ export class TaskStateOperationsService {
       // For now, sticking to the pattern of MCP services calling business services.
       const fullContext = await this.taskQueryService.getTaskContext({
         taskId,
+        sliceType: 'FULL',
+        includeRelated: true,
+        maxComments: 5,
+        maxDelegations: 10,
       });
-      if (!fullContext || !fullContext.task) {
+      if (!fullContext || !fullContext.taskId) {
         throw new NotFoundException(
           `Task full context not found via TaskQueryService for ID: ${taskId}`,
         );
       }
       // Simplified context for hashing and diffing, similar to original facade's getTaskContext
       const simplifiedCurrentContext: any = {
-        taskId: fullContext.task.taskId,
-        name: fullContext.task.name,
-        status: fullContext.task.status,
-        currentMode: fullContext.task.currentMode,
-        creationDate: fullContext.task.creationDate,
-        completionDate: fullContext.task.completionDate,
+        taskId: fullContext.taskId,
+        name: fullContext.name,
+        status: fullContext.status,
+        currentMode: fullContext.currentMode,
+        creationDate: fullContext.creationDate,
+        completionDate: fullContext.completionDate,
       };
       if (fullContext.taskDescription) {
         simplifiedCurrentContext.description =
@@ -212,15 +217,12 @@ export class TaskStateOperationsService {
         simplifiedCurrentContext.acceptanceCriteria =
           fullContext.taskDescription.acceptanceCriteria;
       }
-      if (fullContext.currentImplementationPlan) {
+      if (fullContext.implementationPlan) {
         simplifiedCurrentContext.implementationPlanSummary = {
-          id: fullContext.currentImplementationPlan.id,
-          totalSubtasks:
-            fullContext.currentImplementationPlan.subtasks?.length || 0,
+          id: fullContext.implementationPlan.id,
+          totalSubtasks: fullContext.implementationPlan.totalSubtasks || 0,
           completedSubtasks:
-            fullContext.currentImplementationPlan.subtasks?.filter(
-              (st: any) => st.status === 'completed' || st.status === 'COM',
-            ).length || 0,
+            fullContext.implementationPlan.completedSubtasks || 0,
         };
       }
       if (fullContext.recentComments && fullContext.recentComments.length > 0) {
@@ -239,34 +241,22 @@ export class TaskStateOperationsService {
         simplifiedCurrentContext,
       );
 
-      let contextDiff = null;
-      if (contextHash && contextHash !== currentContextHash) {
-        const oldContext =
-          this.contextManagementService.getContextByHash(contextHash);
-        contextDiff = oldContext
-          ? this.contextManagementService.diffContext(
-              oldContext,
-              simplifiedCurrentContext,
-            )
-          : { __isNew: true, ...simplifiedCurrentContext };
-      }
+      // Cache context for future reference
       this.contextManagementService.cacheContext(simplifiedCurrentContext);
 
-      if (taskState.status !== roleId) {
-        // taskState.status is the task's actual status, roleId is the target mode.
-        const actualCurrentMode = (
-          await this.taskStateService.getCurrentModeForTask({ taskId })
-        ).currentMode;
-        if (actualCurrentMode !== roleId) {
-          await this.taskStateService.updateTaskStatus({
-            taskId,
-            status: taskState.status, // Preserve existing status
-            currentMode: roleId, // Update currentMode to the new roleId
-          });
-        }
+      // Update task's current mode to the target role
+      const actualCurrentMode = (
+        await this.taskStateService.getCurrentModeForTask({ taskId })
+      ).currentMode;
+      if (actualCurrentMode !== toRole) {
+        await this.taskStateService.updateTaskStatus({
+          taskId,
+          status: taskState.status as TaskStatus, // Preserve existing status
+          currentMode: toRole, // Update currentMode to the new toRole
+        });
       }
 
-      const transitionNote = `Role transition: ${fromRole || 'N/A'} -> ${roleId}. Focus: ${focus}. Refs: ${refs ? refs.join(', ') : 'none'}`;
+      const transitionNote = `Role transition: ${fromRole || 'N/A'} -> ${toRole}. ${summary ? `Summary: ${summary}. ` : ''}${reason ? `Reason: ${reason}.` : ''}`;
       await this.taskCommentService.addTaskNote({
         taskId,
         note: transitionNote,
@@ -279,24 +269,28 @@ export class TaskStateOperationsService {
         content: [
           {
             type: 'text',
-            text: `Transitioned to role ${roleId} for task '${taskName}'. Focus: ${focus}. Context hash: ${currentContextHash}.`,
+            text: `Transitioned to role ${toRole} for task '${taskName}'. ${summary ? `Summary: ${summary}` : ''}`,
           },
           {
-            type: 'json',
-            json: {
-              role: roleId,
-              task: {
-                id: taskId,
-                name: taskName,
-                status: taskState.status,
-                currentMode: roleId,
+            type: 'text',
+            text: JSON.stringify(
+              {
+                role: toRole,
+                task: {
+                  id: taskId,
+                  name: taskName,
+                  status: taskState.status as TaskStatus,
+                  currentMode: toRole,
+                },
+                fromRole,
+                toRole,
+                summary,
+                reason,
+                contextHash: currentContextHash,
               },
-              focus,
-              refs: refs || [],
-              contextHash: currentContextHash,
-              contextChanged: !!contextDiff,
-              changes: contextDiff,
-            },
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -309,7 +303,7 @@ export class TaskStateOperationsService {
         throw error;
       }
       console.error(
-        `TaskStateOperationsService Error in handleRoleTransition for task ${params.taskId} to role ${params.roleId}:`,
+        `TaskStateOperationsService Error in handleRoleTransition for task ${params.taskId} to role ${params.toRole}:`,
         error,
       );
       throw new InternalServerErrorException(

@@ -123,8 +123,8 @@ export class TaskCrudOperationsService {
             text: `Task description for ID '${updatedDescription.taskId}' updated successfully.`,
           },
           {
-            type: 'json',
-            json: { ...updatedDescription },
+            type: 'text',
+            text: JSON.stringify(updatedDescription, null, 2),
           },
         ],
       };
