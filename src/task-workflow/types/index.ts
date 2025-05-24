@@ -20,5 +20,15 @@ export interface WorkflowTransitionView {
 }
 
 export interface PrismaErrorHandler {
-  handlePrismaError(error: unknown, taskId: string): never;
+  handlePrismaError(
+    error: unknown,
+    taskId: string,
+    operationContext?: {
+      operation: string;
+      service: string;
+      sliceType?: string;
+      batchId?: string;
+      performanceMs?: number;
+    },
+  ): never;
 }
