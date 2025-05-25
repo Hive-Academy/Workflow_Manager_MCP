@@ -12,6 +12,19 @@ export interface ReportData {
   metrics: ReportMetrics;
   charts: ChartData[];
   recommendations: string[];
+  enhancedInsights?: EnhancedInsight[];
+}
+
+export interface EnhancedInsight {
+  type: string;
+  category: string;
+  title: string;
+  description: string;
+  impact: 'low' | 'medium' | 'high';
+  priority: number; // 1-10, higher is more important
+  confidence: number; // 0-1, confidence in the insight
+  actionableSteps: string[];
+  dataPoints: Record<string, any>;
 }
 
 export interface ReportFilters {

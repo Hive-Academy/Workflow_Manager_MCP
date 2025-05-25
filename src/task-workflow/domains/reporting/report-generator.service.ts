@@ -16,6 +16,7 @@ import {
   ReportFilters,
   ReportMetrics,
 } from './interfaces/report-data.interface';
+import { EnhancedInsightsGeneratorService } from './services/enhanced-insights-generator.service';
 
 /**
  * Report Generator Service
@@ -46,6 +47,7 @@ export class ReportGeneratorService {
     private readonly recommendationEngine: IRecommendationEngineService,
     @Inject('IReportTemplateService')
     private readonly reportTemplate: IReportTemplateService,
+    private readonly enhancedInsightsGenerator: EnhancedInsightsGeneratorService,
   ) {}
 
   /**
@@ -107,7 +109,7 @@ export class ReportGeneratorService {
       ),
     ]);
 
-    return {
+    const reportData: ReportData = {
       title: this.getReportTitle(reportType),
       generatedAt: new Date(),
       dateRange: startDate && endDate ? { startDate, endDate } : undefined,
@@ -115,6 +117,18 @@ export class ReportGeneratorService {
       metrics: allMetrics,
       charts,
       recommendations,
+    };
+
+    // Add enhanced insights to the report data
+    const enhancedInsights =
+      this.enhancedInsightsGenerator.generateEnhancedInsights(
+        reportType,
+        reportData,
+      );
+
+    return {
+      ...reportData,
+      enhancedInsights,
     };
   }
 
@@ -177,6 +191,30 @@ export class ReportGeneratorService {
 
   async cleanupTemporaryFile(filepath: string): Promise<void> {
     return this.reportTemplate.cleanupTemporaryFile(filepath);
+  }
+
+  /**
+   * Generate enhanced insights with smart MCP response
+   * Used by MCP operations service for token-efficient responses
+   */
+  async generateInsightsWithSmartResponse(
+    reportType: ReportType,
+    reportData: ReportData,
+    filePath: string,
+  ): Promise<{
+    insights: import('./services/enhanced-insights-generator.service').EnhancedInsight[];
+    smartResponse: {
+      summary: string;
+      keyInsights: string[];
+      actionableRecommendations: string[];
+      tokenCount: number;
+    };
+  }> {
+    return this.enhancedInsightsGenerator.generateInsightsWithSmartResponse(
+      reportType,
+      reportData,
+      filePath,
+    );
   }
 
   // Private orchestration methods
