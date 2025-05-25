@@ -18,6 +18,7 @@ import { ChartGenerationRefactoredService } from './services/chart-generation-re
 import { RecommendationEngineService } from './services/recommendation-engine.service';
 import { ReportTemplateService } from './services/report-template.service';
 import { ContentGeneratorService } from './services/content-generator.service';
+import { SchemaDrivenIntelligenceService } from './services/schema-driven-intelligence.service';
 
 /**
  * Report Generator Service
@@ -44,6 +45,7 @@ export class ReportGeneratorService {
     private readonly reportTemplate: ReportTemplateService,
     private readonly enhancedInsightsGenerator: EnhancedInsightsGeneratorService,
     private readonly contentGenerator: ContentGeneratorService,
+    private readonly schemaIntelligence: SchemaDrivenIntelligenceService,
   ) {}
 
   /**
@@ -125,9 +127,19 @@ export class ReportGeneratorService {
     // Generate dynamic content using ContentGeneratorService
     const dynamicContent = this.generateDynamicContent(reportType, reportData);
 
-    return {
+    // Generate schema-driven insights for enhanced analysis
+    const schemaInsights = await this.generateSchemaInsights(reportType, {
       ...reportData,
       enhancedInsights,
+      dynamicContent,
+    });
+
+    return {
+      ...reportData,
+      enhancedInsights: [
+        ...(enhancedInsights || []),
+        ...(schemaInsights || []),
+      ],
       dynamicContent,
     };
   }
@@ -171,9 +183,16 @@ export class ReportGeneratorService {
     // Generate dynamic content for individual task reports
     const dynamicContent = this.generateDynamicContent(reportType, reportData);
 
+    // Generate schema-driven insights for individual task reports
+    const schemaInsights = await this.generateSchemaInsights(reportType, {
+      ...reportData,
+      dynamicContent,
+    });
+
     return {
       ...reportData,
       dynamicContent,
+      enhancedInsights: schemaInsights,
     };
   }
 
@@ -254,6 +273,33 @@ export class ReportGeneratorService {
         data,
       ),
     };
+  }
+
+  /**
+   * Generate schema-driven insights using SchemaDrivenIntelligenceService
+   * Provides database schema analysis and intelligent recommendations
+   */
+  private async generateSchemaInsights(
+    reportType: ReportType,
+    data: ReportData,
+  ): Promise<import('./interfaces/report-data.interface').EnhancedInsight[]> {
+    try {
+      // Create a temporary file path for schema analysis (not actually used for file operations)
+      const tempFilePath = `temp-${reportType}-${Date.now()}.html`;
+
+      const schemaResult = await this.schemaIntelligence.generateSchemaInsights(
+        reportType,
+        data,
+        tempFilePath,
+      );
+
+      return schemaResult.enhancedReportData.enhancedInsights || [];
+    } catch (error) {
+      this.logger.warn(
+        `Failed to generate schema insights for ${reportType}: ${error.message}`,
+      );
+      return [];
+    }
   }
 
   // Private orchestration methods
