@@ -12,6 +12,72 @@ import { z } from 'zod';
  * - createMany: Essential for implementation plan subtasks batch creation
  * - updateMany: Critical for batch status updates and bulk modifications
  * - Batch transactions: Ensure data consistency across multiple operations
+ *
+ * 📊 COMPLETE ENTITY FIELD SPECIFICATIONS:
+ *
+ * 🔹 TASK ENTITY - Main workflow tasks
+ *   Required: taskId (string), name (string), status (enum), creationDate (DateTime)
+ *   Optional: completionDate (DateTime), owner (string), currentMode (enum), priority (enum),
+ *            dependencies (string[]), redelegationCount (int), gitBranch (string)
+ *   Relationships: taskDescription (1:1), implementationPlans (1:many), subtasks (1:many),
+ *                 delegationRecords (1:many), researchReports (1:many), codeReviews (1:many),
+ *                 completionReports (1:many), comments (1:many), workflowTransitions (1:many)
+ *
+ * 🔹 TASK DESCRIPTION ENTITY - Detailed specifications
+ *   Required: taskId (string), description (string), createdAt (DateTime), updatedAt (DateTime)
+ *   Optional: businessRequirements (string), technicalRequirements (string), acceptanceCriteria (string[])
+ *   Relationships: task (1:1 required)
+ *
+ * 🔹 IMPLEMENTATION PLAN ENTITY - Technical implementation plans
+ *   Required: taskId (string), overview (string), createdAt (DateTime), updatedAt (DateTime)
+ *   Optional: approach (string), technicalDecisions (string), filesToModify (string[]), createdBy (string)
+ *   Relationships: task (1:1 required), subtasks (1:many)
+ *
+ * 🔹 SUBTASK ENTITY - Granular work items (CRITICAL for batch operations)
+ *   Required: taskId (string), planId (int), name (string), sequenceNumber (int), status (enum)
+ *   Optional: description (string), assignedTo (string), estimatedDuration (string),
+ *            startedAt (DateTime), completedAt (DateTime), batchId (string), batchTitle (string)
+ *   Relationships: task (1:1 required), plan (1:1 required), delegationRecords (1:many), comments (1:many)
+ *
+ * 🔹 RESEARCH REPORT ENTITY - Research findings
+ *   Required: taskId (string), title (string), createdAt (DateTime), updatedAt (DateTime)
+ *   Optional: summary (string), findings (string), recommendations (string), references (string[])
+ *   Relationships: task (1:1 required)
+ *
+ * 🔹 CODE REVIEW REPORT ENTITY - Quality assessments (maps to CodeReview model)
+ *   Required: taskId (string), status (enum), createdAt (DateTime), updatedAt (DateTime)
+ *   Optional: summary (string), strengths (string), issues (string), acceptanceCriteriaVerification (JSON),
+ *            manualTestingResults (string), requiredChanges (string)
+ *   Relationships: task (1:1 required)
+ *
+ * 🔹 COMPLETION REPORT ENTITY - Task completion summaries
+ *   Required: taskId (string), summary (string), createdAt (DateTime)
+ *   Optional: filesModified (string[]), delegationSummary (string), acceptanceCriteriaVerification (JSON)
+ *   Relationships: task (1:1 required)
+ *
+ * 🔹 COMMENT ENTITY - Notes and communications
+ *   Required: taskId (string), mode (enum), content (string), createdAt (DateTime)
+ *   Optional: subtaskId (int)
+ *   Relationships: task (1:1 required), subtask (1:1 optional)
+ *
+ * 🔹 DELEGATION RECORD ENTITY - Role transition tracking (maps to DelegationRecord model)
+ *   Required: taskId (string), fromMode (enum), toMode (enum), delegationTimestamp (DateTime)
+ *   Optional: subtaskId (int), completionTimestamp (DateTime), success (boolean),
+ *            rejectionReason (string), redelegationCount (int)
+ *   Relationships: task (1:1 required), subtask (1:1 optional)
+ *
+ * 🔹 WORKFLOW TRANSITION ENTITY - State change tracking
+ *   Required: taskId (string), fromMode (enum), toMode (enum), transitionTimestamp (DateTime)
+ *   Optional: reason (string)
+ *   Relationships: task (1:1 required)
+ *
+ * 📋 ENUM VALUE SPECIFICATIONS:
+ *
+ * 🔸 TASK STATUS: "not-started" | "in-progress" | "needs-review" | "completed" | "needs-changes" | "paused" | "cancelled"
+ * 🔸 TASK PRIORITY: "Low" | "Medium" | "High" | "Critical"
+ * 🔸 WORKFLOW MODES: "boomerang" | "researcher" | "architect" | "senior-developer" | "code-review"
+ * 🔸 SUBTASK STATUS: "not-started" | "in-progress" | "completed" | "cancelled"
+ * 🔸 CODE REVIEW STATUS: "APPROVED" | "APPROVED_WITH_RESERVATIONS" | "NEEDS_CHANGES"
  */
 
 // ===== OPERATION TYPE DEFINITIONS =====
@@ -63,31 +129,258 @@ export const EntityTypeSchema = z.enum([
 // ===== DATA PAYLOAD SPECIFICATIONS =====
 
 /**
- * 📊 DATA PAYLOAD EXAMPLES BY OPERATION TYPE:
+ * 📊 COMPREHENSIVE DATA PAYLOAD EXAMPLES BY OPERATION TYPE:
  *
- * 🔹 CREATE SINGLE RECORD:
- * - Task: { taskId: "TSK-001", name: "New Task", status: "not-started", priority: "High" }
- * - Subtask: { taskId: "TSK-001", planId: 3, name: "Implement API", description: "...", sequenceNumber: 1, status: "not-started", batchId: "B001" }
+ * 🔹 CREATE SINGLE RECORD EXAMPLES:
  *
- * 🔹 CREATE MANY RECORDS (CRITICAL FOR SUBTASKS):
- * - Subtasks: [
- *     { taskId: "TSK-001", planId: 3, name: "Setup Database", sequenceNumber: 1, batchId: "B001" },
- *     { taskId: "TSK-001", planId: 3, name: "Create API Endpoints", sequenceNumber: 2, batchId: "B001" },
- *     { taskId: "TSK-001", planId: 3, name: "Add Validation", sequenceNumber: 3, batchId: "B001" }
+ * • Task Creation:
+ *   {
+ *     taskId: "TSK-006",
+ *     name: "Implement User Authentication",
+ *     status: "not-started",
+ *     priority: "High",
+ *     currentMode: "boomerang",
+ *     creationDate: "2024-01-15T10:00:00Z",
+ *     gitBranch: "feature/auth-system"
+ *   }
+ *
+ * • Task Description Creation:
+ *   {
+ *     taskId: "TSK-006",
+ *     description: "Implement comprehensive user authentication system with JWT tokens",
+ *     businessRequirements: "Users need secure login/logout functionality",
+ *     technicalRequirements: "JWT tokens, bcrypt hashing, session management",
+ *     acceptanceCriteria: [
+ *       "Users can register with email/password",
+ *       "Users can login with valid credentials",
+ *       "JWT tokens expire after 24 hours",
+ *       "Passwords are securely hashed"
+ *     ]
+ *   }
+ *
+ * • Implementation Plan Creation:
+ *   {
+ *     taskId: "TSK-006",
+ *     overview: "Multi-phase authentication implementation",
+ *     approach: "JWT-based authentication with secure password handling",
+ *     technicalDecisions: "Use bcrypt for hashing, jsonwebtoken for JWT",
+ *     filesToModify: [
+ *       "src/auth/auth.service.ts",
+ *       "src/auth/auth.controller.ts",
+ *       "src/auth/jwt.strategy.ts"
+ *     ],
+ *     createdBy: "architect"
+ *   }
+ *
+ * • Subtask Creation:
+ *   {
+ *     taskId: "TSK-006",
+ *     planId: 4,
+ *     name: "Setup Authentication Module",
+ *     description: "Create auth module with service and controller",
+ *     sequenceNumber: 1,
+ *     status: "not-started",
+ *     assignedTo: "senior-developer",
+ *     estimatedDuration: "2 hours",
+ *     batchId: "B001",
+ *     batchTitle: "Authentication Core"
+ *   }
+ *
+ * • Research Report Creation:
+ *   {
+ *     taskId: "TSK-006",
+ *     title: "Authentication Libraries Research",
+ *     summary: "Comparison of JWT libraries and security best practices",
+ *     findings: "jsonwebtoken is most popular, passport-jwt for NestJS integration",
+ *     recommendations: "Use jsonwebtoken with passport-jwt strategy",
+ *     references: [
+ *       "https://jwt.io/",
+ *       "https://docs.nestjs.com/security/authentication"
+ *     ]
+ *   }
+ *
+ * • Code Review Report Creation:
+ *   {
+ *     taskId: "TSK-006",
+ *     status: "APPROVED",
+ *     summary: "Authentication implementation meets all requirements",
+ *     strengths: "Clean code structure, proper error handling, comprehensive tests",
+ *     issues: "Minor: Consider adding rate limiting",
+ *     acceptanceCriteriaVerification: {
+ *       "Users can register": true,
+ *       "Users can login": true,
+ *       "JWT tokens expire": true,
+ *       "Passwords hashed": true
+ *     },
+ *     manualTestingResults: "All authentication flows tested successfully"
+ *   }
+ *
+ * • Completion Report Creation:
+ *   {
+ *     taskId: "TSK-006",
+ *     summary: "User authentication system successfully implemented",
+ *     filesModified: [
+ *       "src/auth/auth.service.ts",
+ *       "src/auth/auth.controller.ts",
+ *       "src/auth/jwt.strategy.ts",
+ *       "src/auth/auth.module.ts"
+ *     ],
+ *     delegationSummary: "Task completed through architect → senior-developer → code-review workflow",
+ *     acceptanceCriteriaVerification: {
+ *       "registration": "implemented",
+ *       "login": "implemented",
+ *       "jwt_expiry": "configured",
+ *       "password_hashing": "implemented"
+ *     }
+ *   }
+ *
+ * • Comment Creation:
+ *   {
+ *     taskId: "TSK-006",
+ *     mode: "architect",
+ *     content: "Implementation plan ready. Focus on security best practices."
+ *   }
+ *
+ * • Delegation Record Creation:
+ *   {
+ *     taskId: "TSK-006",
+ *     fromMode: "architect",
+ *     toMode: "senior-developer",
+ *     delegationTimestamp: "2024-01-15T11:00:00Z"
+ *   }
+ *
+ * • Workflow Transition Creation:
+ *   {
+ *     taskId: "TSK-006",
+ *     fromMode: "architect",
+ *     toMode: "senior-developer",
+ *     transitionTimestamp: "2024-01-15T11:00:00Z",
+ *     reason: "Implementation plan complete, delegating for development"
+ *   }
+ *
+ * 🔹 CREATE MANY RECORDS (CRITICAL FOR SUBTASKS - Implementation Plan Batch Creation):
+ *
+ * • Subtasks Batch Creation:
+ *   [
+ *     {
+ *       taskId: "TSK-006",
+ *       planId: 4,
+ *       name: "Setup Authentication Module",
+ *       description: "Create auth module with service and controller",
+ *       sequenceNumber: 1,
+ *       status: "not-started",
+ *       assignedTo: "senior-developer",
+ *       estimatedDuration: "2 hours",
+ *       batchId: "B001",
+ *       batchTitle: "Authentication Core"
+ *     },
+ *     {
+ *       taskId: "TSK-006",
+ *       planId: 4,
+ *       name: "Implement JWT Strategy",
+ *       description: "Configure JWT authentication strategy",
+ *       sequenceNumber: 2,
+ *       status: "not-started",
+ *       assignedTo: "senior-developer",
+ *       estimatedDuration: "1.5 hours",
+ *       batchId: "B001",
+ *       batchTitle: "Authentication Core"
+ *     },
+ *     {
+ *       taskId: "TSK-006",
+ *       planId: 4,
+ *       name: "Add Password Hashing",
+ *       description: "Implement bcrypt password hashing",
+ *       sequenceNumber: 3,
+ *       status: "not-started",
+ *       assignedTo: "senior-developer",
+ *       estimatedDuration: "1 hour",
+ *       batchId: "B001",
+ *       batchTitle: "Authentication Core"
+ *     }
  *   ]
  *
- * 🔹 UPDATE SINGLE RECORD:
- * - Task Status: { status: "completed", completionDate: "2024-01-15T10:00:00Z" }
- * - Subtask Progress: { status: "in-progress", startedAt: "2024-01-15T09:00:00Z" }
+ * 🔹 UPDATE SINGLE RECORD EXAMPLES:
+ *
+ * • Task Status Update:
+ *   { status: "completed", completionDate: "2024-01-15T16:00:00Z" }
+ *
+ * • Task Progress Update:
+ *   { status: "in-progress", currentMode: "senior-developer" }
+ *
+ * • Subtask Progress Update:
+ *   { status: "in-progress", startedAt: "2024-01-15T09:00:00Z" }
+ *
+ * • Subtask Completion:
+ *   { status: "completed", completedAt: "2024-01-15T14:00:00Z" }
+ *
+ * • Implementation Plan Update:
+ *   {
+ *     overview: "Updated implementation approach",
+ *     technicalDecisions: "Revised to use different JWT library"
+ *   }
  *
  * 🔹 UPDATE MANY RECORDS (CRITICAL FOR BATCH STATUS UPDATES):
- * - Batch Status Update: { status: "completed", completedAt: "2024-01-15T10:00:00Z" }
- *   (Applied to all records matching where conditions)
+ *
+ * • Batch Status Update (Applied to all records matching where conditions):
+ *   { status: "completed", completedAt: "2024-01-15T14:00:00Z" }
+ *   WHERE: { batchId: "B001" }
+ *
+ * • Bulk Task Assignment:
+ *   { currentMode: "senior-developer", status: "in-progress" }
+ *   WHERE: { status: "not-started", priority: "High" }
+ *
+ * • Bulk Subtask Cancellation:
+ *   { status: "cancelled" }
+ *   WHERE: { taskId: "TSK-006", status: "not-started" }
  *
  * 🔹 RELATIONSHIP OPERATIONS:
- * - Connect Existing: { task: { connect: { taskId: "TSK-001" } } }
- * - Create and Connect: { taskDescription: { create: { description: "...", acceptanceCriteria: [...] } } }
- * - Update Related: { implementationPlans: { update: { where: { id: 3 }, data: { overview: "Updated..." } } } }
+ *
+ * • Connect to Existing Records:
+ *   { task: { connect: { taskId: "TSK-001" } } }
+ *   { plan: { connect: { id: 3 } } }
+ *
+ * • Create and Connect New Records:
+ *   {
+ *     taskDescription: {
+ *       create: {
+ *         description: "Detailed task description",
+ *         acceptanceCriteria: ["Criteria 1", "Criteria 2"]
+ *       }
+ *     }
+ *   }
+ *
+ * • Update Related Records:
+ *   {
+ *     subtasks: {
+ *       updateMany: {
+ *         where: { batchId: "B001" },
+ *         data: { status: "completed" }
+ *       }
+ *     }
+ *   }
+ *
+ * 🔹 UPSERT OPERATIONS (Create if not exists, update if exists):
+ *
+ * • Task Upsert:
+ *   WHERE: { taskId: "TSK-006" }
+ *   CREATE: { taskId: "TSK-006", name: "New Task", status: "not-started" }
+ *   UPDATE: { name: "Updated Task Name", status: "in-progress" }
+ *
+ * • Comment Upsert:
+ *   WHERE: { taskId: "TSK-006", mode: "architect" }
+ *   CREATE: { taskId: "TSK-006", mode: "architect", content: "Initial comment" }
+ *   UPDATE: { content: "Updated comment" }
+ *
+ * 🔹 DELETE OPERATIONS:
+ *
+ * • Single Record Delete:
+ *   WHERE: { id: 25 } (Delete comment with ID 25)
+ *   WHERE: { taskId: "TSK-006" } (Delete task TSK-006)
+ *
+ * • Multiple Records Delete:
+ *   WHERE: { batchId: "B001", status: "cancelled" } (Delete cancelled subtasks in batch)
+ *   WHERE: { taskId: "TSK-006", mode: "error" } (Delete error comments for task)
  */
 export const DataPayloadSchema = z
   .record(z.any())
@@ -135,50 +428,149 @@ export const WhereConditionSchema = z
       '- { plan: { createdBy: "architect" } } - Filter by implementation plan creator',
   );
 
-// Connect/disconnect for relations with comprehensive examples
-export const RelationOperationSchema = z.object({
-  connect: z
-    .record(z.any())
-    .optional()
+// ===== ADVANCED OPERATION SCHEMAS =====
+
+/**
+ * 🔄 BATCH OPERATION CONFIGURATION:
+ *
+ * 🚀 CRITICAL FOR IMPLEMENTATION PLANS:
+ * - Create implementation plan + all subtasks in single transaction
+ * - Update multiple subtask statuses atomically
+ * - Ensure consistency across related operations
+ *
+ * 🔹 EXAMPLE BATCH OPERATIONS:
+ * [
+ *   {
+ *     "operation": "create",
+ *     "entity": "implementationPlan",
+ *     "data": { "taskId": "TSK-005", "overview": "..." }
+ *   },
+ *   {
+ *     "operation": "createMany",
+ *     "entity": "subtask",
+ *     "data": [{ "name": "Subtask 1" }, { "name": "Subtask 2" }]
+ *   }
+ * ]
+ */
+export const BatchOperationSchema = z.object({
+  operations: z
+    .array(
+      z.object({
+        operation: MutationOperationSchema,
+        entity: EntityTypeSchema,
+        data: DataPayloadSchema.optional(),
+        where: WhereConditionSchema.optional(),
+      }),
+    )
     .describe(
-      'Connect to existing related records:\n' +
-        '- { taskId: "TSK-001" } - Connect to existing task\n' +
-        '- { id: 123 } - Connect by primary key\n' +
-        '- { planId: 3 } - Connect to implementation plan',
+      'Array of operations to execute in batch:\n' +
+        '- All operations execute in single transaction\n' +
+        '- Maintains order of operations for dependencies\n' +
+        '- Supports mixed operation types (create, update, delete)',
     ),
-  disconnect: z
-    .record(z.any())
-    .optional()
+  continueOnError: z
+    .boolean()
+    .default(false)
     .describe(
-      'Disconnect from related records:\n' +
-        '- { taskId: "TSK-001" } - Disconnect from task\n' +
-        '- true - Disconnect all (for optional one-to-one relations)',
-    ),
-  create: z
-    .record(z.any())
-    .optional()
-    .describe(
-      'Create and connect new related records:\n' +
-        '- { description: "...", acceptanceCriteria: [...] } - Create task description\n' +
-        '- { content: "New comment", mode: "architect" } - Create comment',
-    ),
-  update: z
-    .record(z.any())
-    .optional()
-    .describe(
-      'Update connected related records:\n' +
-        '- { where: { id: 123 }, data: { status: "updated" } } - Update specific record\n' +
-        '- { data: { status: "completed" } } - Update all connected records',
-    ),
-  delete: z
-    .record(z.any())
-    .optional()
-    .describe(
-      'Delete connected related records:\n' +
-        '- { id: 123 } - Delete specific related record\n' +
-        '- true - Delete all connected records (cascade delete)',
+      'Continue batch if individual operations fail:\n' +
+        '- false (default): Stop on first error, rollback all\n' +
+        '- true: Continue processing, collect all errors',
     ),
 });
+
+/**
+ * 🔒 TRANSACTION CONTROL - Ensure data consistency:
+ *
+ * 🔹 BATCH OPERATION TRANSACTIONS:
+ * - Essential for createMany/updateMany operations
+ * - Ensures all subtasks created/updated together or none
+ * - Prevents partial batch completion on errors
+ *
+ * 🔹 MULTI-ENTITY TRANSACTIONS:
+ * - Group related operations (task + implementation plan + subtasks)
+ * - Maintain referential integrity across entities
+ * - Rollback all changes if any operation fails
+ */
+export const TransactionSchema = z.object({
+  id: z.string().optional().describe('Transaction ID for grouping operations'),
+  timeout: z
+    .number()
+    .optional()
+    .describe('Transaction timeout in milliseconds (default: 30000)'),
+  isolationLevel: z
+    .enum([
+      'ReadUncommitted',
+      'ReadCommitted',
+      'RepeatableRead',
+      'Serializable',
+    ])
+    .optional()
+    .describe(
+      'Transaction isolation level:\n' +
+        '- ReadUncommitted: Fastest, allows dirty reads\n' +
+        '- ReadCommitted: Prevents dirty reads (default)\n' +
+        '- RepeatableRead: Prevents dirty and non-repeatable reads\n' +
+        '- Serializable: Highest isolation, prevents all phenomena',
+    ),
+});
+
+// ===== RESPONSE AND PERFORMANCE SCHEMAS =====
+
+export const ResponseFormatSchema = z.object({
+  format: z
+    .enum(['full', 'summary', 'minimal', 'id-only'])
+    .default('full')
+    .describe(
+      'Response format level:\n' +
+        '- "full": Complete data with all requested fields\n' +
+        '- "summary": Essential fields only\n' +
+        '- "minimal": Basic information\n' +
+        '- "id-only": Just IDs for performance',
+    ),
+  includeAffectedCount: z
+    .boolean()
+    .default(true)
+    .describe('Include count of affected records'),
+  includeValidationErrors: z
+    .boolean()
+    .default(true)
+    .describe('Include validation error details'),
+});
+
+export const PerformanceSchema = z.object({
+  timeout: z.number().max(60000).default(30000).describe('Operation timeout'),
+  bulkMode: z
+    .boolean()
+    .optional()
+    .describe('Use bulk operations when possible'),
+  skipTriggers: z
+    .boolean()
+    .optional()
+    .describe('Skip database triggers for performance'),
+});
+
+export const ValidationSchema = z.object({
+  businessRules: z
+    .boolean()
+    .default(true)
+    .describe('Apply business rule validation'),
+  referentialIntegrity: z
+    .boolean()
+    .default(true)
+    .describe('Check referential integrity'),
+  customValidators: z
+    .array(z.string())
+    .optional()
+    .describe('Custom validator names to apply'),
+});
+
+export const AuditSchema = z.object({
+  userId: z.string().optional().describe('User performing the operation'),
+  reason: z.string().optional().describe('Reason for the change'),
+  metadata: z.record(z.any()).optional().describe('Additional audit metadata'),
+});
+
+// ===== MAIN SCHEMA =====
 
 export const UniversalMutationSchema = z.object({
   operation: MutationOperationSchema.describe('The type of mutation operation'),
@@ -273,413 +665,17 @@ export const UniversalMutationSchema = z.object({
         '- { "plan": { "select": { "overview": true, "createdBy": true } } }',
     ),
 
-  // Transaction support with comprehensive examples
-  transaction: z
-    .object({
-      id: z
-        .string()
-        .optional()
-        .describe('Transaction ID for grouping operations'),
-      isolationLevel: z
-        .enum([
-          'ReadUncommitted',
-          'ReadCommitted',
-          'RepeatableRead',
-          'Serializable',
-        ])
-        .optional()
-        .describe(
-          'Transaction isolation level:\n' +
-            '- ReadUncommitted: Fastest, allows dirty reads\n' +
-            '- ReadCommitted: Prevents dirty reads (default)\n' +
-            '- RepeatableRead: Prevents dirty and non-repeatable reads\n' +
-            '- Serializable: Highest isolation, prevents all phenomena',
-        ),
-      timeout: z
-        .number()
-        .optional()
-        .describe('Transaction timeout in milliseconds (default: 30000)'),
-    })
-    .optional()
-    .describe(
-      '🔒 TRANSACTION CONTROL - Ensure data consistency:\n\n' +
-        '🔹 BATCH OPERATION TRANSACTIONS:\n' +
-        '- Essential for createMany/updateMany operations\n' +
-        '- Ensures all subtasks created/updated together or none\n' +
-        '- Prevents partial batch completion on errors\n\n' +
-        '🔹 MULTI-ENTITY TRANSACTIONS:\n' +
-        '- Group related operations (task + implementation plan + subtasks)\n' +
-        '- Maintain referential integrity across entities\n' +
-        '- Rollback all changes if any operation fails',
-    ),
+  batch: BatchOperationSchema.optional(),
 
-  // Batch operations with comprehensive configuration
-  batch: z
-    .object({
-      operations: z
-        .array(
-          z.object({
-            operation: MutationOperationSchema,
-            entity: EntityTypeSchema,
-            data: DataPayloadSchema.optional(),
-            where: WhereConditionSchema.optional(),
-          }),
-        )
-        .describe(
-          'Array of operations to execute in batch:\n' +
-            '- All operations execute in single transaction\n' +
-            '- Maintains order of operations for dependencies\n' +
-            '- Supports mixed operation types (create, update, delete)',
-        ),
-      continueOnError: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe(
-          'Continue batch if individual operations fail:\n' +
-            '- false (default): Stop on first error, rollback all\n' +
-            '- true: Continue processing, collect all errors',
-        ),
-    })
-    .optional()
-    .describe(
-      '📦 BATCH OPERATION CONFIGURATION:\n\n' +
-        '🚀 CRITICAL FOR IMPLEMENTATION PLANS:\n' +
-        '- Create implementation plan + all subtasks in single transaction\n' +
-        '- Update multiple subtask statuses atomically\n' +
-        '- Ensure consistency across related operations\n\n' +
-        '🔹 EXAMPLE BATCH OPERATIONS:\n' +
-        '[\n' +
-        '  {\n' +
-        '    "operation": "create",\n' +
-        '    "entity": "implementationPlan",\n' +
-        '    "data": { "taskId": "TSK-005", "overview": "..." }\n' +
-        '  },\n' +
-        '  {\n' +
-        '    "operation": "createMany",\n' +
-        '    "entity": "subtask",\n' +
-        '    "data": [{ "name": "Subtask 1" }, { "name": "Subtask 2" }]\n' +
-        '  }\n' +
-        ']',
-    ),
+  transaction: TransactionSchema.optional(),
 
-  // Validation and constraints
-  validate: z
-    .object({
-      businessRules: z
-        .boolean()
-        .optional()
-        .default(true)
-        .describe('Apply business rule validation'),
-      referentialIntegrity: z
-        .boolean()
-        .optional()
-        .default(true)
-        .describe('Check referential integrity'),
-      customValidators: z
-        .array(z.string())
-        .optional()
-        .describe('Custom validator names to apply'),
-    })
-    .optional()
-    .describe('Validation options'),
+  response: ResponseFormatSchema.optional(),
 
-  // Audit and tracking
-  audit: z
-    .object({
-      userId: z.string().optional().describe('User performing the operation'),
-      reason: z.string().optional().describe('Reason for the change'),
-      metadata: z
-        .record(z.any())
-        .optional()
-        .describe('Additional audit metadata'),
-    })
-    .optional()
-    .describe('Audit trail information'),
+  performance: PerformanceSchema.optional(),
 
-  // Performance options
-  performance: z
-    .object({
-      skipTriggers: z
-        .boolean()
-        .optional()
-        .describe('Skip database triggers for performance'),
-      bulkMode: z
-        .boolean()
-        .optional()
-        .describe('Use bulk operations when possible'),
-      timeout: z
-        .number()
-        .max(60000)
-        .optional()
-        .default(30000)
-        .describe('Operation timeout'),
-    })
-    .optional()
-    .describe('Performance optimization options'),
+  validate: ValidationSchema.optional(),
 
-  // Response control
-  response: z
-    .object({
-      format: z
-        .enum(['full', 'summary', 'minimal', 'id-only'])
-        .optional()
-        .default('full')
-        .describe(
-          'Response format level:\n' +
-            '- "full": Complete data with all requested fields\n' +
-            '- "summary": Essential fields only\n' +
-            '- "minimal": Basic information\n' +
-            '- "id-only": Just IDs for performance',
-        ),
-      includeAffectedCount: z
-        .boolean()
-        .optional()
-        .default(true)
-        .describe('Include count of affected records'),
-      includeValidationErrors: z
-        .boolean()
-        .optional()
-        .default(true)
-        .describe('Include validation error details'),
-    })
-    .optional()
-    .describe('Response formatting options'),
+  audit: AuditSchema.optional(),
 });
 
 export type UniversalMutationInput = z.infer<typeof UniversalMutationSchema>;
-
-/**
- * 🚀 COMPREHENSIVE MUTATION EXAMPLES
- *
- * ===== CRITICAL BATCH OPERATIONS =====
- *
- * 🔹 CREATE MANY SUBTASKS (Implementation Plan Creation):
- * {
- *   "operation": "createMany",
- *   "entity": "subtask",
- *   "data": [
- *     {
- *       "taskId": "TSK-005",
- *       "planId": 3,
- *       "name": "Enhance Universal Query Schema Documentation",
- *       "description": "Add comprehensive field specifications for all 10 entities...",
- *       "sequenceNumber": 1,
- *       "status": "not-started",
- *       "assignedTo": "senior-developer",
- *       "estimatedDuration": "30 minutes",
- *       "batchId": "B001",
- *       "batchTitle": "Schema File Enhancement"
- *     },
- *     {
- *       "taskId": "TSK-005",
- *       "planId": 3,
- *       "name": "Enhance Universal Mutation Schema Documentation",
- *       "description": "Document all mutation operations with complete examples...",
- *       "sequenceNumber": 2,
- *       "status": "not-started",
- *       "assignedTo": "senior-developer",
- *       "estimatedDuration": "25 minutes",
- *       "batchId": "B001",
- *       "batchTitle": "Schema File Enhancement"
- *     },
- *     {
- *       "taskId": "TSK-005",
- *       "planId": 3,
- *       "name": "Enhance Workflow Operations Schema Documentation",
- *       "description": "Complete workflow operation documentation with examples...",
- *       "sequenceNumber": 3,
- *       "status": "not-started",
- *       "assignedTo": "senior-developer",
- *       "estimatedDuration": "20 minutes",
- *       "batchId": "B001",
- *       "batchTitle": "Schema File Enhancement"
- *     }
- *   ],
- *   "transaction": {
- *     "isolationLevel": "ReadCommitted",
- *     "timeout": 30000
- *   },
- *   "response": {
- *     "format": "summary",
- *     "includeAffectedCount": true
- *   }
- * }
- *
- * 🔹 UPDATE MANY SUBTASKS (Batch Status Update):
- * {
- *   "operation": "updateMany",
- *   "entity": "subtask",
- *   "where": {
- *     "batchId": "B001"
- *   },
- *   "data": {
- *     "status": "completed",
- *     "completedAt": "2024-01-15T10:00:00Z"
- *   },
- *   "include": {
- *     "task": {
- *       "select": { "taskId": true, "name": true }
- *     }
- *   },
- *   "response": {
- *     "format": "summary",
- *     "includeAffectedCount": true
- *   }
- * }
- *
- * 🔹 BATCH TRANSACTION (Implementation Plan + Subtasks):
- * {
- *   "batch": {
- *     "operations": [
- *       {
- *         "operation": "create",
- *         "entity": "implementationPlan",
- *         "data": {
- *           "taskId": "TSK-006",
- *           "overview": "Comprehensive implementation plan...",
- *           "approach": "Batch-based implementation methodology...",
- *           "technicalDecisions": "Key architectural choices...",
- *           "createdBy": "architect",
- *           "filesToModify": ["file1.ts", "file2.ts"]
- *         }
- *       },
- *       {
- *         "operation": "createMany",
- *         "entity": "subtask",
- *         "data": [
- *           {
- *             "taskId": "TSK-006",
- *             "planId": 4,
- *             "name": "Backend Core APIs",
- *             "sequenceNumber": 1,
- *             "batchId": "B001"
- *           },
- *           {
- *             "taskId": "TSK-006",
- *             "planId": 4,
- *             "name": "Frontend Components",
- *             "sequenceNumber": 2,
- *             "batchId": "B002"
- *           }
- *         ]
- *       }
- *     ],
- *     "continueOnError": false
- *   },
- *   "transaction": {
- *     "isolationLevel": "ReadCommitted"
- *   }
- * }
- *
- * ===== SINGLE RECORD OPERATIONS =====
- *
- * 🔹 CREATE TASK WITH DESCRIPTION:
- * {
- *   "operation": "create",
- *   "entity": "task",
- *   "data": {
- *     "taskId": "TSK-007",
- *     "name": "Implement User Authentication",
- *     "status": "not-started",
- *     "priority": "High",
- *     "currentMode": "boomerang",
- *     "taskDescription": {
- *       "create": {
- *         "description": "Implement secure user authentication system...",
- *         "businessRequirements": "Users need secure login...",
- *         "technicalRequirements": "JWT tokens, bcrypt hashing...",
- *         "acceptanceCriteria": [
- *           "Users can register with email/password",
- *           "Users can login securely",
- *           "JWT tokens expire appropriately"
- *         ]
- *       }
- *     }
- *   },
- *   "include": {
- *     "taskDescription": true
- *   }
- * }
- *
- * 🔹 UPDATE TASK STATUS:
- * {
- *   "operation": "update",
- *   "entity": "task",
- *   "where": {
- *     "taskId": "TSK-005"
- *   },
- *   "data": {
- *     "status": "completed",
- *     "completionDate": "2024-01-15T10:00:00Z",
- *     "currentMode": null
- *   },
- *   "select": {
- *     "taskId": true,
- *     "name": true,
- *     "status": true,
- *     "completionDate": true
- *   }
- * }
- *
- * 🔹 UPSERT OPERATION:
- * {
- *   "operation": "upsert",
- *   "entity": "comment",
- *   "where": {
- *     "taskId": "TSK-005",
- *     "mode": "architect"
- *   },
- *   "data": {
- *     "create": {
- *       "taskId": "TSK-005",
- *       "mode": "architect",
- *       "content": "Implementation plan created successfully"
- *     },
- *     "update": {
- *       "content": "Implementation plan updated with new requirements"
- *     }
- *   }
- * }
- *
- * ===== ADVANCED OPERATIONS =====
- *
- * 🔹 DELETE MANY (Cleanup Operations):
- * {
- *   "operation": "deleteMany",
- *   "entity": "comment",
- *   "where": {
- *     "AND": [
- *       { "createdAt": { "lt": "2024-01-01T00:00:00Z" } },
- *       { "mode": "system" }
- *     ]
- *   },
- *   "response": {
- *     "format": "id-only",
- *     "includeAffectedCount": true
- *   }
- * }
- *
- * 🔹 COMPLEX RELATIONSHIP UPDATE:
- * {
- *   "operation": "update",
- *   "entity": "implementationPlan",
- *   "where": {
- *     "taskId": "TSK-005"
- *   },
- *   "data": {
- *     "overview": "Updated implementation approach",
- *     "subtasks": {
- *       "updateMany": {
- *         "where": { "status": "not-started" },
- *         "data": { "assignedTo": "senior-developer" }
- *       }
- *     }
- *   },
- *   "include": {
- *     "subtasks": {
- *       "where": { "status": "not-started" }
- *     }
- *   }
- * }
- */
