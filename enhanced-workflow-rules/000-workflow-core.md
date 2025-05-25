@@ -55,7 +55,7 @@ BEFORE starting any role work:
 
 **Always use MCP-first approach with minimal token usage:**
 
-- **Start each role by retrieving context**: `get_task_context` with appropriate taskId
+- **Start each role by retrieving context**: `query_data` with comprehensive entity includes
 - **Use MCP for data persistence**, not for verbose communication in responses
 - **Reference MCP data instead of repeating information** in messages to user
 - **Focus on completion-driven workflow** rather than frequent status updates
@@ -79,7 +79,7 @@ BEFORE starting any role work:
 - **Architect**: Creates implementation plans with logical batches of related subtasks (3-8 per batch)
 - **Senior Developer**: Implements entire batches, not individual subtasks
 - **Batch Dependencies**: Respect batch sequencing and dependencies strictly
-- **Batch Completion**: Use `check_batch_status` to verify batch completion before proceeding
+- **Batch Completion**: Use `query_data` to verify batch completion status before proceeding
 
 ### Rule 4: Enhanced Quality Standards (NEW)
 
@@ -146,7 +146,12 @@ Before adding a note, ask:
 **Step 1: Essential Context and Checks (2-3 MCP calls max)**
 
 ```
-1. Check existing tasks: list_tasks (status: "in-progress", includeCompleted: false)
+1. Check existing tasks: query_data({
+   entity: "task",
+   where: { status: "in-progress" },
+   select: { id: true, name: true, status: true },
+   pagination: { take: 10 }
+})
 2. If tasks exist → ask user what to do before proceeding
 3. Memory Bank Analysis (MANDATORY): Verify and extract from ProjectOverview.md, TechnicalArchitecture.md, DeveloperGuide.md
 ```
@@ -172,10 +177,31 @@ Before adding a note, ask:
 
 ```
 4. Evaluate research necessity using decision framework
-5. Create task with comprehensive details: create_task
-   - Include all acceptance criteria (functional, technical, quality, regression)
-   - Set taskId format: TSK-001, TSK-002, etc.
-6. Delegate appropriately with minimal message
+5. Create task with comprehensive details: mutate_data({
+   operation: "create",
+   entity: "task",
+   data: {
+     id: "TSK-001", // Sequential format
+     name: "Clear, descriptive name",
+     status: "not-started",
+     taskDescription: {
+       create: {
+         description: "Comprehensive what/why/how analysis",
+         businessRequirements: "Why this matters from business perspective",
+         technicalRequirements: "Technical constraints and considerations",
+         acceptanceCriteria: ["Array of specific, testable criteria"]
+       }
+     }
+   },
+   include: { taskDescription: true }
+})
+6. Delegate appropriately: workflow_operations({
+   operation: "delegate",
+   taskId: "TSK-001",
+   fromRole: "boomerang",
+   toRole: "researcher" | "architect",
+   message: "Minimal delegation message"
+})
 ```
 
 **Total MCP calls: 4-6 maximum**
@@ -194,7 +220,15 @@ Before adding a note, ask:
 **Step 1: Context Retrieval (1 MCP call)**
 
 ```
-1. Get task context: get_task_context (taskId, sliceType: "FULL")
+1. Get task context: query_data({
+   entity: "task",
+   where: { id: taskId },
+   include: {
+     taskDescription: true,
+     implementationPlans: true,
+     researchReports: true
+   }
+})
 ```
 
 **Step 2: Comprehensive Research (0 MCP calls)**
@@ -208,9 +242,25 @@ Before adding a note, ask:
 **Step 3: Report & Return (2 MCP calls)**
 
 ```
-4. Create research report: create_research_report with comprehensive findings
-5. Brief completion note: add_task_note (only if essential for next role)
-6. Return to Boomerang with minimal handoff message
+4. Create research report: mutate_data({
+   operation: "create",
+   entity: "researchReport",
+   data: {
+     taskId: taskId,
+     title: "Research Report Title",
+     summary: "Key findings summary",
+     findings: "Comprehensive research results",
+     recommendations: "Actionable recommendations",
+     references: ["Array of sources"]
+   }
+})
+5. Return to Boomerang: workflow_operations({
+   operation: "delegate",
+   taskId: taskId,
+   fromRole: "researcher",
+   toRole: "boomerang",
+   message: "Research complete. Key findings: [brief summary]."
+})
 ```
 
 **Total MCP calls: 3 maximum**
@@ -229,27 +279,56 @@ Before adding a note, ask:
 **Step 1: Context & Planning (1-2 MCP calls)**
 
 ```
-1. Get full context: get_task_context (taskId, sliceType: "FULL")
-2. If research exists: get_research_report (taskId)
+1. Get full context: query_data({
+   entity: "task",
+   where: { id: taskId },
+   include: {
+     taskDescription: true,
+     researchReports: true,
+     implementationPlans: true
+   }
+})
+2. If research exists: Already included in query above
 ```
 
 **Step 2: Implementation Plan Creation with Technical Standards (1 MCP call)**
 
 ```
-3. Create comprehensive implementation plan: create_implementation_plan with:
-   - SOLID principles integration requirements
-   - Design pattern specifications with examples
-   - Code quality standards and verification methods
-   - Security requirements and validation approaches
-   - Logical batch organization (3-8 subtasks per batch)
-   - Clear batch dependencies and integration points
-   - Detailed subtask specifications with quality gates
+3. Create comprehensive implementation plan: mutate_data({
+   operation: "create",
+   entity: "implementationPlan",
+   data: {
+     taskId: taskId,
+     overview: "Technical summary",
+     approach: "Batch-based implementation methodology",
+     technicalDecisions: "Key architectural choices",
+     createdBy: "architect",
+     filesToModify: ["Array of files"],
+     batches: [
+       {
+         id: "B001",
+         title: "Backend Core APIs",
+         description: "Core API endpoints and data layer",
+         dependsOn: [],
+         subtasks: ["3-8 related backend subtasks"]
+       }
+       // Additional batches...
+     ]
+   },
+   include: { subtasks: true }
+})
 ```
 
 **Step 3: Batch Delegation (1 MCP call)**
 
 ```
-4. Delegate first batch to Senior Developer with efficient message
+4. Delegate first batch: workflow_operations({
+   operation: "delegate",
+   taskId: taskId,
+   fromRole: "architect",
+   toRole: "senior-developer",
+   message: "Implement batch B001. Focus on [batch purpose]."
+})
 ```
 
 **Total MCP calls: 3-4 maximum**
@@ -268,7 +347,17 @@ Before adding a note, ask:
 **Step 1: Batch Context Retrieval (1 MCP call)**
 
 ```
-1. Get implementation plan: get_task_context (taskId, sliceType: "FULL")
+1. Get implementation plan: query_data({
+   entity: "task",
+   where: { id: taskId },
+   include: {
+     taskDescription: true,
+     implementationPlans: {
+       include: { subtasks: true }
+     },
+     researchReports: true
+   }
+})
 ```
 
 **Step 2: Complete Batch Implementation with Technical Excellence (0 MCP calls during implementation)**
@@ -287,14 +376,30 @@ Before adding a note, ask:
 **Step 3: Batch Completion Verification (1 MCP call)**
 
 ```
-3. Verify batch complete: check_batch_status (taskId, batchId)
+3. Update batch status: mutate_data({
+   operation: "update",
+   entity: "implementationPlan",
+   where: { taskId: taskId },
+   data: {
+     batches: {
+       updateMany: {
+         where: { id: "B001" },
+         data: { status: "completed" }
+       }
+     }
+   }
+})
 ```
 
 **Step 4: Completion Reporting (1 MCP call - only if essential)**
 
 ```
-4. Add completion note ONLY if essential for workflow continuity:
-   "Batch B001 complete for TSK-[X]. [Technical excellence summary]. Ready for next batch or review."
+4. Add completion note ONLY if essential: workflow_operations({
+   operation: "transition",
+   taskId: taskId,
+   newStatus: "batch-completed",
+   notes: "Batch B001 complete. Technical excellence summary. Ready for next batch or review."
+})
 ```
 
 **Batch Continuation Pattern:**
@@ -318,7 +423,18 @@ Before adding a note, ask:
 **Step 1: Full Context Review (1 MCP call)**
 
 ```
-1. Get complete context: get_task_context (taskId, sliceType: "FULL")
+1. Get complete context: query_data({
+   entity: "task",
+   where: { id: taskId },
+   include: {
+     taskDescription: true,
+     implementationPlans: {
+       include: { subtasks: true }
+     },
+     researchReports: true,
+     reviewReports: true
+   }
+})
 ```
 
 **Step 2: Comprehensive Review with Mandatory Manual Testing (0 MCP calls during review)**
@@ -337,16 +453,28 @@ Before adding a note, ask:
 **Step 3: Review Report & Decision (2 MCP calls)**
 
 ```
-3. Create comprehensive review report: create_code_review_report with:
-   - Detailed manual testing results with evidence
-   - Acceptance criteria verification status with proof
-   - Technical quality assessment with specific findings
-   - Security and performance validation results
-   - Issues categorized by severity (CRITICAL/MAJOR/MINOR/SUGGESTIONS)
+3. Create comprehensive review report: mutate_data({
+   operation: "create",
+   entity: "reviewReport",
+   data: {
+     taskId: taskId,
+     status: "APPROVED" | "APPROVED_WITH_RESERVATIONS" | "NEEDS_CHANGES",
+     summary: "Overall assessment",
+     acceptanceCriteriaVerification: { /* JSON verification results */ },
+     testingResults: "Comprehensive manual testing outcomes",
+     issuesFound: ["Categorized issues with severity"],
+     recommendations: "Specific next steps and improvements",
+     evidence: "Supporting documentation and test results"
+   }
+})
 
-4. Add completion note (essential): add_task_note with review status:
-   "Code review complete for TSK-[X]. Status: [APPROVED/APPROVED_WITH_RESERVATIONS/NEEDS_CHANGES].
-   [Brief key findings]. Comprehensive evidence in MCP report."
+4. Complete review workflow: workflow_operations({
+   operation: "delegate",
+   taskId: taskId,
+   fromRole: "code-review",
+   toRole: "boomerang",
+   message: "Code review complete. Status: [STATUS]. [Brief key findings]."
+})
 ```
 
 **Total MCP calls: 3 maximum**
@@ -365,7 +493,19 @@ Before adding a note, ask:
 **Step 1: Final Verification (1 MCP call)**
 
 ```
-1. Get complete context: get_task_context (taskId, sliceType: "FULL")
+1. Get complete context: query_data({
+   entity: "task",
+   where: { id: taskId },
+   include: {
+     taskDescription: true,
+     implementationPlans: {
+       include: { subtasks: true }
+     },
+     researchReports: true,
+     reviewReports: true,
+     completionReports: true
+   }
+})
 ```
 
 **Step 2: Acceptance Criteria Verification (0 MCP calls)**
@@ -379,8 +519,27 @@ Before adding a note, ask:
 **Step 3: Completion & Delivery (2 MCP calls)**
 
 ```
-4. Create completion report: create_completion_report with comprehensive summary
-5. Final status update: update_task_status (status: "completed", completionDate: current date)
+4. Create completion report: mutate_data({
+   operation: "create",
+   entity: "completionReport",
+   data: {
+     taskId: taskId,
+     summary: "Concise accomplishment summary",
+     delegationSummary: "Efficient workflow execution summary",
+     acceptanceCriteriaVerification: { /* JSON verification results */ },
+     filesModified: ["Array of changed files"]
+   }
+})
+
+5. Final status update: workflow_operations({
+   operation: "complete",
+   taskId: taskId,
+   fromRole: "boomerang",
+   completionData: {
+     status: "completed",
+     completedAt: new Date().toISOString()
+   }
+})
 ```
 
 **Step 4: User Delivery (0 MCP calls)**
@@ -438,9 +597,8 @@ Before adding a note, ask:
 - Boomerang (Final): 3 calls maximum
 
 **Essential vs. Avoid:**
-✅ Essential: get_task_context, create_task, create_implementation_plan, create_research_report,
-           create_code_review_report, create_completion_report, check_batch_status
-❌ Avoid: Frequent update_task_status, excessive add_task_note calls, redundant context retrievals
+✅ Essential: query_data, mutate_data, workflow_operations
+❌ Avoid: Frequent status updates, excessive notes, redundant context retrievals
 ```
 
 ## Error Handling & Recovery
@@ -461,8 +619,8 @@ Before adding a note, ask:
 
 ### If Batch Workflow Breaks Down
 
-1. Use get_task_context to check current implementation plan
-2. Use check_batch_status to verify batch completion status
+1. Use query_data to check current implementation plan status
+2. Use query_data to verify batch completion status
 3. Resume appropriate batch-based workflow with quality gates
 4. Ensure batch dependencies and technical standards are respected
 
@@ -482,10 +640,16 @@ Before adding a note, ask:
 The enhanced Cursor workflow maintains the same rigorous quality standards as the roo system while operating as a single-agent with MCP integration. The critical success factors are:
 
 1. **ALWAYS load role-specific rules** before proceeding with role work
-2. **Use MCP efficiently** for data persistence and workflow management
+2. **Use MCP efficiently** with universal tools for data persistence and workflow management
 3. **Enforce comprehensive quality standards** including manual testing and technical excellence
 4. **Manage notes efficiently** to minimize token usage while maintaining workflow continuity
 5. **Apply batch-based organization** with proper dependencies and integration
 6. **Document evidence** for all quality gates and acceptance criteria satisfaction
 
-Remember: **Success depends on loading complete role instructions and following enhanced quality standards while maintaining efficient MCP integration and token usage.**
+**Universal MCP Tools Used:**
+
+- **`query_data`**: Universal querying with full Prisma filtering capabilities
+- **`mutate_data`**: Universal mutations with transaction support and relation management
+- **`workflow_operations`**: Specialized workflow state management with role delegation
+
+Remember: **Success depends on loading complete role instructions and following enhanced quality standards while maintaining efficient MCP integration and token usage with the powerful universal tools.**
