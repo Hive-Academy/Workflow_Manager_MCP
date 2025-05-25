@@ -19,6 +19,7 @@ import { RecommendationEngineService } from './services/recommendation-engine.se
 import { ReportTemplateService } from './services/report-template.service';
 import { ContentGeneratorService } from './services/content-generator.service';
 import { SchemaDrivenIntelligenceService } from './services/schema-driven-intelligence.service';
+import { SmartResponseSummarizationService } from './services/smart-response-summarization.service';
 
 /**
  * Report Generator Service
@@ -46,6 +47,7 @@ export class ReportGeneratorService {
     private readonly enhancedInsightsGenerator: EnhancedInsightsGeneratorService,
     private readonly contentGenerator: ContentGeneratorService,
     private readonly schemaIntelligence: SchemaDrivenIntelligenceService,
+    private readonly smartSummarization: SmartResponseSummarizationService,
   ) {}
 
   /**
@@ -237,10 +239,48 @@ export class ReportGeneratorService {
       tokenCount: number;
     };
   }> {
-    return this.enhancedInsightsGenerator.generateInsightsWithSmartResponse(
+    // Get enhanced insights from the insights generator
+    const insightsResult =
+      await this.enhancedInsightsGenerator.generateInsightsWithSmartResponse(
+        reportType,
+        reportData,
+        filePath,
+      );
+
+    // Generate optimized smart summary using SmartResponseSummarizationService
+    const smartSummary = await this.smartSummarization.createOptimizedSummary(
       reportType,
       reportData,
       filePath,
+    );
+
+    // Combine insights with optimized smart response
+    return {
+      insights: insightsResult.insights,
+      smartResponse: smartSummary,
+    };
+  }
+
+  /**
+   * Generate smart summary for MCP responses
+   * Creates token-efficient summaries that direct users to comprehensive reports
+   */
+  async generateSmartSummary(
+    reportType: ReportType,
+    reportData: ReportData,
+    filePath: string,
+    maxTokens: number = 200,
+  ): Promise<{
+    summary: string;
+    keyInsights: string[];
+    actionableRecommendations: string[];
+    tokenCount: number;
+  }> {
+    return this.smartSummarization.createOptimizedSummary(
+      reportType,
+      reportData,
+      filePath,
+      maxTokens,
     );
   }
 
