@@ -13,6 +13,72 @@ import { z } from 'zod';
  * - complete: Critical for task completion with evidence tracking
  * - transition: Important for status changes with workflow validation
  * - escalate: Necessary for handling blockers and quality issues
+ *
+ * 📊 COMPLETE WORKFLOW FIELD SPECIFICATIONS:
+ *
+ * 🔹 WORKFLOW OPERATION TYPES (operation):
+ * - delegate: Hand off task/subtask between roles (ESSENTIAL)
+ * - complete: Mark work completed with evidence (CRITICAL)
+ * - transition: Change status with validation (IMPORTANT)
+ * - escalate: Handle issues and blockers (NECESSARY)
+ * - reassign: Change assignment within/across roles
+ * - pause: Temporarily suspend work (preserves context)
+ * - resume: Resume paused work (restores context)
+ * - cancel: Terminate task entirely (requires cleanup)
+ *
+ * 🔹 WORKFLOW ROLES (fromRole/toRole):
+ * - boomerang: Task coordination, intake, final delivery (ENTRY/EXIT)
+ * - researcher: Knowledge gathering, analysis (KNOWLEDGE specialist)
+ * - architect: Technical planning, design (DESIGN specialist)
+ * - senior-developer: Implementation, coding (IMPLEMENTATION specialist)
+ * - code-review: Quality assurance, testing (QUALITY specialist)
+ *
+ * 🔹 TASK STATUS VALUES (newStatus):
+ * - not-started: Initial state, awaiting assignment
+ * - in-progress: Active work by assigned role
+ * - needs-review: Work complete, awaiting quality review
+ * - completed: All work finished and approved
+ * - needs-changes: Review identified required fixes
+ * - paused: Work temporarily suspended
+ * - cancelled: Task terminated with cleanup
+ *
+ * 🔹 COMPLETION DATA FIELDS (completionData):
+ * - summary: Work accomplishment summary (REQUIRED)
+ * - evidence: Supporting documentation and proof
+ * - filesModified: Array of changed files
+ * - acceptanceCriteriaVerification: JSON verification results
+ *
+ * 🔹 REJECTION DATA FIELDS (rejectionData):
+ * - reason: Rejection explanation (REQUIRED)
+ * - severity: Issue severity (low/medium/high/critical)
+ * - requiredChanges: Specific change requirements
+ * - blockers: Array of blocking issues
+ *
+ * 🔹 SCHEDULING FIELDS (scheduling):
+ * - deadline: ISO date deadline for operation
+ * - estimatedDuration: Time estimate for operation
+ * - priority: Operation priority (low/medium/high/urgent)
+ * - scheduleFor: ISO date to schedule operation
+ *
+ * 🔹 CONSTRAINT FIELDS (constraints):
+ * - forceTransition: Force invalid transitions (default: false)
+ * - allowSkipValidation: Skip validation checks (default: false)
+ * - createAuditTrail: Create audit entry (default: true)
+ * - notifyStakeholders: Send notifications (default: true)
+ *
+ * 🔹 BATCH OPERATION FIELDS (batch):
+ * - taskIds: Array of task IDs for batch operations
+ * - parallelExecution: Execute in parallel (default: false)
+ * - continueOnError: Continue if individual ops fail (default: false)
+ *
+ * 🔹 CONDITION FIELDS (conditions):
+ * - requiredRole: Required current role for operation
+ * - requiredStatus: Required current status for operation
+ * - customConditions: Array of custom condition checks
+ *
+ * 🔹 METADATA FIELDS (metadata):
+ * - Additional operation-specific data as key-value pairs
+ * - Used for custom workflow extensions and integrations
  */
 
 // ===== WORKFLOW OPERATION DEFINITIONS =====
@@ -106,6 +172,382 @@ export const TaskStatusSchema = z.enum([
   'cancelled', // ❌ Terminated
 ]);
 
+/**
+ * 📋 COMPLETION DATA SCHEMA:
+ * Comprehensive data structure for task/operation completion
+ */
+export const CompletionDataSchema = z.object({
+  summary: z
+    .string()
+    .describe(
+      '📝 COMPLETION SUMMARY - Concise description of work accomplished (REQUIRED):\n\n' +
+        '🔹 EFFECTIVE SUMMARY PATTERNS:\n' +
+        '- "Research complete: Evaluated 5 options, recommended React Query for state management"\n' +
+        '- "Implementation complete: All 8 subtasks finished, manual testing passed"\n' +
+        '- "Code review complete: APPROVED - All acceptance criteria verified"\n' +
+        '- "Architecture complete: Implementation plan created with 3 batches, 12 subtasks"\n\n' +
+        '🔹 SUMMARY REQUIREMENTS:\n' +
+        '- Specific accomplishments with quantifiable results\n' +
+        '- Key decisions made and rationale\n' +
+        '- Quality verification status\n' +
+        '- Next steps or handoff information',
+    ),
+
+  evidence: z
+    .record(z.any())
+    .optional()
+    .describe(
+      '📊 COMPLETION EVIDENCE - Supporting documentation and proof of completion:\n\n' +
+        '🔹 EVIDENCE TYPES:\n' +
+        '- testResults: { "manual": "passed", "unit": "98% coverage", "integration": "all passed" }\n' +
+        '- codeMetrics: { "linesAdded": 245, "filesModified": 8, "complexity": "low" }\n' +
+        '- qualityChecks: { "linting": "passed", "security": "no issues", "performance": "optimized" }\n' +
+        '- acceptanceCriteria: { "criterion1": "verified", "criterion2": "verified" }\n\n' +
+        '🔹 EVIDENCE STRUCTURE:\n' +
+        '- Key-value pairs with descriptive keys\n' +
+        '- Quantifiable metrics where possible\n' +
+        '- Status indicators (passed/failed/verified)\n' +
+        '- Supporting data and measurements',
+    ),
+
+  filesModified: z
+    .array(z.string())
+    .optional()
+    .describe(
+      '📁 FILES MODIFIED - Array of files changed during the operation:\n\n' +
+        '🔹 FILE PATH EXAMPLES:\n' +
+        '- ["src/components/UserDashboard.tsx", "src/services/api.service.ts"]\n' +
+        '- ["docs/implementation-plan.md", "tests/integration/api.test.ts"]\n' +
+        '- ["schema/universal-query.schema.ts", "descriptions/query.description.ts"]\n\n' +
+        '🔹 PATH REQUIREMENTS:\n' +
+        '- Relative paths from project root\n' +
+        '- Include all significant file changes\n' +
+        '- Group related changes logically\n' +
+        '- Exclude temporary or generated files',
+    ),
+
+  acceptanceCriteriaVerification: z
+    .record(z.any())
+    .optional()
+    .describe(
+      '✅ ACCEPTANCE CRITERIA VERIFICATION - JSON verification results:\n\n' +
+        '🔹 VERIFICATION STRUCTURE:\n' +
+        '- { "criterion1": { "status": "verified", "evidence": "Manual testing passed" } }\n' +
+        '- { "criterion2": { "status": "verified", "evidence": "Code review approved" } }\n' +
+        '- { "criterion3": { "status": "pending", "reason": "Awaiting deployment" } }\n\n' +
+        '🔹 VERIFICATION STATUSES:\n' +
+        '- "verified": Criterion fully satisfied with evidence\n' +
+        '- "partial": Partially satisfied, needs completion\n' +
+        '- "pending": Awaiting verification or dependencies\n' +
+        '- "failed": Criterion not met, requires attention',
+    ),
+});
+
+/**
+ * 📋 REJECTION DATA SCHEMA:
+ * Comprehensive data structure for escalation and rejection handling
+ */
+export const RejectionDataSchema = z.object({
+  reason: z
+    .string()
+    .describe(
+      '❌ REJECTION REASON - Clear explanation for rejection or escalation (REQUIRED):\n\n' +
+        '🔹 EFFECTIVE REJECTION REASONS:\n' +
+        '- "Security vulnerability: SQL injection risk in user input validation"\n' +
+        '- "Performance issue: API response time exceeds 2s requirement"\n' +
+        '- "Missing functionality: User authentication not implemented"\n' +
+        '- "Code quality: Violates SOLID principles, needs refactoring"\n\n' +
+        '🔹 REASON REQUIREMENTS:\n' +
+        '- Specific issue identification\n' +
+        '- Impact assessment\n' +
+        '- Reference to standards or requirements\n' +
+        '- Actionable feedback for resolution',
+    ),
+
+  severity: z
+    .enum(['low', 'medium', 'high', 'critical'])
+    .optional()
+    .describe(
+      '⚠️ ISSUE SEVERITY - Impact level of the rejection or escalation:\n\n' +
+        '🔹 SEVERITY LEVELS:\n' +
+        '- "low": Minor issues, cosmetic problems, non-blocking\n' +
+        '- "medium": Functional issues, performance concerns, moderate impact\n' +
+        '- "high": Security issues, major functionality gaps, significant impact\n' +
+        '- "critical": System-breaking issues, security vulnerabilities, blocking\n\n' +
+        '🔹 SEVERITY GUIDELINES:\n' +
+        '- Consider user impact and business risk\n' +
+        '- Evaluate technical debt implications\n' +
+        '- Assess security and compliance requirements\n' +
+        '- Factor in timeline and resource constraints',
+    ),
+
+  requiredChanges: z
+    .string()
+    .optional()
+    .describe(
+      '🔧 REQUIRED CHANGES - Specific modifications needed to address issues:\n\n' +
+        '🔹 CHANGE SPECIFICATION EXAMPLES:\n' +
+        '- "Add input sanitization to all user-facing forms using validator.js"\n' +
+        '- "Implement caching layer to reduce API response time below 1s"\n' +
+        '- "Add comprehensive error handling with user-friendly messages"\n' +
+        '- "Refactor UserService to follow single responsibility principle"\n\n' +
+        '🔹 CHANGE REQUIREMENTS:\n' +
+        '- Specific, actionable instructions\n' +
+        '- Technical implementation guidance\n' +
+        '- Quality standards and acceptance criteria\n' +
+        '- Timeline and priority considerations',
+    ),
+
+  blockers: z
+    .array(z.string())
+    .optional()
+    .describe(
+      '🚧 BLOCKING ISSUES - Array of issues preventing progress:\n\n' +
+        '🔹 BLOCKER EXAMPLES:\n' +
+        '- ["External API dependency not available", "Database schema changes required"]\n' +
+        '- ["Missing design specifications", "Unclear business requirements"]\n' +
+        '- ["Technical expertise gap", "Resource allocation conflicts"]\n\n' +
+        '🔹 BLOCKER DOCUMENTATION:\n' +
+        '- Clear issue identification\n' +
+        '- Impact on workflow progression\n' +
+        '- Potential resolution approaches\n' +
+        '- Escalation requirements',
+    ),
+});
+
+/**
+ * 📋 SCHEDULING SCHEMA:
+ * Comprehensive scheduling and timing information for workflow operations
+ */
+export const SchedulingSchema = z.object({
+  deadline: z
+    .string()
+    .optional()
+    .describe(
+      '⏰ OPERATION DEADLINE - ISO date deadline for the workflow operation:\n\n' +
+        '🔹 DEADLINE EXAMPLES:\n' +
+        '- "2024-01-20T17:00:00Z": End of business day deadline\n' +
+        '- "2024-01-22T09:00:00Z": Start of next business day\n' +
+        '- "2024-01-25T23:59:59Z": End of sprint deadline\n\n' +
+        '🔹 DEADLINE CONSIDERATIONS:\n' +
+        '- Business hours and timezone alignment\n' +
+        '- Sprint and milestone boundaries\n' +
+        '- Dependency and integration requirements\n' +
+        '- Resource availability and capacity',
+    ),
+
+  estimatedDuration: z
+    .string()
+    .optional()
+    .describe(
+      '⏱️ ESTIMATED DURATION - Time estimate for completing the operation:\n\n' +
+        '🔹 DURATION EXAMPLES:\n' +
+        '- "30 minutes": Quick fixes and minor updates\n' +
+        '- "2 hours": Feature implementation or complex debugging\n' +
+        '- "1 day": Major feature development or comprehensive testing\n' +
+        '- "3 days": Complex integration or architectural changes\n\n' +
+        '🔹 ESTIMATION GUIDELINES:\n' +
+        '- Include development, testing, and review time\n' +
+        '- Factor in complexity and unknowns\n' +
+        '- Consider team experience and expertise\n' +
+        '- Account for integration and deployment time',
+    ),
+
+  priority: z
+    .enum(['low', 'medium', 'high', 'urgent'])
+    .optional()
+    .describe(
+      '🎯 OPERATION PRIORITY - Urgency level for the workflow operation:\n\n' +
+        '🔹 PRIORITY LEVELS:\n' +
+        '- "low": Nice-to-have improvements, non-critical enhancements\n' +
+        '- "medium": Standard feature development, planned improvements\n' +
+        '- "high": Important features, significant business value\n' +
+        '- "urgent": Critical fixes, blocking issues, security vulnerabilities\n\n' +
+        '🔹 PRIORITY FACTORS:\n' +
+        '- Business impact and user value\n' +
+        '- Technical risk and dependencies\n' +
+        '- Timeline constraints and deadlines\n' +
+        '- Resource availability and capacity',
+    ),
+
+  scheduleFor: z
+    .string()
+    .optional()
+    .describe(
+      '📅 SCHEDULE FOR - ISO date to schedule the operation for execution:\n\n' +
+        '🔹 SCHEDULING EXAMPLES:\n' +
+        '- "2024-01-16T09:00:00Z": Next business day morning\n' +
+        '- "2024-01-19T14:00:00Z": Specific afternoon slot\n' +
+        '- "2024-01-22T08:00:00Z": Start of next sprint\n\n' +
+        '🔹 SCHEDULING CONSIDERATIONS:\n' +
+        '- Team availability and capacity\n' +
+        '- Dependency completion requirements\n' +
+        '- Integration and deployment windows\n' +
+        '- Business and operational constraints',
+    ),
+});
+
+/**
+ * 📋 CONSTRAINTS SCHEMA:
+ * Workflow operation constraints and validation controls
+ */
+export const ConstraintsSchema = z.object({
+  forceTransition: z
+    .boolean()
+    .default(false)
+    .describe(
+      '🔧 FORCE TRANSITION - Force workflow transition even if validation fails:\n\n' +
+        '🔹 FORCE TRANSITION USAGE:\n' +
+        '- Emergency situations requiring immediate action\n' +
+        '- Administrative overrides for exceptional cases\n' +
+        '- Recovery from workflow state corruption\n' +
+        '- Testing and development scenarios\n\n' +
+        '⚠️ CAUTION: Use sparingly as it bypasses safety checks',
+    ),
+
+  allowSkipValidation: z
+    .boolean()
+    .default(false)
+    .describe(
+      '⚡ SKIP VALIDATION - Allow skipping standard validation checks:\n\n' +
+        '🔹 SKIP VALIDATION SCENARIOS:\n' +
+        '- Performance-critical operations\n' +
+        '- Bulk operations with pre-validated data\n' +
+        '- Administrative maintenance tasks\n' +
+        '- Development and testing environments\n\n' +
+        '⚠️ CAUTION: May compromise data integrity and workflow consistency',
+    ),
+
+  createAuditTrail: z
+    .boolean()
+    .default(true)
+    .describe(
+      '📋 CREATE AUDIT TRAIL - Generate audit trail entry for the operation:\n\n' +
+        '🔹 AUDIT TRAIL BENEFITS:\n' +
+        '- Complete operation history tracking\n' +
+        '- Compliance and governance requirements\n' +
+        '- Debugging and troubleshooting support\n' +
+        '- Performance and workflow analysis\n\n' +
+        '✅ RECOMMENDED: Keep enabled for production environments',
+    ),
+
+  notifyStakeholders: z
+    .boolean()
+    .default(true)
+    .describe(
+      '📢 NOTIFY STAKEHOLDERS - Send notifications to relevant stakeholders:\n\n' +
+        '🔹 NOTIFICATION RECIPIENTS:\n' +
+        '- Role assignees and team members\n' +
+        '- Project managers and stakeholders\n' +
+        '- Quality assurance and review teams\n' +
+        '- Integration and deployment teams\n\n' +
+        '✅ RECOMMENDED: Keep enabled for team coordination',
+    ),
+});
+
+/**
+ * 📋 BATCH OPERATIONS SCHEMA:
+ * Configuration for batch workflow operations across multiple tasks
+ */
+export const BatchOperationsSchema = z.object({
+  taskIds: z
+    .array(z.string())
+    .describe(
+      '📦 TASK IDS - Array of task IDs for batch workflow operations:\n\n' +
+        '🔹 BATCH OPERATION EXAMPLES:\n' +
+        '- ["TSK-001", "TSK-002", "TSK-003"]: Related feature tasks\n' +
+        '- ["TSK-BUG-001", "TSK-BUG-002"]: Bug fix batch\n' +
+        '- ["TSK-REFACTOR-001", "TSK-REFACTOR-002"]: Refactoring batch\n\n' +
+        '🔹 BATCH CONSIDERATIONS:\n' +
+        '- Logical grouping of related tasks\n' +
+        '- Dependency management across tasks\n' +
+        '- Resource allocation and capacity\n' +
+        '- Coordination and communication requirements',
+    ),
+
+  parallelExecution: z
+    .boolean()
+    .default(false)
+    .describe(
+      '⚡ PARALLEL EXECUTION - Execute batch operations in parallel:\n\n' +
+        '🔹 PARALLEL EXECUTION BENEFITS:\n' +
+        '- Faster completion for independent tasks\n' +
+        '- Better resource utilization\n' +
+        '- Reduced overall timeline\n\n' +
+        '🔹 PARALLEL EXECUTION RISKS:\n' +
+        '- Dependency conflicts and race conditions\n' +
+        '- Resource contention and bottlenecks\n' +
+        '- Coordination and synchronization complexity',
+    ),
+
+  continueOnError: z
+    .boolean()
+    .default(false)
+    .describe(
+      '🔄 CONTINUE ON ERROR - Continue batch processing if individual operations fail:\n\n' +
+        '🔹 CONTINUE ON ERROR SCENARIOS:\n' +
+        '- Non-critical operations with acceptable failures\n' +
+        '- Data migration and cleanup operations\n' +
+        '- Bulk updates with partial success tolerance\n\n' +
+        '🔹 ERROR HANDLING CONSIDERATIONS:\n' +
+        '- Error collection and reporting\n' +
+        '- Rollback and recovery strategies\n' +
+        '- Partial success communication',
+    ),
+});
+
+/**
+ * 📋 CONDITIONS SCHEMA:
+ * Conditions that must be met for workflow operations to proceed
+ */
+export const ConditionsSchema = z.object({
+  requiredRole: WorkflowRoleSchema.optional().describe(
+    '👤 REQUIRED ROLE - Role that must be current for the operation to proceed:\n\n' +
+      '🔹 ROLE VALIDATION EXAMPLES:\n' +
+      '- "architect": Only architect can delegate to senior-developer\n' +
+      '- "code-review": Only code-review can approve or reject\n' +
+      '- "boomerang": Only boomerang can perform final delivery\n\n' +
+      '🔹 ROLE VALIDATION BENEFITS:\n' +
+      '- Workflow integrity and consistency\n' +
+      '- Permission and authorization control\n' +
+      '- Audit trail and accountability\n' +
+      '- Quality and process compliance',
+  ),
+
+  requiredStatus: TaskStatusSchema.optional().describe(
+    '📊 REQUIRED STATUS - Status that must be current for the operation to proceed:\n\n' +
+      '🔹 STATUS VALIDATION EXAMPLES:\n' +
+      '- "in-progress": Task must be active for completion\n' +
+      '- "needs-review": Task must be ready for review operations\n' +
+      '- "needs-changes": Task must need changes for reassignment\n\n' +
+      '🔹 STATUS VALIDATION BENEFITS:\n' +
+      '- Workflow state consistency\n' +
+      '- Operation sequence validation\n' +
+      '- Data integrity protection\n' +
+      '- Process compliance enforcement',
+  ),
+
+  customConditions: z
+    .array(z.string())
+    .optional()
+    .describe(
+      '🔧 CUSTOM CONDITIONS - Array of custom condition checks to perform:\n\n' +
+        '🔹 CUSTOM CONDITION EXAMPLES:\n' +
+        '- ["all_subtasks_completed", "acceptance_criteria_verified"]\n' +
+        '- ["security_scan_passed", "performance_tests_passed"]\n' +
+        '- ["dependencies_resolved", "integration_tests_passed"]\n\n' +
+        '🔹 CUSTOM CONDITION BENEFITS:\n' +
+        '- Business rule enforcement\n' +
+        '- Quality gate validation\n' +
+        '- Integration requirement checks\n' +
+        '- Custom workflow logic support',
+    ),
+});
+
+/**
+ * 📋 MAIN WORKFLOW OPERATIONS SCHEMA:
+ * Complete schema for all workflow operations with comprehensive field documentation
+ */
 export const WorkflowOperationsSchema = z.object({
   operation: WorkflowOperationSchema.describe(
     '🔄 WORKFLOW OPERATION TYPE - The specific workflow action to perform:\n\n' +
@@ -200,335 +642,109 @@ export const WorkflowOperationsSchema = z.object({
         '- "Resource constraint: Requires additional expertise."',
     ),
 
+  // Completion data for successful task completion
+  completionData: CompletionDataSchema.optional().describe(
+    '✅ COMPLETION DATA - Comprehensive completion information for successful operations:\n\n' +
+      '🔹 REQUIRED FOR OPERATIONS:\n' +
+      '- "complete": Must provide summary and evidence\n' +
+      '- "delegate" (when completing): Include completion summary\n\n' +
+      '🔹 COMPLETION DATA STRUCTURE:\n' +
+      '- summary: Work accomplishment description (REQUIRED)\n' +
+      '- evidence: Supporting documentation and metrics\n' +
+      '- filesModified: Array of changed files\n' +
+      '- acceptanceCriteriaVerification: JSON verification results\n\n' +
+      '🔹 COMPLETION EXAMPLES:\n' +
+      '- Research: { summary: "Technology evaluation complete", evidence: { optionsEvaluated: 5 } }\n' +
+      '- Development: { summary: "Feature implementation complete", filesModified: ["src/api.ts"] }\n' +
+      '- Review: { summary: "Code review complete: APPROVED", acceptanceCriteriaVerification: {...} }',
+  ),
+
+  // Rejection data for escalation and quality issues
+  rejectionData: RejectionDataSchema.optional().describe(
+    '❌ REJECTION DATA - Comprehensive rejection and escalation information:\n\n' +
+      '🔹 REQUIRED FOR OPERATIONS:\n' +
+      '- "escalate": Must provide reason and severity\n' +
+      '- "transition" (to needs-changes): Include rejection details\n\n' +
+      '🔹 REJECTION DATA STRUCTURE:\n' +
+      '- reason: Clear explanation for rejection (REQUIRED)\n' +
+      '- severity: Issue impact level (low/medium/high/critical)\n' +
+      '- requiredChanges: Specific modification requirements\n' +
+      '- blockers: Array of blocking issues\n\n' +
+      '🔹 REJECTION EXAMPLES:\n' +
+      '- Quality: { reason: "Security vulnerability found", severity: "high" }\n' +
+      '- Blocker: { reason: "API dependency unavailable", blockers: ["External service down"] }\n' +
+      '- Changes: { reason: "Missing functionality", requiredChanges: "Add user authentication" }',
+  ),
+
+  // Scheduling and timing information
+  scheduling: SchedulingSchema.optional().describe(
+    '📅 SCHEDULING - Timing and deadline information for the workflow operation:\n\n' +
+      '🔹 SCHEDULING COMPONENTS:\n' +
+      '- deadline: ISO date deadline for operation completion\n' +
+      '- estimatedDuration: Time estimate for the operation\n' +
+      '- priority: Operation urgency level\n' +
+      '- scheduleFor: ISO date to schedule operation execution\n\n' +
+      '🔹 SCHEDULING EXAMPLES:\n' +
+      '- Urgent: { deadline: "2024-01-16T17:00:00Z", priority: "urgent" }\n' +
+      '- Planned: { scheduleFor: "2024-01-20T09:00:00Z", estimatedDuration: "2 hours" }\n' +
+      '- Sprint: { deadline: "2024-01-25T23:59:59Z", priority: "high" }',
+  ),
+
+  // Workflow operation constraints
+  constraints: ConstraintsSchema.optional().describe(
+    '🔧 CONSTRAINTS - Workflow operation constraints and validation controls:\n\n' +
+      '🔹 CONSTRAINT OPTIONS:\n' +
+      '- forceTransition: Force invalid transitions (emergency use)\n' +
+      '- allowSkipValidation: Skip standard validation checks\n' +
+      '- createAuditTrail: Generate audit trail entry (default: true)\n' +
+      '- notifyStakeholders: Send notifications (default: true)\n\n' +
+      '🔹 CONSTRAINT EXAMPLES:\n' +
+      '- Emergency: { forceTransition: true, createAuditTrail: true }\n' +
+      '- Bulk: { allowSkipValidation: true, notifyStakeholders: false }\n' +
+      '- Standard: { createAuditTrail: true, notifyStakeholders: true }',
+  ),
+
+  // Batch operation configuration
+  batch: BatchOperationsSchema.optional().describe(
+    '📦 BATCH OPERATIONS - Configuration for batch workflow operations:\n\n' +
+      '🔹 BATCH COMPONENTS:\n' +
+      '- taskIds: Array of task IDs for batch processing\n' +
+      '- parallelExecution: Execute operations in parallel\n' +
+      '- continueOnError: Continue if individual operations fail\n\n' +
+      '🔹 BATCH EXAMPLES:\n' +
+      '- Sequential: { taskIds: ["TSK-001", "TSK-002"], parallelExecution: false }\n' +
+      '- Parallel: { taskIds: ["TSK-003", "TSK-004"], parallelExecution: true }\n' +
+      '- Resilient: { taskIds: ["TSK-005", "TSK-006"], continueOnError: true }',
+  ),
+
+  // Conditional operation requirements
+  conditions: ConditionsSchema.optional().describe(
+    '🔍 CONDITIONS - Conditions that must be met for operation to proceed:\n\n' +
+      '🔹 CONDITION TYPES:\n' +
+      '- requiredRole: Role that must be current for operation\n' +
+      '- requiredStatus: Status that must be current for operation\n' +
+      '- customConditions: Array of custom condition checks\n\n' +
+      '🔹 CONDITION EXAMPLES:\n' +
+      '- Role Check: { requiredRole: "architect" }\n' +
+      '- Status Check: { requiredStatus: "in-progress" }\n' +
+      '- Custom: { customConditions: ["all_subtasks_completed"] }',
+  ),
+
+  // Additional operation metadata
   metadata: z
     .record(z.any())
     .optional()
     .describe(
-      '📋 OPERATION METADATA - Additional structured data for workflow operations:\n\n' +
-        '🔹 DELEGATION METADATA:\n' +
-        '- { "batchId": "B001", "priority": "high", "estimatedDuration": "2 hours" }\n' +
-        '- { "researchScope": "technology-evaluation", "deadline": "2024-01-20" }\n' +
-        '- { "reviewType": "security-focused", "criticalPath": true }\n\n' +
-        '🔹 COMPLETION METADATA:\n' +
-        '- { "testsRun": 15, "coveragePercent": 95, "performanceMetrics": {...} }\n' +
-        '- { "filesModified": 8, "linesAdded": 245, "linesRemoved": 12 }\n' +
-        '- { "acceptanceCriteriaMet": 5, "additionalFeatures": 2 }\n\n' +
-        '🔹 ESCALATION METADATA:\n' +
-        '- { "severity": "high", "impactedFeatures": ["auth", "api"], "blockerType": "dependency" }\n' +
-        '- { "qualityIssues": 3, "securityConcerns": 1, "performanceImpact": "medium" }',
-    ),
-
-  // Completion data with comprehensive evidence tracking
-  completionData: z
-    .object({
-      summary: z
-        .string()
-        .describe(
-          'Comprehensive summary of completed work:\n' +
-            '- What was accomplished and how\n' +
-            '- Key technical decisions and implementations\n' +
-            '- Challenges overcome and solutions applied\n' +
-            '- Quality measures taken and results achieved',
-        ),
-      filesModified: z
-        .array(z.string())
-        .optional()
-        .describe(
-          'Complete list of files modified during work:\n' +
-            '- Source code files with specific changes\n' +
-            '- Configuration files updated\n' +
-            '- Documentation files created/modified\n' +
-            '- Test files added or updated',
-        ),
-      acceptanceCriteriaVerification: z
-        .record(z.any())
-        .optional()
-        .describe(
-          'Detailed verification of acceptance criteria:\n' +
-            '- JSON object mapping each criterion to verification result\n' +
-            '- Evidence and proof for each criterion met\n' +
-            '- Test results and validation outcomes\n' +
-            '- Manual verification steps performed',
-        ),
-      evidence: z
-        .record(z.any())
-        .optional()
-        .describe(
-          'Supporting evidence for completion claims:\n' +
-            '- Screenshots of working functionality\n' +
-            '- Test execution results and logs\n' +
-            '- Performance metrics and benchmarks\n' +
-            '- Code review feedback and resolutions',
-        ),
-    })
-    .optional()
-    .describe(
-      '✅ COMPLETION DATA - Comprehensive evidence for task completion:\n\n' +
-        '🔹 REQUIRED FOR COMPLETION OPERATIONS:\n' +
-        '- summary: Clear description of what was accomplished\n' +
-        '- acceptanceCriteriaVerification: Proof each criterion was met\n' +
-        '- evidence: Supporting documentation and test results\n\n' +
-        '🔹 COMPLETION EXAMPLES:\n' +
-        '- Research: { summary: "Technology evaluation complete", evidence: { sources: [...], analysis: {...} } }\n' +
-        '- Development: { summary: "Feature implemented", filesModified: [...], acceptanceCriteriaVerification: {...} }\n' +
-        '- Review: { summary: "Quality review complete", evidence: { testResults: {...}, securityScan: {...} } }',
-    ),
-
-  // Rejection/escalation data with detailed issue tracking
-  rejectionData: z
-    .object({
-      reason: z
-        .string()
-        .describe(
-          'Clear, specific reason for rejection or escalation:\n' +
-            '- Technical issues identified and their impact\n' +
-            '- Quality standards not met and specific gaps\n' +
-            '- Blockers encountered and their severity\n' +
-            '- Requirements misunderstanding or scope issues',
-        ),
-      requiredChanges: z
-        .string()
-        .optional()
-        .describe(
-          'Specific changes required to resolve issues:\n' +
-            '- Detailed action items with clear expectations\n' +
-            '- Technical specifications for fixes needed\n' +
-            '- Quality improvements required\n' +
-            '- Additional work scope or clarifications needed',
-        ),
-      severity: z
-        .enum(['low', 'medium', 'high', 'critical'])
-        .optional()
-        .describe(
-          'Issue severity level for prioritization:\n' +
-            '- "low": Minor issues, cosmetic fixes\n' +
-            '- "medium": Moderate issues affecting functionality\n' +
-            '- "high": Significant issues blocking progress\n' +
-            '- "critical": Severe issues requiring immediate attention',
-        ),
-      blockers: z
-        .array(z.string())
-        .optional()
-        .describe(
-          'Specific blocking issues preventing progress:\n' +
-            '- External dependencies not available\n' +
-            '- Technical limitations or constraints\n' +
-            '- Resource or expertise gaps\n' +
-            '- Conflicting requirements or unclear specifications',
-        ),
-    })
-    .optional()
-    .describe(
-      '⚠️ REJECTION/ESCALATION DATA - Detailed issue documentation:\n\n' +
-        '🔹 REQUIRED FOR ESCALATION OPERATIONS:\n' +
-        '- reason: Clear explanation of the problem\n' +
-        '- severity: Impact level for proper prioritization\n' +
-        '- blockers: Specific issues preventing progress\n\n' +
-        '🔹 ESCALATION EXAMPLES:\n' +
-        '- Technical: { reason: "API dependency unavailable", severity: "high", blockers: ["external-service-down"] }\n' +
-        '- Quality: { reason: "Security vulnerabilities found", severity: "critical", requiredChanges: "Fix XSS issues" }\n' +
-        '- Scope: { reason: "Requirements unclear", severity: "medium", blockers: ["stakeholder-clarification-needed"] }',
-    ),
-
-  // Workflow constraints with comprehensive validation options
-  constraints: z
-    .object({
-      allowSkipValidation: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe(
-          'Allow skipping standard workflow validation:\n' +
-            '- false (default): Enforce all validation rules\n' +
-            '- true: Skip validation for emergency operations',
-        ),
-      forceTransition: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe(
-          'Force workflow transition even if conditions not met:\n' +
-            '- false (default): Respect workflow rules\n' +
-            '- true: Override validation for critical situations',
-        ),
-      notifyStakeholders: z
-        .boolean()
-        .optional()
-        .default(true)
-        .describe(
-          'Send notifications to relevant stakeholders:\n' +
-            '- true (default): Notify all relevant parties\n' +
-            '- false: Silent operation without notifications',
-        ),
-      createAuditTrail: z
-        .boolean()
-        .optional()
-        .default(true)
-        .describe(
-          'Create detailed audit trail entry:\n' +
-            '- true (default): Full audit logging\n' +
-            '- false: Minimal logging for performance',
-        ),
-    })
-    .optional()
-    .describe(
-      '🔒 WORKFLOW CONSTRAINTS - Control workflow operation behavior:\n\n' +
-        '🔹 VALIDATION CONTROL:\n' +
-        '- Standard operations: Use default validation\n' +
-        '- Emergency operations: May skip validation with allowSkipValidation\n' +
-        '- Critical fixes: May force transitions with forceTransition\n\n' +
-        '🔹 NOTIFICATION CONTROL:\n' +
-        '- Normal operations: Notify all stakeholders\n' +
-        '- Silent operations: Disable notifications for automated processes\n\n' +
-        '🔹 AUDIT CONTROL:\n' +
-        '- Full audit: Complete logging for compliance\n' +
-        '- Minimal audit: Reduced logging for performance',
-    ),
-
-  // Scheduling and timing with comprehensive planning options
-  scheduling: z
-    .object({
-      scheduleFor: z
-        .string()
-        .optional()
-        .describe(
-          'ISO 8601 date/time to schedule operation:\n' +
-            '- "2024-01-20T09:00:00Z": Schedule for specific time\n' +
-            '- Used for planned workflow transitions\n' +
-            '- Enables workflow automation and coordination',
-        ),
-      deadline: z
-        .string()
-        .optional()
-        .describe(
-          'ISO 8601 date/time deadline for operation completion:\n' +
-            '- "2024-01-25T17:00:00Z": Hard deadline\n' +
-            '- Used for priority and escalation decisions\n' +
-            '- Triggers alerts as deadline approaches',
-        ),
-      priority: z
-        .enum(['low', 'medium', 'high', 'urgent'])
-        .optional()
-        .describe(
-          'Operation priority level for resource allocation:\n' +
-            '- "low": Background work, flexible timing\n' +
-            '- "medium": Standard priority, normal scheduling\n' +
-            '- "high": Important work, expedited handling\n' +
-            '- "urgent": Critical work, immediate attention',
-        ),
-      estimatedDuration: z
-        .string()
-        .optional()
-        .describe(
-          'Estimated time to complete operation:\n' +
-            '- "2 hours": Simple implementation\n' +
-            '- "1 day": Complex feature development\n' +
-            '- "3 days": Major architectural changes\n' +
-            '- Used for resource planning and scheduling',
-        ),
-    })
-    .optional()
-    .describe(
-      '📅 SCHEDULING INFORMATION - Timing and priority for workflow operations:\n\n' +
-        '🔹 TIME MANAGEMENT:\n' +
-        '- scheduleFor: When to start the operation\n' +
-        '- deadline: When operation must be completed\n' +
-        '- estimatedDuration: Expected time investment\n\n' +
-        '🔹 PRIORITY MANAGEMENT:\n' +
-        '- priority: Resource allocation and urgency level\n' +
-        '- Used for queue management and escalation\n' +
-        '- Affects notification frequency and routing',
-    ),
-
-  // Batch workflow operations with comprehensive coordination
-  batch: z
-    .object({
-      taskIds: z
-        .array(z.string())
-        .describe(
-          'Array of task IDs for batch workflow operations:\n' +
-            '- ["TSK-001", "TSK-002", "TSK-003"]: Multiple related tasks\n' +
-            '- All tasks must be in compatible states for operation\n' +
-            '- Enables coordinated workflow transitions\n' +
-            '- Maintains consistency across related work',
-        ),
-      continueOnError: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe(
-          'Continue batch operation if individual tasks fail:\n' +
-            '- false (default): Stop on first failure, rollback all\n' +
-            '- true: Process all tasks, collect failures for review',
-        ),
-      parallelExecution: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe(
-          'Execute batch operations in parallel:\n' +
-            '- false (default): Sequential processing for safety\n' +
-            '- true: Parallel processing for performance (if safe)',
-        ),
-    })
-    .optional()
-    .describe(
-      '📦 BATCH OPERATION CONFIGURATION - Coordinate multiple workflow operations:\n\n' +
-        '🔹 BATCH DELEGATION:\n' +
-        '- Delegate multiple related tasks to same role\n' +
-        '- Maintain consistency across task assignments\n' +
-        '- Enable coordinated work planning\n\n' +
-        '🔹 BATCH COMPLETION:\n' +
-        '- Complete multiple tasks with shared evidence\n' +
-        '- Coordinate milestone achievements\n' +
-        '- Ensure consistent quality standards\n\n' +
-        '🔹 BATCH ESCALATION:\n' +
-        '- Escalate related issues together\n' +
-        '- Coordinate problem resolution efforts\n' +
-        '- Maintain context across related problems',
-    ),
-
-  // Conditional operations with comprehensive validation
-  conditions: z
-    .object({
-      requiredStatus: TaskStatusSchema.optional().describe(
-        'Required current task status for operation to proceed:\n' +
-          '- "in-progress": Only operate on active tasks\n' +
-          '- "needs-review": Only operate on tasks awaiting review\n' +
-          '- Used to prevent invalid workflow transitions',
-      ),
-      requiredRole: WorkflowRoleSchema.optional().describe(
-        'Required current role assignment for operation:\n' +
-          '- "architect": Only if currently assigned to architect\n' +
-          '- "senior-developer": Only if currently with developer\n' +
-          '- Ensures proper role-based permissions',
-      ),
-      customConditions: z
-        .array(z.string())
-        .optional()
-        .describe(
-          'Custom condition checks to perform before operation:\n' +
-            '- ["has-implementation-plan"]: Verify plan exists\n' +
-            '- ["all-subtasks-complete"]: Check subtask completion\n' +
-            '- ["acceptance-criteria-defined"]: Verify criteria exist\n' +
-            '- ["manual-testing-passed"]: Confirm testing complete',
-        ),
-    })
-    .optional()
-    .describe(
-      '🔍 CONDITIONAL OPERATIONS - Validation requirements for workflow operations:\n\n' +
-        '🔹 STATUS CONDITIONS:\n' +
-        '- Ensure task is in appropriate state for operation\n' +
-        '- Prevent invalid workflow transitions\n' +
-        '- Maintain workflow integrity and consistency\n\n' +
-        '🔹 ROLE CONDITIONS:\n' +
-        '- Verify proper role assignment and permissions\n' +
-        '- Ensure appropriate expertise for operation\n' +
-        '- Maintain role-based workflow discipline\n\n' +
-        '🔹 CUSTOM CONDITIONS:\n' +
-        '- Business rule validation specific to operation\n' +
-        '- Quality gate enforcement\n' +
-        '- Prerequisite verification and compliance',
+      '📊 METADATA - Additional operation-specific data and context:\n\n' +
+        '🔹 METADATA USAGE:\n' +
+        '- Custom workflow extensions and integrations\n' +
+        '- Operation-specific configuration and settings\n' +
+        '- Integration with external systems and tools\n' +
+        '- Performance metrics and monitoring data\n\n' +
+        '🔹 METADATA EXAMPLES:\n' +
+        '- Integration: { "jiraTicket": "PROJ-123", "slackChannel": "#dev-team" }\n' +
+        '- Metrics: { "complexity": "high", "riskLevel": "medium" }\n' +
+        '- Config: { "autoAssign": true, "notificationDelay": 300 }',
     ),
 });
 
