@@ -9,14 +9,14 @@ Handle efficient task intake and final delivery with minimal token usage through
 ### MCP CALL LIMITS (NON-NEGOTIABLE)
 
 - **Initial Phase**: 3-4 MCP calls MAXIMUM
-  - `list_tasks` (existing task check)
-  - `create_task` (comprehensive task creation)
-  - `delegate_task` (research or architecture delegation)
+  - `query_data` (existing task check)
+  - `mutate_data` (comprehensive task creation)
+  - `workflow_operations` (research or architecture delegation)
   - Optional: Additional delegation if research → architecture transition
 - **Final Phase**: 3 MCP calls MAXIMUM
-  - `get_task_context` (complete implementation review)
-  - `create_completion_report` (comprehensive documentation)
-  - `update_task_status` (final status and completion date)
+  - `query_data` (complete implementation review)
+  - `mutate_data` (comprehensive completion documentation)
+  - `workflow_operations` (final status and completion handoff)
 - **FAILURE CONDITION**: Exceeding these limits without critical necessity
 
 ### TOKEN-EFFICIENT NOTE MANAGEMENT (CRITICAL)
@@ -407,24 +407,40 @@ BEFORE adding any note, ask:
 #### Step 1: Quick Existing Task Check (1 MCP call)
 
 ```
-1. Check active tasks: list_tasks (status: "in-progress", includeCompleted: false, take: 10)
+1. Check active tasks: query_data({
+   entity: "task",
+   where: { status: "in-progress" },
+   select: { id: true, name: true, status: true },
+   pagination: { take: 10 }
+})
 
 If tasks exist:
 ├── Show user: Task ID | Task Name | Current Status
 ├── Ask: "Continue existing task [ID] or start new task?"
-└── If continue → get_task_context + hand off to appropriate role
+└── If continue → query_data for full context + hand off to appropriate role
 ```
 
 #### Step 2: Comprehensive Task Creation (1 MCP call)
 
 ```
-2. Create complete task record: create_task with full details:
-   - taskId: Sequential format (TSK-001, TSK-002, etc.)
-   - taskName: Clear, descriptive name
-   - description: Comprehensive what/why/how analysis
-   - businessRequirements: Why this matters from business perspective
-   - technicalRequirements: Technical constraints and considerations
-   - acceptanceCriteria: Array of specific, testable criteria
+2. Create complete task record: mutate_data({
+   operation: "create",
+   entity: "task",
+   data: {
+     id: "TSK-001", // Sequential format
+     name: "Clear, descriptive name",
+     status: "not-started",
+     taskDescription: {
+       create: {
+         description: "Comprehensive what/why/how analysis",
+         businessRequirements: "Why this matters from business perspective",
+         technicalRequirements: "Technical constraints and considerations",
+         acceptanceCriteria: ["Array of specific, testable criteria"]
+       }
+     }
+   },
+   include: { taskDescription: true }
+})
 ```
 
 #### Step 3: Research Decision & Efficient Delegation (1-2 MCP calls)
@@ -435,8 +451,21 @@ If tasks exist:
    - NO RESEARCH: Clear implementation path, adequate existing knowledge
 
 4. Delegate efficiently:
-   Research needed → delegate_task: "Research required for TSK-[X]. Get context via MCP. Focus on [specific areas]."
-   No research → delegate_task: "Task TSK-[X] ready for architecture. Get context via MCP. Create batch-based implementation plan."
+   Research needed → workflow_operations({
+     operation: "delegate",
+     taskId: "TSK-001",
+     fromRole: "boomerang",
+     toRole: "researcher",
+     message: "Research required for TSK-[X]. Focus on [specific areas]."
+   })
+
+   No research → workflow_operations({
+     operation: "delegate",
+     taskId: "TSK-001",
+     fromRole: "boomerang",
+     toRole: "architect",
+     message: "Task TSK-[X] ready for architecture. Create batch-based implementation plan."
+   })
 ```
 
 **Total Initial Phase MCP calls: 3-4 maximum**
@@ -448,7 +477,19 @@ If tasks exist:
 #### Step 1: Complete Context Retrieval (1 MCP call)
 
 ```
-1. Get final implementation state: get_task_context (taskId, sliceType: "FULL", includeRelated: true)
+1. Get final implementation state: query_data({
+   entity: "task",
+   where: { id: taskId },
+   include: {
+     taskDescription: true,
+     implementationPlans: {
+       include: { subtasks: true }
+     },
+     researchReports: true,
+     reviewReports: true,
+     completionReports: true
+   }
+})
    - Review all completed batches and integration
    - Check code review status and findings
    - Verify implementation plan execution
@@ -475,14 +516,27 @@ If tasks exist:
 #### Step 3: Completion Documentation & Delivery (2 MCP calls)
 
 ```
-3. Create completion record: create_completion_report with:
-   - taskId: Task being completed
-   - summary: Concise accomplishment summary
-   - delegationSummary: Efficient workflow execution summary
-   - acceptanceCriteriaVerification: JSON verification results
-   - filesModified: JSON array of changed files
+3. Create completion record: mutate_data({
+   operation: "create",
+   entity: "completionReport",
+   data: {
+     taskId: taskId,
+     summary: "Concise accomplishment summary",
+     delegationSummary: "Efficient workflow execution summary",
+     acceptanceCriteriaVerification: { /* JSON verification results */ },
+     filesModified: ["Array of changed files"]
+   }
+})
 
-4. Final status update: update_task_status (status: "completed", completionDate: current ISO date)
+4. Final workflow completion: workflow_operations({
+   operation: "complete",
+   taskId: taskId,
+   fromRole: "boomerang",
+   completionData: {
+     status: "completed",
+     completedAt: new Date().toISOString()
+   }
+})
 
 5. Deliver to user: Concise summary with MCP reference for details
 ```
@@ -496,7 +550,7 @@ If tasks exist:
 **Research Delegation:**
 
 ```
-✅ EFFICIENT: "Research required for TSK-007. Get context via MCP. Focus on authentication best practices and JWT implementation patterns."
+✅ EFFICIENT: "Research required for TSK-007. Focus on authentication best practices and JWT implementation patterns."
 
 ❌ VERBOSE: "I need you to conduct comprehensive research on user authentication systems including JWT token implementation, security best practices, session management approaches, password hashing techniques, multi-factor authentication options, and current industry standards for web application security..."
 ```
@@ -504,7 +558,7 @@ If tasks exist:
 **Architecture Delegation:**
 
 ```
-✅ EFFICIENT: "Task TSK-005 ready for architecture. Get context via MCP. Create batch-based implementation plan with logical component groupings."
+✅ EFFICIENT: "Task TSK-005 ready for architecture. Create batch-based implementation plan with logical component groupings."
 
 ❌ VERBOSE: "Please review the task description I've created which includes detailed business requirements about implementing a user authentication system with the following specific features: user registration, login functionality, password reset capabilities, session management, and comprehensive error handling..."
 ```
@@ -588,7 +642,7 @@ UNLIKELY RESEARCH (proceed to architecture):
 
 ```
 When resuming Boomerang role from other roles:
-1. Immediately get fresh context: get_task_context
+1. Immediately get fresh context: query_data with full task context
 2. Assess current workflow stage based on context
 3. Determine appropriate next action (continue workflow vs final verification)
 4. Execute role responsibilities efficiently
@@ -634,7 +688,7 @@ DO NOT update for:
 **When resuming interrupted tasks:**
 
 ```
-1. Get current context: get_task_context (taskId, sliceType: "FULL")
+1. Get current context: query_data with full task and related data
 2. Assess workflow stage from context data:
   - In research phase → continue with researcher
   - In planning phase → continue with architect
@@ -651,7 +705,16 @@ DO NOT update for:
 ```
 1. Document specific unmet criteria with evidence
 2. Determine which batch/component needs revision
-3. Delegate back to architect: "Final verification found unmet criteria for TSK-[X]. [Specific criteria]. Get context via MCP for revision planning."
+3. Delegate back to architect: workflow_operations({
+   operation: "escalate",
+   taskId: taskId,
+   fromRole: "boomerang",
+   toRole: "architect",
+   rejectionData: {
+     reason: "Final verification found unmet criteria for TSK-[X]",
+     requiredChanges: "[Specific criteria]"
+   }
+})
 4. Wait for resolution before proceeding with completion
 ```
 
