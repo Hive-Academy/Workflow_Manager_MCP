@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implementation Plan Analytics Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: #f8fafc; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px 8px 0 0; }
+        .content { padding: 30px; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .metric-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; text-align: center; }
+        .metric-value { font-size: 2rem; font-weight: bold; color: #2d3748; margin-bottom: 5px; }
+        .metric-label { color: #718096; font-size: 0.9rem; }
+        .chart-container { margin: 30px 0; }
+        .chart-wrapper { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .recommendations { background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 20px 0; }
+        .recommendations h3 { margin-top: 0; color: #1e40af; }
+        .recommendations ul { margin: 0; padding-left: 20px; }
+        .recommendations li { margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Implementation Plan Analytics Report</h1>
+            <p>Generated on 5/25/2025, 3:31:54 AM</p>
+            
+        </div>
+        
+        <div class="content">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">3</div>
+                    <div class="metric-label">Total Tasks</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">33.3%</div>
+                    <div class="metric-label">Completion Rate</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">5</div>
+                    <div class="metric-label">Total Delegations</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">1</div>
+                    <div class="metric-label">Code Reviews</div>
+                </div>
+            </div>
+
+            
+                <div class="chart-wrapper">
+                    <h3>Task Status Distribution</h3>
+                    <canvas id="chart0" width="400" height="200"></canvas>
+                </div>
+            
+                <div class="chart-wrapper">
+                    <h3>Task Priority Distribution</h3>
+                    <canvas id="chart1" width="400" height="200"></canvas>
+                </div>
+            
+                <div class="chart-wrapper">
+                    <h3>Code Review Outcomes</h3>
+                    <canvas id="chart2" width="400" height="200"></canvas>
+                </div>
+            
+                <div class="chart-wrapper">
+                    <h3>Batch Completion Rates</h3>
+                    <canvas id="chart3" width="400" height="200"></canvas>
+                </div>
+            
+                <div class="chart-wrapper">
+                    <h3>Estimation Accuracy by Batch</h3>
+                    <canvas id="chart4" width="400" height="200"></canvas>
+                </div>
+            
+
+            
+                <div class="recommendations">
+                    <h3>Recommendations</h3>
+                    <ul>
+                        
+                            <li>Consider reviewing task complexity and breaking down large tasks into smaller subtasks.</li>
+                        
+                            <li>Improve delegation success by providing clearer task descriptions and requirements.</li>
+                        
+                            <li>Focus on improving implementation efficiency through better planning or resource allocation.</li>
+                        
+                            <li>Review implementation planning process to improve plan completion rates.</li>
+                        
+                    </ul>
+                </div>
+            
+        </div>
+    </div>
+
+    <script>
+        
+            new Chart(document.getElementById('chart0'), {
+                type: 'pie',
+                data: {
+                    labels: ["Completed","In Progress","Not Started"],
+                    datasets: [{"label":"Tasks","data":[1,1,0],"backgroundColor":["#4ade80","#fbbf24","#f87171"]}]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+        
+            new Chart(document.getElementById('chart1'), {
+                type: 'bar',
+                data: {
+                    labels: ["Unknown","High","Medium"],
+                    datasets: [{"label":"Count","data":[1,1,1],"backgroundColor":"#3b82f6"}]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+        
+            new Chart(document.getElementById('chart2'), {
+                type: 'doughnut',
+                data: {
+                    labels: ["Approved","Approved with Reservations","Needs Changes"],
+                    datasets: [{"label":"Reviews","data":[1,0,0],"backgroundColor":["#10b981","#f59e0b","#ef4444"]}]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+        
+            new Chart(document.getElementById('chart3'), {
+                type: 'bar',
+                data: {
+                    labels: ["B004","B003","B002","B001"],
+                    datasets: [{"label":"Completion %","data":[0,0,66.66666666666666,100],"backgroundColor":"#06b6d4"}]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+        
+            new Chart(document.getElementById('chart4'), {
+                type: 'line',
+                data: {
+                    labels: ["B004","B003","B002","B001"],
+                    datasets: [{"label":"Accuracy %","data":[85,85,85,85],"borderColor":"#8b5cf6"}]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+        
+    </script>
+</body>
+</html>

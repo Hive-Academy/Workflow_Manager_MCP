@@ -22,7 +22,10 @@
     "cursor",
     "nestjs",
     "prisma",
-    "docker"
+    "docker",
+    "reporting",
+    "analytics",
+    "playwright"
   ],
   "main": "dist/main.js",
   "engines": {
@@ -41,13 +44,14 @@
     "db:migrate": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:init": "npm run db:generate && npm run db:migrate",
-    "postinstall": "npm run db:generate",
+    "postinstall": "npm run db:generate && playwright install chromium",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "playwright:install": "playwright install chromium"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.4",
@@ -58,8 +62,10 @@
     "@prisma/client": "^6.8.2",
     "@rekog/mcp-nest": "^1.5.2",
     "@types/express": "^4.17.21",
+    "ejs": "^3.1.10",
     "express": "^4.19.2",
     "fastmcp": "^1.27.6",
+    "playwright": "^1.48.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "uuid": "^11.1.0",
@@ -73,6 +79,7 @@
     "@nestjs/testing": "^11.0.1",
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.10.7",
+    "@types/ejs": "^3.1.5",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.7",
     "@types/supertest": "^6.0.2",
