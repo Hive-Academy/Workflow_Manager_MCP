@@ -9,6 +9,10 @@ import {
   UniversalMutationSchema,
   UniversalMutationInput,
 } from './universal-mutation.schema';
+import {
+  UNIVERSAL_QUERY_DESCRIPTION,
+  UNIVERSAL_MUTATION_DESCRIPTION,
+} from './descriptions';
 
 // Type definitions for better type safety
 
@@ -54,27 +58,7 @@ export class UniversalOperationsService {
 
   @Tool({
     name: 'query_data',
-    description: `
-Universal query tool with full Prisma filtering capabilities.
-
-🎯 REPLACES 15+ INDIVIDUAL QUERY TOOLS:
-• get_task_context, list_tasks, search_tasks
-• get_research_report, get_code_review_report, get_completion_report  
-• task_dashboard, workflow_status, get_current_mode_for_task
-• And many more...
-
-🚀 POWERFUL FEATURES:
-• Advanced Prisma filtering (where, include, select, orderBy)
-• Pagination and sorting
-• Aggregations and analytics
-• Performance optimizations
-• Flexible response formatting
-
-📊 EXAMPLE QUERIES:
-• All in-progress tasks: { entity: "task", where: { status: "in-progress" } }
-• Task with full context: { entity: "task", where: { id: "TSK-001" }, include: { taskDescription: true, implementationPlans: { include: { subtasks: true } } } }
-• Task analytics: { entity: "task", aggregation: { count: true, groupBy: ["status"] } }
-    `,
+    description: UNIVERSAL_QUERY_DESCRIPTION,
     parameters: UniversalQuerySchema,
   })
   async queryData(input: UniversalQueryInput): Promise<any> {
@@ -175,29 +159,7 @@ Universal query tool with full Prisma filtering capabilities.
 
   @Tool({
     name: 'mutate_data',
-    description: `
-Universal mutation tool for creating, updating, and deleting data.
-
-🎯 REPLACES 20+ INDIVIDUAL MUTATION TOOLS:
-• create_task, update_task_status, delete_task
-• create_implementation_plan, update_subtask_status
-• create_research_report, update_code_review_report
-• delegate_task, complete_task, add_task_note
-• And many more...
-
-🚀 POWERFUL FEATURES:
-• All CRUD operations (create, update, upsert, delete)
-• Batch operations and transactions
-• Relation management (connect, disconnect, create)
-• Business rule validation
-• Audit trail support
-• Performance optimizations
-
-📝 EXAMPLE MUTATIONS:
-• Create task: { operation: "create", entity: "task", data: { id: "TSK-001", name: "New Task" } }
-• Update status: { operation: "update", entity: "task", where: { id: "TSK-001" }, data: { status: "completed" } }
-• Batch create: { operation: "createMany", entity: "subtask", data: [...] }
-    `,
+    description: UNIVERSAL_MUTATION_DESCRIPTION,
     parameters: UniversalMutationSchema,
   })
   async mutateData(input: UniversalMutationInput): Promise<any> {

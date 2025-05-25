@@ -5,6 +5,7 @@ import {
   WorkflowOperationsSchema,
   WorkflowOperationsInput,
 } from './workflow-operations.schema';
+import { WORKFLOW_OPERATIONS_DESCRIPTION } from './descriptions';
 
 // Type definitions for workflow operation results
 interface WorkflowOperationResult {
@@ -54,27 +55,7 @@ export class WorkflowOperationsService {
 
   @Tool({
     name: 'workflow_operations',
-    description: `
-Specialized workflow state management and transitions.
-
-🎯 REPLACES WORKFLOW-SPECIFIC TOOLS:
-• delegate_task, complete_task, handle_role_transition
-• update_task_status (with workflow validation)
-• Workflow state management and validation
-
-🚀 ADVANCED WORKFLOW FEATURES:
-• Role-based delegation with validation
-• Completion with evidence tracking
-• Escalation and rejection handling
-• Batch workflow operations
-• Conditional operations
-• Audit trail and notifications
-
-📋 EXAMPLE OPERATIONS:
-• Delegate: { operation: "delegate", taskId: "TSK-001", fromRole: "architect", toRole: "senior-developer" }
-• Complete: { operation: "complete", taskId: "TSK-001", completionData: { summary: "...", filesModified: [...] } }
-• Escalate: { operation: "escalate", taskId: "TSK-001", rejectionData: { reason: "...", severity: "high" } }
-    `,
+    description: WORKFLOW_OPERATIONS_DESCRIPTION,
     parameters: WorkflowOperationsSchema,
   })
   async executeWorkflowOperation(input: WorkflowOperationsInput): Promise<any> {
