@@ -12,8 +12,11 @@ import { RecommendationEngineService } from './services/recommendation-engine.se
 import { ReportTemplateService } from './services/report-template.service';
 import { EnhancedInsightsGeneratorService } from './services/enhanced-insights-generator.service';
 import { SmartResponseSummarizationService } from './services/smart-response-summarization.service';
+import { SchemaDrivenIntelligenceService } from './services/schema-driven-intelligence.service';
 import { TemplateFactoryService } from './services/template-factory.service';
 import { ContentGeneratorService } from './services/content-generator.service';
+import { ReportPathGeneratorService } from './services/report-path-generator.service';
+import { ReportMcpOperationsService } from './report-mcp-operations.service';
 
 @Module({
   imports: [PrismaModule, ChartGenerationModule],
@@ -30,13 +33,23 @@ import { ContentGeneratorService } from './services/content-generator.service';
     ReportTemplateService,
     EnhancedInsightsGeneratorService,
     SmartResponseSummarizationService,
+    SchemaDrivenIntelligenceService,
     TemplateFactoryService,
     ContentGeneratorService,
+    ReportPathGeneratorService,
+
+    // MCP Operations
+    ReportMcpOperationsService,
   ],
   exports: [
-    // Core Services
+    // Core Services that might be needed externally
     ReportGeneratorService,
     ReportRenderingService,
+
+    // MCP Operations Service (needed for MCP server registration)
+    ReportMcpOperationsService,
+
+    // Export the chart generation module for external use
     ChartGenerationModule,
   ],
 })
