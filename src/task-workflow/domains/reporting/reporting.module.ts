@@ -25,20 +25,24 @@ import { ReportMcpOperationsService } from './report-mcp-operations.service';
     ReportGeneratorService,
     ReportRenderingService,
 
-    // Core Analytics Services
+    // Core Analytics Services (actively used)
     MetricsCalculatorService,
     TimeSeriesAnalysisService,
     PerformanceBenchmarkService,
     RecommendationEngineService,
     ReportTemplateService,
     EnhancedInsightsGeneratorService,
+
+    // Integrated Intelligence Services (previously unused, now integrated)
     SmartResponseSummarizationService,
     SchemaDrivenIntelligenceService,
-    TemplateFactoryService,
     ContentGeneratorService,
+
+    // Supporting Services
+    TemplateFactoryService,
     ReportPathGeneratorService,
 
-    // MCP Operations
+    // MCP Operations (unified interface for both database and analytics reports)
     ReportMcpOperationsService,
   ],
   exports: [
@@ -51,6 +55,15 @@ import { ReportMcpOperationsService } from './report-mcp-operations.service';
 
     // Export the chart generation module for external use
     ChartGenerationModule,
+
+    // Export integrated intelligence services for external use
+    ContentGeneratorService,
+    SchemaDrivenIntelligenceService,
+    SmartResponseSummarizationService,
+
+    // Export template services for external use
+    ReportTemplateService,
+    TemplateFactoryService,
   ],
 })
 export class ReportingModule {}
