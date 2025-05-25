@@ -10,6 +10,8 @@ import {
   ReportType,
 } from '../interfaces/service-contracts.interface';
 import { ReportData } from '../interfaces/report-data.interface';
+import { TemplateFactoryService } from './template-factory.service';
+import { ContentGeneratorService } from './content-generator.service';
 
 /**
  * Report Template Service
@@ -22,12 +24,18 @@ export class ReportTemplateService implements IReportTemplateService {
   private readonly logger = new Logger(ReportTemplateService.name);
   private readonly templatesPath = path.join(
     process.cwd(),
+    'src',
+    'task-workflow',
+    'domains',
+    'reporting',
     'templates',
-    'reports',
   );
   private readonly tempPath = path.join(process.cwd(), 'reports', 'temp');
 
-  constructor() {
+  constructor(
+    private readonly templateFactory: TemplateFactoryService,
+    private readonly contentGenerator: ContentGeneratorService,
+  ) {
     this.ensureDirectories();
   }
 
@@ -35,7 +43,8 @@ export class ReportTemplateService implements IReportTemplateService {
     reportType: ReportType,
     data: ReportData,
   ): Promise<string> {
-    const templatePath = path.join(this.templatesPath, `${reportType}.ejs`);
+    const templateFileName = this.templateFactory.getTemplatePath(reportType);
+    const templatePath = path.join(this.templatesPath, templateFileName);
 
     try {
       // Check if template exists, if not create a default one
@@ -45,8 +54,33 @@ export class ReportTemplateService implements IReportTemplateService {
         await this.createDefaultTemplate(reportType, templatePath);
       }
 
+      // Enhance data with generated content
+      const enhancedData = {
+        ...data,
+        executiveSummary: this.contentGenerator.generateExecutiveSummary(
+          reportType,
+          data,
+        ),
+        keyInsights: this.contentGenerator.generateKeyInsights(
+          reportType,
+          data,
+        ),
+        actionableRecommendations:
+          this.contentGenerator.generateActionableRecommendations(
+            reportType,
+            data,
+          ),
+        detailedAnalysis: this.contentGenerator.generateDetailedAnalysis(
+          reportType,
+          data,
+        ),
+        chartConfig: this.templateFactory.getChartConfiguration(reportType),
+        shouldIncludeCharts:
+          this.templateFactory.shouldIncludeCharts(reportType),
+      };
+
       const template = await fs.readFile(templatePath, 'utf-8');
-      return ejs.render(template, { data, reportType });
+      return ejs.render(template, { data: enhancedData, reportType });
     } catch (error) {
       this.logger.error(`Failed to render template for ${reportType}`, error);
       return this.generateFallbackHtml(data);
@@ -86,9 +120,28 @@ export class ReportTemplateService implements IReportTemplateService {
     reportType: ReportType,
     templatePath: string,
   ): Promise<void> {
-    const defaultTemplate = this.getDefaultTemplate(reportType);
-    await fs.writeFile(templatePath, defaultTemplate, 'utf-8');
-    this.logger.log(`Created default template for ${reportType}`);
+    // Try to copy from the comprehensive template first
+    const comprehensiveTemplatePath = path.join(
+      this.templatesPath,
+      'comprehensive.ejs',
+    );
+    try {
+      await fs.access(comprehensiveTemplatePath);
+      const comprehensiveTemplate = await fs.readFile(
+        comprehensiveTemplatePath,
+        'utf-8',
+      );
+      await fs.writeFile(templatePath, comprehensiveTemplate, 'utf-8');
+      this.logger.log(
+        `Created template for ${reportType} based on comprehensive template`,
+      );
+      return;
+    } catch {
+      // Fallback to basic template only if comprehensive doesn't exist
+      const defaultTemplate = this.getDefaultTemplate(reportType);
+      await fs.writeFile(templatePath, defaultTemplate, 'utf-8');
+      this.logger.log(`Created basic default template for ${reportType}`);
+    }
   }
 
   private getDefaultTemplate(_reportType: ReportType): string {

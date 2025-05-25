@@ -53,11 +53,34 @@ export class ChartCalculationService implements IChartCalculationService {
     startColor: string,
     endColor: string,
   ): string[] {
-    const min = Math.min(...values);
-    const max = Math.max(...values);
+    // Handle edge cases
+    if (!values || values.length === 0) {
+      return ['#000000']; // Return default color for empty values
+    }
+
+    // Filter out invalid values for min/max calculation
+    const validValues = values.filter(
+      (v) => !isNaN(v) && v !== null && v !== undefined,
+    );
+    if (validValues.length === 0) {
+      return values.map(() => '#000000'); // All values are invalid
+    }
+
+    const min = Math.min(...validValues);
+    const max = Math.max(...validValues);
+
+    // If all values are the same, return the start color
+    if (max === min) {
+      return values.map(() => startColor || '#000000');
+    }
 
     return values.map((value) => {
-      const ratio = (value - min) / (max - min);
+      // Handle invalid values
+      if (isNaN(value) || value === null || value === undefined) {
+        return '#000000'; // Default color for invalid values
+      }
+
+      const ratio = Math.max(0, Math.min(1, (value - min) / (max - min))); // Clamp ratio between 0 and 1
       return this.interpolateColor(startColor, endColor, ratio);
     });
   }
@@ -66,6 +89,14 @@ export class ChartCalculationService implements IChartCalculationService {
    * Interpolate between two colors
    */
   interpolateColor(color1: string, color2: string, ratio: number): string {
+    // Defensive programming: ensure colors are valid strings
+    if (!color1 || typeof color1 !== 'string') {
+      color1 = '#000000'; // Default to black
+    }
+    if (!color2 || typeof color2 !== 'string') {
+      color2 = '#ffffff'; // Default to white
+    }
+
     const hex1 = color1.replace('#', '');
     const hex2 = color2.replace('#', '');
 
@@ -169,19 +200,41 @@ export class ChartCalculationService implements IChartCalculationService {
       viridis: ['#440154', '#31688e', '#35b779', '#fde725'],
     };
 
-    const colors = colorMaps[scheme];
+    const colors = colorMaps[scheme] || colorMaps['red-green']; // Fallback to red-green
+
+    // Handle edge cases
+    if (!values || values.length === 0) {
+      return ['#000000']; // Return default color for empty values
+    }
+
+    if (max === min) {
+      // All values are the same, return the middle color
+      const middleIndex = Math.floor(colors.length / 2);
+      return values.map(() => colors[middleIndex] || '#000000');
+    }
 
     return values.map((value) => {
-      const ratio = (value - min) / (max - min);
-      const colorIndex = Math.floor(ratio * (colors.length - 1));
-      const nextColorIndex = Math.min(colorIndex + 1, colors.length - 1);
-      const localRatio = ratio * (colors.length - 1) - colorIndex;
+      // Handle NaN or invalid values
+      if (isNaN(value) || value === null || value === undefined) {
+        return '#000000'; // Default color for invalid values
+      }
 
-      return this.interpolateColor(
-        colors[colorIndex],
-        colors[nextColorIndex],
-        localRatio,
+      const ratio = Math.max(0, Math.min(1, (value - min) / (max - min))); // Clamp ratio between 0 and 1
+      const colorIndex = Math.max(
+        0,
+        Math.min(colors.length - 1, Math.floor(ratio * (colors.length - 1))),
       );
+      const nextColorIndex = Math.min(colorIndex + 1, colors.length - 1);
+      const localRatio = Math.max(
+        0,
+        Math.min(1, ratio * (colors.length - 1) - colorIndex),
+      );
+
+      // Ensure we have valid colors before interpolating
+      const color1 = colors[colorIndex] || '#000000';
+      const color2 = colors[nextColorIndex] || '#ffffff';
+
+      return this.interpolateColor(color1, color2, localRatio);
     });
   }
 
@@ -189,6 +242,11 @@ export class ChartCalculationService implements IChartCalculationService {
    * Darken a color by a factor
    */
   darkenColor(color: string, factor: number): string {
+    // Defensive programming: ensure color is a valid string
+    if (!color || typeof color !== 'string') {
+      color = '#000000'; // Default to black
+    }
+
     const hex = color.replace('#', '');
     const r = Math.round(parseInt(hex.substr(0, 2), 16) * (1 - factor));
     const g = Math.round(parseInt(hex.substr(2, 2), 16) * (1 - factor));

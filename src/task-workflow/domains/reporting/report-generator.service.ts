@@ -1,15 +1,9 @@
 // src/task-workflow/domains/reporting/report-generator.service.ts
 
-import { Injectable, Logger, Inject } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   ReportType,
   WhereClause,
-  IMetricsCalculatorService,
-  ITimeSeriesAnalysisService,
-  IPerformanceBenchmarkService,
-  IChartGenerationService,
-  IRecommendationEngineService,
-  IReportTemplateService,
 } from './interfaces/service-contracts.interface';
 import {
   ReportData,
@@ -17,6 +11,12 @@ import {
   ReportMetrics,
 } from './interfaces/report-data.interface';
 import { EnhancedInsightsGeneratorService } from './services/enhanced-insights-generator.service';
+import { MetricsCalculatorService } from './services/metrics-calculator.service';
+import { TimeSeriesAnalysisService } from './services/time-series-analysis.service';
+import { PerformanceBenchmarkService } from './services/performance-benchmark.service';
+import { ChartGenerationRefactoredService } from './services/chart-generation-refactored.service';
+import { RecommendationEngineService } from './services/recommendation-engine.service';
+import { ReportTemplateService } from './services/report-template.service';
 
 /**
  * Report Generator Service
@@ -28,25 +28,19 @@ import { EnhancedInsightsGeneratorService } from './services/enhanced-insights-g
  * - ISP: Clients depend only on interfaces they use
  * - DIP: Depends on abstractions, not concrete implementations
  *
- * Refactored from 1,761-line God Class to focused ~150-line orchestrator
+ * SIMPLIFIED: Removed interface over-engineering, using direct service injection
  */
 @Injectable()
 export class ReportGeneratorService {
   private readonly logger = new Logger(ReportGeneratorService.name);
 
   constructor(
-    @Inject('IMetricsCalculatorService')
-    private readonly metricsCalculator: IMetricsCalculatorService,
-    @Inject('ITimeSeriesAnalysisService')
-    private readonly timeSeriesAnalysis: ITimeSeriesAnalysisService,
-    @Inject('IPerformanceBenchmarkService')
-    private readonly performanceBenchmark: IPerformanceBenchmarkService,
-    @Inject('IChartGenerationService')
-    private readonly chartGeneration: IChartGenerationService,
-    @Inject('IRecommendationEngineService')
-    private readonly recommendationEngine: IRecommendationEngineService,
-    @Inject('IReportTemplateService')
-    private readonly reportTemplate: IReportTemplateService,
+    private readonly metricsCalculator: MetricsCalculatorService,
+    private readonly timeSeriesAnalysis: TimeSeriesAnalysisService,
+    private readonly performanceBenchmark: PerformanceBenchmarkService,
+    private readonly chartGeneration: ChartGenerationRefactoredService,
+    private readonly recommendationEngine: RecommendationEngineService,
+    private readonly reportTemplate: ReportTemplateService,
     private readonly enhancedInsightsGenerator: EnhancedInsightsGeneratorService,
   ) {}
 

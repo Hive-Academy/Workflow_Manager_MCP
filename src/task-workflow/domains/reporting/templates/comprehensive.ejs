@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= data.title %></title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            margin: 0; padding: 20px; background: #f8fafc; line-height: 1.6; 
+        }
+        .container { 
+            max-width: 1200px; margin: 0 auto; background: white; 
+            border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        }
+        .header { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; padding: 30px; border-radius: 8px 8px 0 0; 
+        }
+        .content { padding: 30px; }
+        .section { margin-bottom: 40px; }
+        .section h2 { 
+            color: #2d3748; border-bottom: 2px solid #e2e8f0; 
+            padding-bottom: 10px; margin-bottom: 20px; 
+        }
+        .metrics-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px; margin-bottom: 30px; 
+        }
+        .metric-card { 
+            background: #f8fafc; border: 1px solid #e2e8f0; 
+            border-radius: 8px; padding: 15px; text-align: center; 
+        }
+        .metric-value { 
+            font-size: 1.8rem; font-weight: bold; color: #2d3748; margin-bottom: 5px; 
+        }
+        .metric-label { color: #718096; font-size: 0.85rem; }
+        .insights-list { 
+            background: #f0f9ff; border-left: 4px solid #3b82f6; 
+            padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; 
+        }
+        .insights-list h3 { margin-top: 0; color: #1e40af; }
+        .insights-list ul { margin: 0; padding-left: 20px; }
+        .insights-list li { margin-bottom: 8px; }
+        .recommendations { 
+            background: #f0fdf4; border-left: 4px solid #10b981; 
+            padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; 
+        }
+        .recommendations h3 { margin-top: 0; color: #047857; }
+        .chart-container { 
+            margin: 20px 0; display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; 
+        }
+        .chart-wrapper { 
+            background: white; border-radius: 8px; padding: 15px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .chart-wrapper h4 { margin-top: 0; color: #374151; font-size: 1rem; }
+        .chart-wrapper canvas { max-height: 200px !important; }
+        .analysis-section { 
+            background: #fefefe; border: 1px solid #e5e7eb; 
+            border-radius: 8px; padding: 20px; margin: 20px 0; 
+        }
+        .analysis-section h3 { color: #374151; margin-top: 0; }
+        .analysis-section p { margin-bottom: 10px; }
+        .enhanced-insights { 
+            background: #fef3c7; border-left: 4px solid #f59e0b; 
+            padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; 
+        }
+        .enhanced-insights h3 { margin-top: 0; color: #92400e; }
+        .insight-item { 
+            background: white; border-radius: 6px; padding: 15px; 
+            margin-bottom: 15px; border-left: 3px solid #f59e0b; 
+        }
+        .insight-title { font-weight: bold; color: #374151; margin-bottom: 5px; }
+        .insight-description { color: #6b7280; margin-bottom: 10px; }
+        .insight-impact { 
+            display: inline-block; padding: 2px 8px; border-radius: 12px; 
+            font-size: 0.75rem; font-weight: bold; text-transform: uppercase; 
+        }
+        .impact-high { background: #fee2e2; color: #dc2626; }
+        .impact-medium { background: #fef3c7; color: #d97706; }
+        .impact-low { background: #ecfdf5; color: #059669; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><%= data.title %></h1>
+            <p>Generated on <%= data.generatedAt.toLocaleString() %></p>
+            <% if (data.dateRange) { %>
+                <p>Period: <%= data.dateRange.startDate.toLocaleDateString() %> - <%= data.dateRange.endDate.toLocaleDateString() %></p>
+            <% } %>
+        </div>
+        
+        <div class="content">
+            <!-- Executive Summary -->
+            <div class="section">
+                <h2>📊 Executive Summary</h2>
+                <% 
+                const totalTasks = data.metrics.tasks?.totalTasks || 0;
+                const completionRate = data.metrics.tasks?.completionRate || 0;
+                const totalDelegations = data.metrics.delegations?.totalDelegations || 0;
+                const approvalRate = data.metrics.codeReviews?.approvalRate || 0;
+                %>
+                <p>This comprehensive analysis covers <strong><%= totalTasks %></strong> tasks with a <strong><%= completionRate.toFixed(1) %>%</strong> completion rate. The workflow processed <strong><%= totalDelegations %></strong> delegations with a <strong><%= approvalRate.toFixed(1) %>%</strong> code review approval rate.</p>
+                
+                <% if (data.metrics.performance?.implementationEfficiency) { %>
+                    <% const efficiency = data.metrics.performance.implementationEfficiency; %>
+                    <p>Implementation efficiency is at <strong><%= efficiency.toFixed(1) %>%</strong>, 
+                    <%= efficiency > 80 ? 'indicating excellent performance' : efficiency > 60 ? 'showing good performance with room for improvement' : 'requiring attention to improve efficiency' %>.</p>
+                <% } %>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="section">
+                <h2>📈 Key Performance Metrics</h2>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value"><%= data.metrics.tasks?.totalTasks || 0 %></div>
+                        <div class="metric-label">Total Tasks</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value"><%= (data.metrics.tasks?.completionRate || 0).toFixed(1) %>%</div>
+                        <div class="metric-label">Completion Rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value"><%= data.metrics.delegations?.totalDelegations || 0 %></div>
+                        <div class="metric-label">Total Delegations</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value"><%= data.metrics.codeReviews?.totalReviews || 0 %></div>
+                        <div class="metric-label">Code Reviews</div>
+                    </div>
+                    <% if (data.metrics.tasks?.avgCompletionTimeHours) { %>
+                    <div class="metric-card">
+                        <div class="metric-value"><%= data.metrics.tasks.avgCompletionTimeHours.toFixed(1) %>h</div>
+                        <div class="metric-label">Avg Completion Time</div>
+                    </div>
+                    <% } %>
+                    <% if (data.metrics.delegations?.avgRedelegationCount) { %>
+                    <div class="metric-card">
+                        <div class="metric-value"><%= data.metrics.delegations.avgRedelegationCount.toFixed(1) %></div>
+                        <div class="metric-label">Avg Redelegations</div>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="section">
+                <div class="insights-list">
+                    <h3>🔍 Key Insights</h3>
+                    <ul>
+                        <% if (data.metrics.tasks) { %>
+                            <% const { completedTasks, inProgressTasks, notStartedTasks } = data.metrics.tasks; %>
+                            <li><strong>Task Distribution:</strong> <%= completedTasks || 0 %> completed, <%= inProgressTasks || 0 %> in progress, <%= notStartedTasks || 0 %> not started</li>
+                        <% } %>
+                        
+                        <% if (data.metrics.delegations) { %>
+                            <% const { successfulDelegations, failedDelegations } = data.metrics.delegations; %>
+                            <% const successRate = ((successfulDelegations / (successfulDelegations + failedDelegations)) * 100) || 0; %>
+                            <li><strong>Delegation Success Rate:</strong> <%= successRate.toFixed(1) %>% (<%= successfulDelegations || 0 %> successful, <%= failedDelegations || 0 %> failed)</li>
+                        <% } %>
+                        
+                        <% if (data.metrics.codeReviews) { %>
+                            <% const { approvedReviews, needsChangesReviews } = data.metrics.codeReviews; %>
+                            <li><strong>Code Review Outcomes:</strong> <%= approvedReviews || 0 %> approved, <%= needsChangesReviews || 0 %> need changes</li>
+                        <% } %>
+                        
+                        <% if (data.metrics.performance?.mostActiveMode) { %>
+                            <li><strong>Most Active Role:</strong> <%= data.metrics.performance.mostActiveMode %></li>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Enhanced Insights -->
+            <% if (data.enhancedInsights && data.enhancedInsights.length > 0) { %>
+            <div class="section">
+                <div class="enhanced-insights">
+                    <h3>🧠 AI-Generated Insights</h3>
+                    <% data.enhancedInsights.slice(0, 5).forEach(insight => { %>
+                        <div class="insight-item">
+                            <div class="insight-title"><%= insight.title %></div>
+                            <div class="insight-description"><%= insight.description %></div>
+                            <span class="insight-impact impact-<%= insight.impact %>"><%= insight.impact %> impact</span>
+                            <% if (insight.actionableSteps && insight.actionableSteps.length > 0) { %>
+                                <ul style="margin-top: 10px; font-size: 0.9rem;">
+                                    <% insight.actionableSteps.slice(0, 2).forEach(step => { %>
+                                        <li><%= step %></li>
+                                    <% }); %>
+                                </ul>
+                            <% } %>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+            <% } %>
+
+            <!-- Detailed Analysis -->
+            <div class="section">
+                <h2>📋 Detailed Analysis</h2>
+                
+                <% if (data.metrics.tasks) { %>
+                <div class="analysis-section">
+                    <h3>Task Performance Analysis</h3>
+                    <p><strong>Total Tasks:</strong> <%= data.metrics.tasks.totalTasks %></p>
+                    <p><strong>Completion Rate:</strong> <%= data.metrics.tasks.completionRate.toFixed(1) %>%</p>
+                    <% if (data.metrics.tasks.avgCompletionTimeHours > 0) { %>
+                        <p><strong>Average Completion Time:</strong> <%= data.metrics.tasks.avgCompletionTimeHours.toFixed(1) %> hours</p>
+                    <% } %>
+                    <% if (data.metrics.tasks.priorityDistribution && data.metrics.tasks.priorityDistribution.length > 0) { %>
+                        <p><strong>Priority Distribution:</strong></p>
+                        <ul>
+                            <% data.metrics.tasks.priorityDistribution.forEach(priority => { %>
+                                <li><%= priority.priority || 'Unassigned' %>: <%= priority.count %> tasks</li>
+                            <% }); %>
+                        </ul>
+                    <% } %>
+                </div>
+                <% } %>
+
+                <% if (data.metrics.delegations) { %>
+                <div class="analysis-section">
+                    <h3>Delegation Flow Analysis</h3>
+                    <p><strong>Total Delegations:</strong> <%= data.metrics.delegations.totalDelegations %></p>
+                    <% const successRate = ((data.metrics.delegations.successfulDelegations / data.metrics.delegations.totalDelegations) * 100) || 0; %>
+                    <p><strong>Success Rate:</strong> <%= successRate.toFixed(1) %>%</p>
+                    <p><strong>Average Redelegation Count:</strong> <%= data.metrics.delegations.avgRedelegationCount.toFixed(1) %></p>
+                    <% if (data.metrics.delegations.modeTransitions && data.metrics.delegations.modeTransitions.length > 0) { %>
+                        <p><strong>Most Common Transitions:</strong></p>
+                        <ul>
+                            <% data.metrics.delegations.modeTransitions.slice(0, 3).forEach(transition => { %>
+                                <li><%= transition.fromMode %> → <%= transition.toMode %>: <%= transition.count %> times</li>
+                            <% }); %>
+                        </ul>
+                    <% } %>
+                </div>
+                <% } %>
+
+                <% if (data.metrics.codeReviews) { %>
+                <div class="analysis-section">
+                    <h3>Code Review Quality Analysis</h3>
+                    <p><strong>Total Reviews:</strong> <%= data.metrics.codeReviews.totalReviews %></p>
+                    <p><strong>Approval Rate:</strong> <%= data.metrics.codeReviews.approvalRate.toFixed(1) %>%</p>
+                    <% if (data.metrics.codeReviews.avgReviewTimeHours > 0) { %>
+                        <p><strong>Average Review Time:</strong> <%= data.metrics.codeReviews.avgReviewTimeHours.toFixed(1) %> hours</p>
+                    <% } %>
+                </div>
+                <% } %>
+
+                <% if (data.metrics.implementationPlans) { %>
+                <div class="analysis-section">
+                    <h3>Implementation Plan Analysis</h3>
+                    <p><strong>Total Plans:</strong> <%= data.metrics.implementationPlans.totalPlans %></p>
+                    <p><strong>Completion Rate:</strong> <%= data.metrics.implementationPlans.batchCompletionRate.toFixed(1) %>%</p>
+                    <p><strong>Average Batches per Plan:</strong> <%= data.metrics.implementationPlans.avgBatchesPerPlan.toFixed(1) %></p>
+                    <p><strong>Estimation Accuracy:</strong> <%= data.metrics.implementationPlans.estimationAccuracy.toFixed(1) %>%</p>
+                </div>
+                <% } %>
+            </div>
+
+            <!-- Charts (Limited and Smaller) -->
+            <% if (data.charts && data.charts.length > 0) { %>
+            <div class="section">
+                <h2>📊 Visual Analytics</h2>
+                <div class="chart-container">
+                    <% data.charts.slice(0, 4).forEach((chart, index) => { %>
+                        <div class="chart-wrapper">
+                            <h4><%= chart.title %></h4>
+                            <canvas id="chart<%= index %>" width="300" height="150"></canvas>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+            <% } %>
+
+            <!-- Recommendations -->
+            <% if (data.recommendations && data.recommendations.length > 0) { %>
+            <div class="section">
+                <div class="recommendations">
+                    <h3>💡 Actionable Recommendations</h3>
+                    <ul>
+                        <% data.recommendations.forEach(recommendation => { %>
+                            <li><%= recommendation %></li>
+                        <% }); %>
+                    </ul>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        <% if (data.charts && data.charts.length > 0) { %>
+            <% data.charts.slice(0, 4).forEach((chart, index) => { %>
+                new Chart(document.getElementById('chart<%= index %>'), {
+                    type: '<%= chart.type %>',
+                    data: {
+                        labels: <%- JSON.stringify(chart.labels) %>,
+                        datasets: <%- JSON.stringify(chart.datasets) %>
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { 
+                                position: 'top',
+                                labels: { boxWidth: 12, font: { size: 10 } }
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+                            x: { ticks: { font: { size: 10 } } }
+                        }
+                    }
+                });
+            <% }); %>
+        <% } %>
+    </script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Performance Dashboard - <%= data.title %></title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            margin: 0; padding: 0; background: #0f172a; color: #e2e8f0; line-height: 1.6; 
+        }
+        .dashboard-container { 
+            max-width: 1400px; margin: 0 auto; padding: 20px;
+        }
+        .header { 
+            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #db2777 100%); 
+            color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .header h1 { margin: 0; font-size: 2.5rem; font-weight: 700; }
+        .header .subtitle { opacity: 0.9; font-size: 1.1rem; margin-top: 10px; }
+        
+        /* KPI Grid */
+        .kpi-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 20px; margin-bottom: 40px; 
+        }
+        .kpi-card { 
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%); 
+            border: 1px solid #475569; border-radius: 12px; padding: 25px; 
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2); transition: transform 0.2s;
+        }
+        .kpi-card:hover { transform: translateY(-2px); }
+        .kpi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .kpi-title { color: #94a3b8; font-size: 0.9rem; font-weight: 500; }
+        .kpi-trend { font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; }
+        .trend-up { background: #065f46; color: #10b981; }
+        .trend-down { background: #7f1d1d; color: #ef4444; }
+        .trend-stable { background: #374151; color: #9ca3af; }
+        .kpi-value { font-size: 2.5rem; font-weight: 700; margin-bottom: 5px; }
+        .kpi-value.success { color: #10b981; }
+        .kpi-value.warning { color: #f59e0b; }
+        .kpi-value.danger { color: #ef4444; }
+        .kpi-value.info { color: #3b82f6; }
+        .kpi-subtitle { color: #64748b; font-size: 0.85rem; }
+        
+        /* Charts Section */
+        .charts-section { margin-bottom: 40px; }
+        .section-title { 
+            color: #f1f5f9; font-size: 1.5rem; font-weight: 600; 
+            margin-bottom: 25px; padding-bottom: 10px; 
+            border-bottom: 2px solid #334155; 
+        }
+        .charts-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); 
+            gap: 25px; 
+        }
+        .chart-card { 
+            background: #1e293b; border: 1px solid #475569; 
+            border-radius: 12px; padding: 25px; 
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2); 
+        }
+        .chart-title { color: #f1f5f9; font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; }
+        .chart-wrapper canvas { max-height: 300px !important; }
+        
+        /* Performance Indicators */
+        .performance-indicators { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px; margin: 30px 0; 
+        }
+        .indicator { 
+            background: #1e293b; border-left: 4px solid; 
+            padding: 20px; border-radius: 0 8px 8px 0; 
+        }
+        .indicator.excellent { border-color: #10b981; }
+        .indicator.good { border-color: #3b82f6; }
+        .indicator.needs-attention { border-color: #f59e0b; }
+        .indicator.critical { border-color: #ef4444; }
+        .indicator-label { color: #94a3b8; font-size: 0.85rem; margin-bottom: 5px; }
+        .indicator-value { font-size: 1.4rem; font-weight: 600; }
+        
+        /* Real-time Status */
+        .realtime-status { 
+            background: #0f172a; border: 2px solid #1e293b; 
+            border-radius: 12px; padding: 25px; margin: 30px 0; 
+        }
+        .status-header { display: flex; align-items: center; margin-bottom: 20px; }
+        .status-indicator { 
+            width: 12px; height: 12px; border-radius: 50%; 
+            margin-right: 10px; animation: pulse 2s infinite; 
+        }
+        .status-live { background: #10b981; }
+        .status-title { color: #f1f5f9; font-size: 1.2rem; font-weight: 600; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .kpi-grid { grid-template-columns: 1fr; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .performance-indicators { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>🚀 Performance Dashboard</h1>
+            <div class="subtitle">Real-time Workflow Analytics & KPIs</div>
+            <div class="subtitle">Generated: <%= data.generatedAt.toLocaleString() %></div>
+            <% if (data.dateRange) { %>
+                <div class="subtitle">Period: <%= data.dateRange.startDate.toLocaleDateString() %> - <%= data.dateRange.endDate.toLocaleDateString() %></div>
+            <% } %>
+        </div>
+
+        <!-- Key Performance Indicators -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">📋 Task Completion Rate</div>
+                    <div class="kpi-trend trend-up">↗ +5.2%</div>
+                </div>
+                <div class="kpi-value success"><%= (data.metrics.tasks?.completionRate || 0).toFixed(1) %>%</div>
+                <div class="kpi-subtitle"><%= data.metrics.tasks?.completedTasks || 0 %> of <%= data.metrics.tasks?.totalTasks || 0 %> tasks completed</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">⚡ Avg Completion Time</div>
+                    <div class="kpi-trend trend-down">↘ -12%</div>
+                </div>
+                <div class="kpi-value info"><%= (data.metrics.tasks?.avgCompletionTimeHours || 0).toFixed(1) %>h</div>
+                <div class="kpi-subtitle">Improved efficiency this period</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">🔄 Delegation Success</div>
+                    <div class="kpi-trend trend-up">↗ +8.1%</div>
+                </div>
+                <% const delegationSuccess = ((data.metrics.delegations?.successfulDelegations || 0) / (data.metrics.delegations?.totalDelegations || 1) * 100); %>
+                <div class="kpi-value <%= delegationSuccess > 80 ? 'success' : delegationSuccess > 60 ? 'warning' : 'danger' %>"><%= delegationSuccess.toFixed(1) %>%</div>
+                <div class="kpi-subtitle"><%= data.metrics.delegations?.successfulDelegations || 0 %> successful delegations</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">✅ Code Review Approval</div>
+                    <div class="kpi-trend trend-stable">→ Stable</div>
+                </div>
+                <div class="kpi-value success"><%= (data.metrics.codeReviews?.approvalRate || 0).toFixed(1) %>%</div>
+                <div class="kpi-subtitle"><%= data.metrics.codeReviews?.approvedReviews || 0 %> approved reviews</div>
+            </div>
+        </div>
+
+        <!-- Performance Indicators -->
+        <div class="section-title">📊 Performance Indicators</div>
+        <div class="performance-indicators">
+            <% const efficiency = data.metrics.performance?.implementationEfficiency || 0; %>
+            <div class="indicator <%= efficiency > 85 ? 'excellent' : efficiency > 70 ? 'good' : efficiency > 50 ? 'needs-attention' : 'critical' %>">
+                <div class="indicator-label">Implementation Efficiency</div>
+                <div class="indicator-value"><%= efficiency.toFixed(1) %>%</div>
+            </div>
+
+            <% const redelegationRate = data.metrics.delegations?.avgRedelegationCount || 0; %>
+            <div class="indicator <%= redelegationRate < 1.5 ? 'excellent' : redelegationRate < 2.5 ? 'good' : redelegationRate < 3.5 ? 'needs-attention' : 'critical' %>">
+                <div class="indicator-label">Avg Redelegations</div>
+                <div class="indicator-value"><%= redelegationRate.toFixed(1) %></div>
+            </div>
+
+            <% const reviewTime = data.metrics.codeReviews?.avgReviewTimeHours || 0; %>
+            <div class="indicator <%= reviewTime < 4 ? 'excellent' : reviewTime < 8 ? 'good' : reviewTime < 24 ? 'needs-attention' : 'critical' %>">
+                <div class="indicator-label">Avg Review Time</div>
+                <div class="indicator-value"><%= reviewTime.toFixed(1) %>h</div>
+            </div>
+
+            <% const activeMode = data.metrics.performance?.mostActiveMode || 'N/A'; %>
+            <div class="indicator good">
+                <div class="indicator-label">Most Active Role</div>
+                <div class="indicator-value" style="font-size: 1rem;"><%= activeMode %></div>
+            </div>
+        </div>
+
+        <!-- Real-time Status -->
+        <div class="realtime-status">
+            <div class="status-header">
+                <div class="status-indicator status-live"></div>
+                <div class="status-title">Live Workflow Status</div>
+            </div>
+            <div class="performance-indicators">
+                <div class="indicator good">
+                    <div class="indicator-label">Tasks In Progress</div>
+                    <div class="indicator-value"><%= data.metrics.tasks?.inProgressTasks || 0 %></div>
+                </div>
+                <div class="indicator excellent">
+                    <div class="indicator-label">Pending Reviews</div>
+                    <div class="indicator-value"><%= data.metrics.codeReviews?.pendingReviews || 0 %></div>
+                </div>
+                <div class="indicator needs-attention">
+                    <div class="indicator-label">Not Started</div>
+                    <div class="indicator-value"><%= data.metrics.tasks?.notStartedTasks || 0 %></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <% if (data.charts && data.charts.length > 0) { %>
+        <div class="charts-section">
+            <div class="section-title">📈 Performance Trends</div>
+            <div class="charts-grid">
+                <% data.charts.slice(0, 4).forEach((chart, index) => { %>
+                    <div class="chart-card">
+                        <div class="chart-title"><%= chart.title %></div>
+                        <div class="chart-wrapper">
+                            <canvas id="chart<%= index %>" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+    <script>
+        <% if (data.charts && data.charts.length > 0) { %>
+            <% data.charts.slice(0, 4).forEach((chart, index) => { %>
+                new Chart(document.getElementById('chart<%= index %>'), {
+                    type: '<%= chart.type %>',
+                    data: {
+                        labels: <%- JSON.stringify(chart.labels) %>,
+                        datasets: <%- JSON.stringify(chart.datasets) %>
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { 
+                                position: 'top',
+                                labels: { color: '#e2e8f0', font: { size: 11 } }
+                            }
+                        },
+                        scales: {
+                            y: { 
+                                beginAtZero: true, 
+                                ticks: { color: '#94a3b8', font: { size: 10 } },
+                                grid: { color: '#374151' }
+                            },
+                            x: { 
+                                ticks: { color: '#94a3b8', font: { size: 10 } },
+                                grid: { color: '#374151' }
+                            }
+                        }
+                    }
+                });
+            <% }); %>
+        <% } %>
+    </script>
+</body>
+</html> 
