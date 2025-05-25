@@ -117,4 +117,22 @@ export class ChartGenerationService implements IChartGenerationService {
   ): ChartData {
     return this.refactoredService.generateRadarChart(data, title, options);
   }
+
+  /**
+   * Generate task-specific charts for individual task reports (B005)
+   * Delegates to refactored service implementation
+   */
+  generateTaskSpecificChartData(
+    reportType: ReportType,
+    taskMetrics: any,
+  ): ChartData[] {
+    this.logger.warn(
+      'Using deprecated ChartGenerationService for task-specific charts. Consider migrating to ChartGenerationRefactoredService.',
+    );
+
+    return this.refactoredService.generateTaskSpecificChartData(
+      reportType,
+      taskMetrics,
+    );
+  }
 }

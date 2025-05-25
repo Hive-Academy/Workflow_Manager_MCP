@@ -20,14 +20,20 @@ const GenerateReportInputSchema = z.object({
     'implementation_plan_analytics',
     'code_review_insights',
     'delegation_flow_analysis',
+    'task_progress_health',
+    'implementation_execution',
+    'code_review_quality',
+    'delegation_flow_analysis_task',
+    'research_documentation',
+    'communication_collaboration',
   ]).describe(`Type of report to generate. Available report types:
 
-**📊 ANALYTICS REPORTS:**
+**📊 AGGREGATE ANALYTICS REPORTS:**
 • task_summary - Overview of task completion rates, status distribution, and basic metrics
 • delegation_analytics - Deep dive into delegation patterns, handoff efficiency, and role performance
 • performance_dashboard - Real-time performance metrics with trending and benchmarks
 
-**🔍 SPECIALIZED INSIGHTS:**
+**🔍 SPECIALIZED AGGREGATE INSIGHTS:**
 • implementation_plan_analytics - Analysis of implementation plan quality, subtask breakdown, and execution patterns
 • code_review_insights - Code review approval rates, common issues, and quality trends
 • delegation_flow_analysis - Detailed workflow analysis showing delegation paths and bottlenecks
@@ -35,10 +41,19 @@ const GenerateReportInputSchema = z.object({
 **📈 COMPREHENSIVE:**
 • comprehensive - Complete analysis combining all report types with executive summary
 
+**🎯 INDIVIDUAL TASK REPORTS (B005):**
+• task_progress_health - Individual task progress and health analysis (requires taskId filter)
+• implementation_execution - Task implementation execution analysis (requires taskId filter)
+• code_review_quality - Task-specific code review quality metrics (requires taskId filter)
+• delegation_flow_analysis_task - Individual task delegation flow analysis (requires taskId filter)
+• research_documentation - Task research and documentation quality (requires taskId filter)
+• communication_collaboration - Task communication and collaboration metrics (requires taskId filter)
+
 **Example Usage:**
 - For daily standup: "performance_dashboard" 
 - For sprint retrospective: "delegation_analytics"
-- For quarterly review: "comprehensive"`),
+- For quarterly review: "comprehensive"
+- For individual task analysis: "task_progress_health" with taskId filter`),
   startDate: z
     .string()
     .optional()
@@ -53,6 +68,12 @@ const GenerateReportInputSchema = z.object({
     .string()
     .optional()
     .describe('Filter tasks by priority (Low, Medium, High, Critical)'),
+  taskId: z
+    .string()
+    .optional()
+    .describe(
+      'Task ID for individual task reports (required for task_progress_health, implementation_execution, code_review_quality, delegation_flow_analysis_task, research_documentation, communication_collaboration)',
+    ),
   outputFormat: z.enum(['pdf', 'png', 'jpeg', 'html']).default('pdf')
     .describe(`Output format for the report:
 
@@ -204,6 +225,7 @@ Reports are automatically organized in 'workflow-manager-mcp-reports' with meani
         ...(input.owner && { owner: input.owner }),
         ...(input.mode && { mode: input.mode }),
         ...(input.priority && { priority: input.priority }),
+        ...(input.taskId && { taskId: input.taskId }),
       };
 
       // Generate meaningful filename and folder structure
@@ -353,32 +375,36 @@ Reports are automatically organized in 'workflow-manager-mcp-reports' with meani
             filepath: result.filepath,
           }),
         },
-        summary: {
-          totalTasks: reportData.metrics.tasks.totalTasks,
-          completionRate: `${reportData.metrics.tasks.completionRate.toFixed(1)}%`,
-          totalDelegations: reportData.metrics.delegations.totalDelegations,
-          codeReviews: reportData.metrics.codeReviews.totalReviews,
-          recommendationsCount: reportData.recommendations.length,
-        },
+        summary: this.generateReportSummary(reportData, input.reportType),
       };
 
       // For performance_dashboard, return minimal response to save tokens
       if (input.reportType === 'performance_dashboard') {
+        const summary = this.generateReportSummary(
+          reportData,
+          input.reportType,
+        );
         return {
           content: [
             {
               type: 'text',
-              text: `Performance Dashboard generated successfully!\n\nSummary:\n- Total Tasks: ${reportData.metrics.tasks.totalTasks}\n- Completion Rate: ${reportData.metrics.tasks.completionRate.toFixed(1)}%\n- Processing Time: ${response.processingTimeMs}ms\n\nFile: ${result.filename} (${(result.size / 1024).toFixed(1)} KB)\nPath: ${result.filepath}`,
+              text: `Performance Dashboard generated successfully!\n\nSummary:\n- Total Tasks: ${summary.totalTasks || 'N/A'}\n- Completion Rate: ${summary.completionRate || 'N/A'}\n- Processing Time: ${response.processingTimeMs}ms\n\nFile: ${result.filename} (${(result.size / 1024).toFixed(1)} KB)\nPath: ${result.filepath}`,
             },
           ],
         };
       }
 
+      const summary = this.generateReportSummary(reportData, input.reportType);
+      const summaryText =
+        summary.reportType === 'individual_task'
+          ? `Task: ${summary.taskName}\nTask ID: ${summary.taskId}\nRecommendations: ${summary.recommendationsCount}`
+          : `Total Tasks: ${summary.totalTasks}\nCompletion Rate: ${summary.completionRate}\nTotal Delegations: ${summary.totalDelegations}\nCode Reviews: ${summary.codeReviews}\nRecommendations: ${summary.recommendationsCount}`;
+
       return {
         content: [
           {
             type: 'text',
-            text: `Report generated successfully!\n\n**${reportData.title}**\n\nSummary:\n- Total Tasks: ${reportData.metrics.tasks.totalTasks}\n- Completion Rate: ${reportData.metrics.tasks.completionRate.toFixed(1)}%\n- Total Delegations: ${reportData.metrics.delegations.totalDelegations}\n- Code Reviews: ${reportData.metrics.codeReviews.totalReviews}\n- Recommendations: ${reportData.recommendations.length}\n\nFile: ${result.filename} (${(result.size / 1024).toFixed(1)} KB)`,
+            text: `Report generated successfully!\n\n**${reportData.title}**\n\nSummary:\n${summaryText}\n\nFile: ${result.filename} (${(result.size / 1024).toFixed(1)} KB)`,
           },
           {
             type: 'text',
@@ -555,6 +581,27 @@ Reports are automatically organized in 'workflow-manager-mcp-reports' with meani
   }
 
   // Helper method to get report as base64
+  private generateReportSummary(reportData: any, _reportType: string): any {
+    // Handle individual task reports differently
+    if (reportData.metrics.taskSpecific) {
+      return {
+        reportType: 'individual_task',
+        taskId: reportData.taskId,
+        taskName: reportData.metrics.taskSpecific.taskName || 'Unknown Task',
+        recommendationsCount: reportData.recommendations?.length || 0,
+      };
+    }
+
+    // Handle aggregate reports
+    return {
+      totalTasks: reportData.metrics.tasks?.totalTasks || 0,
+      completionRate: `${(reportData.metrics.tasks?.completionRate || 0).toFixed(1)}%`,
+      totalDelegations: reportData.metrics.delegations?.totalDelegations || 0,
+      codeReviews: reportData.metrics.codeReviews?.totalReviews || 0,
+      recommendationsCount: reportData.recommendations?.length || 0,
+    };
+  }
+
   private async getReportAsBase64(filename: string): Promise<string> {
     try {
       return await this.reportRenderer.getReportAsBase64(filename);
