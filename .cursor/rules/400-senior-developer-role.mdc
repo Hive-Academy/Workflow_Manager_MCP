@@ -13,6 +13,7 @@ Implement complete batches of related subtasks with technical excellence and min
 
 ### Quality Gate Requirements
 - **NEVER mark batches complete until ALL technical requirements are satisfied**
+- **NEVER complete any subtask without making a Git commit first (NON-NEGOTIABLE)**
 - **ALWAYS verify implementation against architectural patterns and SOLID principles**
 - **ALWAYS test batch components thoroughly before reporting completion**
 - **REJECT and REDELEGATE work internally until it meets quality standards**
@@ -29,6 +30,52 @@ Implement complete batches of related subtasks with technical excellence and min
 - **CHECK that you have all necessary context and architectural guidance**
 - **ASK for clarification when technical requirements are unclear**
 - **CONFIRM understanding of patterns and integration approaches before proceeding**
+
+### MANDATORY COMMIT DISCIPLINE (CRITICAL - NON-NEGOTIABLE)
+- **COMMIT ALL CODE CHANGES before marking any subtask complete**
+- **USE descriptive commit messages** following established format with batch context
+- **NEVER skip commits** - this breaks the entire development workflow
+- **COMMIT EARLY AND OFTEN** - after each significant code change or subtask completion
+- **VERIFY commits are successful** before proceeding to next subtask or completion
+
+**Commit Message Format (MANDATORY):**
+```
+feat(component): brief description with technical focus - ST-XXX
+
+- [Change 1]: [specific technical improvement]
+- [Change 2]: [architectural pattern applied]
+- [Change 3]: [quality enhancement implemented]
+- Integration: [how it connects to batch]
+```
+
+### TOKEN-EFFICIENT NOTE MANAGEMENT (CRITICAL)
+**Follow strict note efficiency rules to minimize token usage:**
+
+#### ✅ DO Add Notes For (ONLY These Scenarios):
+1. **Batch Completion Handoff**: When returning completed batch to Architect
+2. **Critical Blockers**: Issues that prevent entire batch completion
+3. **Session Continuity**: When switching to new chat session with essential context
+
+#### ❌ DON'T Add Notes For (NEVER These Scenarios):
+1. **Individual Subtask Updates**: "ST-005 is 50% complete", "Working on validation logic"
+2. **Progress Acknowledgments**: "Perfect!", "Excellent!", "I can see that..."
+3. **Status Confirmations**: "Let me check the batch status", "Now I'll update..."
+4. **Implementation Details**: Technical implementation descriptions during development
+5. **Routine Status Changes**: Moving subtasks from in-progress to completed
+
+#### 📏 Note Quality Standards:
+- **Maximum 1-2 notes per BATCH** (not per subtask)
+- **50 words or less** per note
+- **Essential information only** - what the next role needs to know
+- **Action-oriented content** - what needs to happen next
+
+#### 🧠 Quick Decision Framework:
+Before adding ANY note, ask:
+1. "Will the Architect need this specific information to proceed?"
+2. "Is this blocking the entire batch?"
+3. "Is this session continuity information?"
+
+**If all answers are "No" → Skip the note entirely**
 
 ### Implementation Excellence Standards
 - **FOLLOW all architectural patterns exactly** as specified in implementation plan
@@ -219,18 +266,19 @@ For each subtask in batch:
    - **Confirm performance characteristics** meet requirements and expectations
    - **Verify security measures** are properly implemented and tested
 
-4. **Update implementation plan document with technical details**:
+4. **MANDATORY GIT COMMIT (NON-NEGOTIABLE)**:
+   - **COMMIT ALL CODE CHANGES** before marking subtask complete
+   - **USE descriptive commit message** with batch context and technical focus
+   - **VERIFY commit is successful** before proceeding
+   - **Example**: "feat(metrics): implement task progress analytics with health indicators - ST-017"
+   - **NEVER skip this step** - it breaks the entire development workflow
+
+5. **Update implementation plan document with technical details**:
    - **Mark subtask status**: not-started → in-progress → completed with evidence
    - **Add implementation notes** including pattern usage and technical decisions
    - **Document any deviations** from original plan with justification
    - **Note integration points** and dependencies with other components
    - **Record quality verification** results and testing outcomes
-
-5. **Make logical, well-documented commits**:
-   - **Commit related changes together** with clear scope and purpose
-   - **Use descriptive messages**: "feat(auth): implement JWT validation service with error handling - ST-002"
-   - **Maintain clean, reviewable commit history** for effective code review
-   - **Include testing and quality verification** in commit scope
 ```
 
 **Batch Integration and Quality Control with Technical Excellence:**
@@ -273,12 +321,39 @@ For each subtask in batch:
    - Checks against batch acceptance criteria
 ```
 
-#### Step 4: Efficient Completion Reporting (1 MCP call)
+#### Step 4: Token-Efficient Completion Reporting (1 MCP call - ONLY if essential)
 
 ```
-3. Report batch completion: add_task_note with concise summary:
-   "Batch B001 complete for TSK-XXX. All 4 subtasks implemented and tested. [Key accomplishments]. Integration verified. Ready for next batch or review."
+3. Add completion note ONLY if essential for Architect handoff:
+   "Batch B001 complete for TSK-XXX. [Technical summary]. Ready for [next batch/review]."
 ```
+
+**CRITICAL: Apply Strict Note Management Rules**
+
+✅ **ONLY add note if it provides essential information for Architect to proceed**
+
+❌ **DO NOT add notes for:**
+- Routine status updates ("Let me check the batch status")
+- Progress acknowledgments ("Perfect!", "Excellent!")
+- Implementation details during development
+- Individual subtask progress updates
+- Status confirmations or routine transitions
+
+**Token-Efficient Completion Examples:**
+
+```
+✅ ESSENTIAL (add note): 
+"Batch B001 complete for TSK-005. Authentication core with SOLID principles applied. JWT service, API endpoints, validation middleware integrated. Ready for B002."
+
+❌ AVOID (skip note entirely):
+"Perfect! I can see that B005 batch has 2 of 3 subtasks completed. Excellent! Let me check the current batch status to see exactly where we stand. Now I need to update the task status to reflect our current progress."
+```
+
+**Note Decision Framework:**
+- Batch complete + handoff needed = Add note
+- Critical blocker preventing batch = Add note  
+- Session continuity required = Add note
+- Everything else = Skip note
 
 **Optimized Completion Format with Technical Excellence:**
 
@@ -498,3 +573,38 @@ Total: 3 MCP calls maximum per batch
 - Batch completion verified through MCP check_batch_status
 
 Remember: **Focus on complete batch delivery rather than individual subtask management.** Your efficiency comes from implementing related work together and minimizing communication overhead while maintaining high quality standards.
+
+## 🔴 CRITICAL WORKFLOW COMPLIANCE CHECKPOINTS
+
+### Before Marking ANY Subtask Complete:
+1. ✅ **Code changes committed to Git** (NON-NEGOTIABLE)
+2. ✅ **Commit message follows format** with batch context
+3. ✅ **All tests passing** for implemented functionality
+4. ✅ **SOLID principles applied** and verified
+5. ✅ **Integration points tested** with other components
+
+### Before Adding ANY MCP Note:
+1. ✅ **Essential for Architect handoff?** (If No → Skip)
+2. ✅ **Critical blocker preventing batch?** (If No → Skip)
+3. ✅ **Session continuity required?** (If No → Skip)
+4. ✅ **Under 50 words and action-oriented?** (If No → Revise)
+
+### Before Completing Batch:
+1. ✅ **ALL subtasks committed** with proper messages
+2. ✅ **Batch integration verified** end-to-end
+3. ✅ **check_batch_status confirmed** all complete
+4. ✅ **Quality gates passed** with evidence
+5. ✅ **Only essential handoff note added** (if any)
+
+### 🚨 IMMEDIATE FAILURE CONDITIONS:
+- **Completing subtask without Git commit** = Immediate workflow failure
+- **Adding unnecessary progress notes** = Token efficiency violation
+- **Skipping SOLID principles verification** = Quality gate failure
+- **Missing batch integration testing** = Technical compliance failure
+
+## 🏆 SUCCESS METRICS:
+- **3 MCP calls maximum per batch** (Context → Verification → Essential Note)
+- **1-2 notes maximum per batch** (only for handoffs/blockers/continuity)
+- **100% commit compliance** (every subtask = 1+ commits)
+- **100% SOLID principles application** with evidence
+- **Zero unnecessary status updates** or progress acknowledgments

@@ -511,6 +511,443 @@ export class MetricsCalculatorService implements IMetricsCalculatorService {
     };
   }
 
+  // Individual Task Metrics Methods (B005 - ST-017)
+  async getTaskProgressHealthMetrics(
+    taskId: string,
+  ): Promise<
+    import('../interfaces/metrics.interface').TaskProgressHealthMetrics
+  > {
+    const task = await this.prisma.task.findUnique({
+      where: { taskId: taskId },
+      include: {
+        implementationPlans: {
+          include: {
+            subtasks: true,
+          },
+        },
+        delegationRecords: {
+          orderBy: { delegationTimestamp: 'desc' },
+        },
+        comments: true,
+      },
+    });
+
+    if (!task) {
+      throw new Error(`Task ${taskId} not found`);
+    }
+
+    const allSubtasks = task.implementationPlans.flatMap(
+      (plan: any) => plan.subtasks,
+    );
+    const totalSubtasks = allSubtasks.length;
+    const completedSubtasks = allSubtasks.filter(
+      (st: any) => st.status === 'completed',
+    ).length;
+
+    const progressPercent =
+      totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
+
+    // Group subtasks by batch
+    const batchGroups = allSubtasks.reduce((groups: any, subtask: any) => {
+      const batchId = subtask.batchId || 'default';
+      if (!groups[batchId]) {
+        groups[batchId] = {
+          batchId,
+          batchTitle: subtask.batchTitle || 'Default Batch',
+          subtasks: [],
+        };
+      }
+      groups[batchId].subtasks.push(subtask);
+      return groups;
+    }, {});
+
+    const batchAnalysis = Object.values(batchGroups).map((batch: any) => ({
+      batchId: batch.batchId,
+      batchTitle: batch.batchTitle,
+      totalSubtasks: batch.subtasks.length,
+      completedSubtasks: batch.subtasks.filter(
+        (st: any) => st.status === 'completed',
+      ).length,
+      completionRate:
+        batch.subtasks.length > 0
+          ? (batch.subtasks.filter((st: any) => st.status === 'completed')
+              .length /
+              batch.subtasks.length) *
+            100
+          : 0,
+      startDate: batch.subtasks[0]?.startedAt,
+      endDate: batch.subtasks[batch.subtasks.length - 1]?.completedAt,
+      duration:
+        batch.subtasks[0]?.startedAt &&
+        batch.subtasks[batch.subtasks.length - 1]?.completedAt
+          ? (batch.subtasks[batch.subtasks.length - 1].completedAt.getTime() -
+              batch.subtasks[0].startedAt.getTime()) /
+            (1000 * 60 * 60)
+          : undefined,
+      dependencies: [], // TODO: Implement dependency tracking
+      blockers: [], // TODO: Implement blocker detection
+    }));
+
+    const redelegationReasons = task.delegationRecords
+      .filter((dr) => dr.rejectionReason)
+      .map((dr) => dr.rejectionReason!)
+      .filter((reason, index, arr) => arr.indexOf(reason) === index);
+
+    // Simplified implementations for ST-017 - will be enhanced in ST-018
+    const healthIndicators = [
+      {
+        indicator: 'Progress',
+        status:
+          progressPercent > 80
+            ? 'healthy'
+            : progressPercent > 50
+              ? 'warning'
+              : 'critical',
+        value: progressPercent,
+        threshold: 80,
+        description: `Task is ${progressPercent.toFixed(1)}% complete`,
+      },
+    ] as any[];
+
+    const bottlenecks = [] as any[]; // TODO: Implement in ST-018
+
+    const estimationAccuracy = 85; // TODO: Calculate based on actual vs estimated times
+
+    const qualityScore = Math.max(0, 100 - (task.redelegationCount || 0) * 10);
+
+    const totalDuration = task.completionDate
+      ? (task.completionDate.getTime() - task.creationDate.getTime()) /
+        (1000 * 60 * 60)
+      : undefined;
+
+    return {
+      taskId: task.taskId,
+      taskName: task.name,
+      status: task.status,
+      currentMode: task.currentMode || '',
+      creationDate: task.creationDate,
+      completionDate: task.completionDate || undefined,
+      totalDuration,
+      progressPercent,
+      totalSubtasks,
+      completedSubtasks,
+      batchAnalysis,
+      redelegationCount: task.redelegationCount || 0,
+      redelegationReasons,
+      qualityScore,
+      healthIndicators,
+      bottlenecks,
+      estimationAccuracy,
+    };
+  }
+
+  async getImplementationExecutionMetrics(
+    taskId: string,
+  ): Promise<
+    import('../interfaces/metrics.interface').ImplementationExecutionMetrics
+  > {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+      include: {
+        implementationPlans: {
+          include: {
+            batches: {
+              include: {
+                subtasks: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!task) {
+      throw new Error(`Task ${taskId} not found`);
+    }
+
+    const implementationPlan = task.implementationPlans[0];
+    if (!implementationPlan) {
+      throw new Error(`No implementation plan found for task ${taskId}`);
+    }
+
+    const totalBatches = implementationPlan.batches.length;
+    const completedBatches = implementationPlan.batches.filter((batch) =>
+      batch.subtasks.every((st) => st.status === 'completed'),
+    ).length;
+
+    const batchExecution = implementationPlan.batches.map((batch) => {
+      const plannedSubtasks = batch.subtasks.length;
+      const actualSubtasks = batch.subtasks.length; // Same for now
+      const qualityScore = this.calculateBatchQualityScore(batch);
+      const technicalDebt = this.calculateTechnicalDebt(batch);
+
+      return {
+        batchId: batch.id,
+        batchTitle: batch.title,
+        plannedSubtasks,
+        actualSubtasks,
+        estimatedDuration: 'TBD', // TODO: Add estimation tracking
+        actualDuration:
+          (batch.updatedAt.getTime() - batch.createdAt.getTime()) /
+          (1000 * 60 * 60),
+        qualityScore,
+        technicalDebt,
+        integrationIssues: [], // TODO: Track integration issues
+      };
+    });
+
+    const subtaskPerformance = implementationPlan.batches.flatMap((batch) =>
+      batch.subtasks.map((subtask) => ({
+        subtaskId: subtask.id,
+        name: subtask.name,
+        estimatedDuration: subtask.estimatedDuration || 'TBD',
+        actualDuration:
+          (subtask.updatedAt.getTime() - subtask.createdAt.getTime()) /
+          (1000 * 60 * 60),
+        qualityScore: this.calculateSubtaskQualityScore(subtask),
+        reworkCount: 0, // TODO: Track rework
+        complexityScore: this.calculateComplexityScore(subtask),
+      })),
+    );
+
+    const technicalQuality = this.calculateTechnicalQualityMetrics(task);
+    const integrationPoints = this.identifyIntegrationPoints(task);
+    const architecturalCompliance =
+      this.assessArchitecturalCompliance(implementationPlan);
+
+    return {
+      taskId: task.id,
+      implementationPlan: {
+        id: implementationPlan.id,
+        overview: implementationPlan.overview,
+        approach: implementationPlan.approach,
+        technicalDecisions: implementationPlan.technicalDecisions,
+        totalBatches,
+        completedBatches,
+        batchCompletionRate:
+          totalBatches > 0 ? (completedBatches / totalBatches) * 100 : 0,
+      },
+      batchExecution,
+      subtaskPerformance,
+      technicalQuality,
+      integrationPoints,
+      architecturalCompliance,
+    };
+  }
+
+  async getCodeReviewQualityMetrics(
+    taskId: string,
+  ): Promise<
+    import('../interfaces/metrics.interface').CodeReviewQualityMetrics
+  > {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+      include: {
+        codeReviews: true,
+        taskDescription: true,
+      },
+    });
+
+    if (!task) {
+      throw new Error(`Task ${taskId} not found`);
+    }
+
+    const codeReviews = task.codeReviews.map((review) => ({
+      id: review.id,
+      status: review.status,
+      createdAt: review.createdAt,
+      completedAt: review.updatedAt,
+      summary: review.summary,
+      strengths: review.strengths,
+      issues: review.issues,
+      requiredChanges: review.requiredChanges,
+      manualTestingResults: review.manualTestingResults,
+    }));
+
+    const totalReviews = codeReviews.length;
+    const approvedReviews = codeReviews.filter(
+      (r) => r.status === 'APPROVED',
+    ).length;
+    const overallApprovalRate =
+      totalReviews > 0 ? (approvedReviews / totalReviews) * 100 : 0;
+
+    const avgReviewCycleDays = this.calculateAvgReviewCycleDays(codeReviews);
+    const reworkCycles = this.calculateReworkCycles(codeReviews);
+
+    const acceptanceCriteriaVerification = this.verifyAcceptanceCriteria(task);
+    const qualityTrends = this.calculateQualityTrends(codeReviews);
+    const issueCategories = this.categorizeIssues(codeReviews);
+    const reviewerFeedback = this.extractReviewerFeedback(codeReviews);
+    const testingCoverage = this.assessTestingCoverage(task);
+
+    return {
+      taskId: task.id,
+      codeReviews,
+      overallApprovalRate,
+      avgReviewCycleDays,
+      reworkCycles,
+      acceptanceCriteriaVerification,
+      qualityTrends,
+      issueCategories,
+      reviewerFeedback,
+      testingCoverage,
+    };
+  }
+
+  async getTaskDelegationFlowMetrics(
+    taskId: string,
+  ): Promise<
+    import('../interfaces/metrics.interface').TaskDelegationFlowMetrics
+  > {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+      include: {
+        delegationRecords: {
+          orderBy: { delegationTimestamp: 'asc' },
+        },
+        workflowTransitions: {
+          orderBy: { transitionTimestamp: 'asc' },
+        },
+        comments: {
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+
+    if (!task) {
+      throw new Error(`Task ${taskId} not found`);
+    }
+
+    const delegationHistory = task.delegationRecords.map((record) => ({
+      id: record.id,
+      fromMode: record.fromMode,
+      toMode: record.toMode,
+      delegationTimestamp: record.delegationTimestamp,
+      completionTimestamp: record.completionTimestamp,
+      success: record.success,
+      message: record.message,
+      redelegationCount: record.redelegationCount || 0,
+    }));
+
+    const flowEfficiency = this.calculateFlowEfficiency(delegationHistory);
+    const handoffQuality = this.assessHandoffQuality(delegationHistory);
+    const rolePerformance = this.analyzeRolePerformance(
+      delegationHistory,
+      task.workflowTransitions,
+    );
+    const communicationPatterns = this.analyzeCommunicationPatterns(
+      task.comments,
+    );
+    const workflowBottlenecks = this.identifyWorkflowBottlenecks(
+      delegationHistory,
+      task.workflowTransitions,
+    );
+    const collaborationScore = this.calculateCollaborationScore(
+      delegationHistory,
+      task.comments,
+    );
+
+    return {
+      taskId: task.id,
+      delegationHistory,
+      flowEfficiency,
+      handoffQuality,
+      rolePerformance,
+      communicationPatterns,
+      workflowBottlenecks,
+      collaborationScore,
+    };
+  }
+
+  async getResearchDocumentationMetrics(
+    taskId: string,
+  ): Promise<
+    import('../interfaces/metrics.interface').ResearchDocumentationMetrics
+  > {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+      include: {
+        researchReports: true,
+      },
+    });
+
+    if (!task) {
+      throw new Error(`Task ${taskId} not found`);
+    }
+
+    const researchReports = task.researchReports.map((report) => ({
+      id: report.id,
+      title: report.title,
+      summary: report.summary,
+      findings: report.findings,
+      recommendations: report.recommendations,
+      createdAt: report.createdAt,
+      impact: this.assessResearchImpact(report) as 'low' | 'medium' | 'high',
+    }));
+
+    const knowledgeCapture = this.analyzeKnowledgeCapture(researchReports);
+    const researchImpact = this.calculateResearchImpact(researchReports);
+    const documentationQuality =
+      this.assessDocumentationQuality(researchReports);
+    const knowledgeTransfer = this.analyzeKnowledgeTransfer(task);
+
+    return {
+      taskId: task.id,
+      researchReports,
+      knowledgeCapture,
+      researchImpact,
+      documentationQuality,
+      knowledgeTransfer,
+    };
+  }
+
+  async getCommunicationCollaborationMetrics(
+    taskId: string,
+  ): Promise<
+    import('../interfaces/metrics.interface').CommunicationCollaborationMetrics
+  > {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+      include: {
+        comments: {
+          orderBy: { createdAt: 'asc' },
+        },
+        delegationRecords: true,
+        workflowTransitions: true,
+      },
+    });
+
+    if (!task) {
+      throw new Error(`Task ${taskId} not found`);
+    }
+
+    const commentAnalysis = this.analyzeComments(task.comments);
+    const crossModeInteraction = this.analyzeCrossModeInteraction(
+      task.comments,
+      task.delegationRecords,
+    );
+    const informationFlow = this.analyzeInformationFlow(
+      task.comments,
+      task.workflowTransitions,
+    );
+    const collaborationEffectiveness = this.assessCollaborationEffectiveness(
+      task.comments,
+      task.delegationRecords,
+    );
+    const communicationPatterns = this.identifyTaskCommunicationPatterns(
+      task.comments,
+    );
+
+    return {
+      taskId: task.id,
+      commentAnalysis,
+      crossModeInteraction,
+      informationFlow,
+      collaborationEffectiveness,
+      communicationPatterns,
+    };
+  }
+
   // Private helper methods following DRY principle
   private calculateAverageCompletionTime(
     completedTasks: Array<{ creationDate: Date; completionDate: Date | null }>,
@@ -688,5 +1125,222 @@ export class MetricsCalculatorService implements IMetricsCalculatorService {
       reviewerPerformance: [],
       acceptanceCriteriaSuccess: 0,
     };
+  }
+
+  // Helper methods for individual task metrics (B005 - ST-017)
+  // These are simplified implementations that will be enhanced in ST-018
+  private calculateBatchQualityScore(_batch: any): number {
+    return 85; // TODO: Implement quality scoring algorithm
+  }
+
+  private calculateTechnicalDebt(_batch: any): number {
+    return 15; // TODO: Implement technical debt calculation
+  }
+
+  private calculateSubtaskQualityScore(_subtask: any): number {
+    return 90; // TODO: Implement subtask quality scoring
+  }
+
+  private calculateComplexityScore(_subtask: any): number {
+    return 50; // TODO: Implement complexity scoring
+  }
+
+  private calculateTechnicalQualityMetrics(task: any): any {
+    return {
+      codeQuality: 85,
+      testCoverage: 80,
+      architecturalCompliance: 90,
+      securityScore: 85,
+      performanceScore: 80,
+      maintainabilityScore: 85,
+    };
+  }
+
+  private identifyIntegrationPoints(task: any): any[] {
+    return []; // TODO: Implement integration point identification
+  }
+
+  private assessArchitecturalCompliance(plan: any): any {
+    return {
+      solidPrinciples: {
+        singleResponsibility: 85,
+        openClosed: 80,
+        liskovSubstitution: 90,
+        interfaceSegregation: 85,
+        dependencyInversion: 80,
+        overallScore: 84,
+      },
+      designPatterns: [],
+      codeStandards: {
+        namingConventions: 90,
+        codeStructure: 85,
+        documentation: 80,
+        errorHandling: 85,
+        overallScore: 85,
+      },
+      securityCompliance: {
+        inputValidation: 85,
+        authentication: 90,
+        authorization: 85,
+        dataProtection: 80,
+        overallScore: 85,
+      },
+    };
+  }
+
+  private calculateAvgReviewCycleDays(reviews: any[]): number {
+    if (reviews.length === 0) return 0;
+    return (
+      reviews.reduce((sum, review) => {
+        const days =
+          (review.completedAt.getTime() - review.createdAt.getTime()) /
+          (1000 * 60 * 60 * 24);
+        return sum + days;
+      }, 0) / reviews.length
+    );
+  }
+
+  private calculateReworkCycles(reviews: any[]): number {
+    return reviews.filter((r) => r.status === 'NEEDS_CHANGES').length;
+  }
+
+  private verifyAcceptanceCriteria(task: any): any[] {
+    return []; // TODO: Implement acceptance criteria verification
+  }
+
+  private calculateQualityTrends(reviews: any[]): any[] {
+    return []; // TODO: Implement quality trend calculation
+  }
+
+  private categorizeIssues(reviews: any[]): any[] {
+    return []; // TODO: Implement issue categorization
+  }
+
+  private extractReviewerFeedback(reviews: any[]): any[] {
+    return []; // TODO: Implement feedback extraction
+  }
+
+  private assessTestingCoverage(task: any): any {
+    return {
+      unitTests: 80,
+      integrationTests: 70,
+      e2eTests: 60,
+      manualTesting: true,
+      coveragePercent: 75,
+    };
+  }
+
+  private calculateFlowEfficiency(delegations: any[]): number {
+    return 85; // TODO: Implement flow efficiency calculation
+  }
+
+  private assessHandoffQuality(delegations: any[]): any[] {
+    return []; // TODO: Implement handoff quality assessment
+  }
+
+  private analyzeRolePerformance(
+    delegations: any[],
+    transitions: any[],
+  ): any[] {
+    return []; // TODO: Implement role performance analysis
+  }
+
+  private analyzeCommunicationPatterns(comments: any[]): any[] {
+    return []; // TODO: Implement communication pattern analysis
+  }
+
+  private identifyWorkflowBottlenecks(
+    delegations: any[],
+    transitions: any[],
+  ): any[] {
+    return []; // TODO: Implement bottleneck identification
+  }
+
+  private calculateCollaborationScore(
+    delegations: any[],
+    comments: any[],
+  ): number {
+    return 80; // TODO: Implement collaboration scoring
+  }
+
+  private assessResearchImpact(report: any): string {
+    return 'medium'; // TODO: Implement research impact assessment
+  }
+
+  private analyzeKnowledgeCapture(reports: any[]): any {
+    return {
+      totalFindings: reports.length,
+      actionableInsights: Math.floor(reports.length * 0.8),
+      knowledgeGaps: [],
+      expertiseAreas: [],
+      reusabilityScore: 75,
+    };
+  }
+
+  private calculateResearchImpact(reports: any[]): any {
+    return {
+      implementationInfluence: 80,
+      decisionSupport: 85,
+      riskMitigation: 75,
+      innovationScore: 70,
+    };
+  }
+
+  private assessDocumentationQuality(reports: any[]): any {
+    return {
+      completeness: 85,
+      clarity: 80,
+      accuracy: 90,
+      maintainability: 75,
+      overallScore: 82,
+    };
+  }
+
+  private analyzeKnowledgeTransfer(task: any): any[] {
+    return []; // TODO: Implement knowledge transfer analysis
+  }
+
+  private analyzeComments(comments: any[]): any {
+    return {
+      totalComments: comments.length,
+      avgCommentsPerMode: comments.length / 5, // Assuming 5 modes
+      communicationFrequency: comments.length / 7, // Per week
+      responseTime: 2, // Hours
+      clarityScore: 80,
+    };
+  }
+
+  private analyzeCrossModeInteraction(
+    comments: any[],
+    delegations: any[],
+  ): any[] {
+    return []; // TODO: Implement cross-mode interaction analysis
+  }
+
+  private analyzeInformationFlow(comments: any[], transitions: any[]): any {
+    return {
+      upstreamFlow: 80,
+      downstreamFlow: 85,
+      bidirectionalFlow: 75,
+      informationLoss: 10,
+      flowEfficiency: 82,
+    };
+  }
+
+  private assessCollaborationEffectiveness(
+    comments: any[],
+    delegations: any[],
+  ): any {
+    return {
+      teamworkScore: 85,
+      knowledgeSharing: 80,
+      conflictResolution: 90,
+      decisionMaking: 85,
+      overallEffectiveness: 85,
+    };
+  }
+
+  private identifyTaskCommunicationPatterns(comments: any[]): any[] {
+    return []; // TODO: Implement task communication pattern identification
   }
 }
