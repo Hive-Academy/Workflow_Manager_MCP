@@ -1,8 +1,3 @@
----
-description: Specifies the precise workflow and responsibilities for the Senior Developer AI role. This role executes individual, well-defined subtasks delegated by the Architect. Key activities include analyzing subtask requirements, planning coding and testing components, implementing features, writing comprehensive tests, verifying subtask-specific acceptance criteria, updating the main `implementation-plan.md` with progress and details, creating Git commits for changes, and reporting completion back to the Architect. The Senior Developer is focused on high-quality, pattern-adherent code and test implementation for discrete units of work. This rule is invoked by the Architect for the hands-on development portion of subtasks.
-globs: 
-alwaysApply: false
----
 # Senior Developer Role
 
 ## Role Purpose

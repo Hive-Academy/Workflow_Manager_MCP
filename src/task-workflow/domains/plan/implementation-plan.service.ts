@@ -290,6 +290,18 @@ export class ImplementationPlanService {
       batchStatusUpdated?: boolean;
     }
   > {
+    // Handle batch updates
+    if (params.subtasks && params.subtasks.length > 0) {
+      return this.updateSubtasksBatch(params);
+    }
+
+    // Handle single subtask update (backward compatible)
+    if (!params.subtaskId || !params.newStatus) {
+      throw new BadRequestException(
+        'Either provide subtaskId+newStatus for single update OR subtasks array for batch update.',
+      );
+    }
+
     const { taskId, subtaskId, newStatus } = params;
 
     // ✅ OPTIMIZED: Single query with selective includes
@@ -391,6 +403,148 @@ export class ImplementationPlanService {
       ...updatedSubtask,
       planStatusUpdated,
       batchStatusUpdated,
+    };
+  }
+
+  private async updateSubtasksBatch(params: UpdateSubtaskStatusParams): Promise<
+    PrismaSubtaskType & {
+      planStatusUpdated?: boolean;
+      batchStatusUpdated?: boolean;
+      batchUpdateCount?: number;
+    }
+  > {
+    const { taskId, subtasks } = params;
+
+    if (!subtasks || subtasks.length === 0) {
+      throw new BadRequestException(
+        'Subtasks array cannot be empty for batch update.',
+      );
+    }
+
+    // Validate all subtasks belong to the task
+    const subtaskIds = subtasks.map((s) => s.subtaskId);
+    const existingSubtasks = await this.prisma.subtask.findMany({
+      where: {
+        id: { in: subtaskIds },
+        task: { taskId },
+      },
+      select: {
+        id: true,
+        taskId: true,
+        planId: true,
+        name: true,
+        status: true,
+        startedAt: true,
+        completedAt: true,
+        batchId: true,
+      },
+    });
+
+    if (existingSubtasks.length !== subtasks.length) {
+      const foundIds = existingSubtasks.map((s) => s.id);
+      const missingIds = subtaskIds.filter((id) => !foundIds.includes(id));
+      throw new NotFoundException(
+        `Subtasks not found or don't belong to task '${taskId}': ${missingIds.join(', ')}`,
+      );
+    }
+
+    // Process batch updates in transaction
+    const results = await this.prisma.$transaction(async (tx) => {
+      const updatePromises = subtasks.map(async (subtaskUpdate) => {
+        const existingSubtask = existingSubtasks.find(
+          (s) => s.id === subtaskUpdate.subtaskId,
+        );
+        if (!existingSubtask) return null;
+
+        const updateData: Prisma.SubtaskUpdateInput = {
+          status: subtaskUpdate.newStatus,
+        };
+
+        // Handle timestamps for status changes
+        if (
+          subtaskUpdate.newStatus === 'in-progress' &&
+          !existingSubtask.startedAt
+        ) {
+          updateData.startedAt = new Date();
+        } else if (subtaskUpdate.newStatus === 'completed') {
+          updateData.completedAt = new Date();
+          if (!existingSubtask.startedAt) {
+            updateData.startedAt = new Date();
+          }
+        }
+
+        return tx.subtask.update({
+          where: { id: subtaskUpdate.subtaskId },
+          data: updateData,
+        });
+      });
+
+      return Promise.all(updatePromises);
+    });
+
+    const validResults = results.filter((r) => r !== null);
+
+    // Check for batch and plan completion status after batch update
+    let planStatusUpdated = false;
+    let batchStatusUpdated = false;
+
+    if (validResults.length > 0) {
+      // Get unique plan IDs and batch IDs affected
+      const planIds = [...new Set(existingSubtasks.map((s) => s.planId))];
+      const batchIds = [
+        ...new Set(existingSubtasks.map((s) => s.batchId).filter(Boolean)),
+      ];
+
+      // Check plan completion for affected plans
+      for (const planId of planIds) {
+        const planStats = await this.prisma.subtask.aggregate({
+          where: { planId },
+          _count: { id: true },
+        });
+
+        const completedInPlan = await this.prisma.subtask.count({
+          where: {
+            planId,
+            status: 'completed',
+          },
+        });
+
+        if (completedInPlan === planStats._count.id) {
+          planStatusUpdated = true;
+        }
+      }
+
+      // Check batch completion for affected batches
+      for (const batchId of batchIds) {
+        const batchStats = await this.prisma.subtask.aggregate({
+          where: {
+            task: { taskId },
+            batchId,
+          },
+          _count: { id: true },
+        });
+
+        const completedInBatch = await this.prisma.subtask.count({
+          where: {
+            task: { taskId },
+            batchId,
+            status: 'completed',
+          },
+        });
+
+        if (completedInBatch === batchStats._count.id) {
+          batchStatusUpdated = true;
+        }
+      }
+    }
+
+    // Return the first updated subtask with batch metadata
+    const firstUpdated = validResults[0];
+    return {
+      ...firstUpdated,
+      planStatusUpdated,
+      batchStatusUpdated,
+      batchUpdateCount: validResults.length,
     };
   }
 

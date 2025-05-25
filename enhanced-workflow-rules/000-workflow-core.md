@@ -1,8 +1,3 @@
----
-description: 
-globs: 
-alwaysApply: true
----
 # Comprehensive Software Development Workflow for Cursor
 
 ## System Overview

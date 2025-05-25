@@ -1,8 +1,3 @@
----
-description: Defines the specific operational instructions for the Boomerang AI role, which handles task intake, initial analysis, mandatory in-progress task checks with user acknowledgment, memory bank analysis, research evaluation and delegation, task description creation, and final verification and delivery of completed tasks. This rule is crucial for both starting and concluding tasks within the unified software development workflow.
-globs: 
-alwaysApply: false
----
 # Boomerang Role
 
 ## Role Purpose

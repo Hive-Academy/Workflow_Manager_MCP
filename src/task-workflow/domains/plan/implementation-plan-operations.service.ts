@@ -179,21 +179,39 @@ export class ImplementationPlanOperationsService {
   @Tool({
     name: 'update_subtask_status',
     description:
-      'Updates the status of a specific subtask within an implementation plan.',
+      'Updates the status of a specific subtask or multiple subtasks within an implementation plan. For single updates, provide subtaskId+newStatus. For batch updates, provide subtasks array.',
     parameters: UpdateSubtaskStatusSchema,
   })
   async updateSubtaskStatus(params: z.infer<typeof UpdateSubtaskStatusSchema>) {
     try {
       const result =
         await this.implementationPlanService.updateSubtaskStatus(params);
-      const { planStatusUpdated, ...updatedSubtask } = result;
-      let responseText = `Subtask '${updatedSubtask.name}' (Database ID: ${updatedSubtask.id}) status updated to '${updatedSubtask.status}'.`;
-      if (params.notes) {
-        responseText += ` Provided notes: "${params.notes}" (Note: not directly stored on subtask via this tool, use add_note_to_subtask).`;
+      const { planStatusUpdated, batchStatusUpdated, ...updatedSubtask } =
+        result;
+      const batchUpdateCount = (result as any).batchUpdateCount;
+
+      let responseText: string;
+
+      // Handle batch operation response
+      if (batchUpdateCount && batchUpdateCount > 1) {
+        responseText = `Batch update completed: ${batchUpdateCount} subtasks updated.`;
+        if (batchStatusUpdated) {
+          responseText += ` One or more batches completed.`;
+        }
+        if (planStatusUpdated) {
+          responseText += ` Implementation Plan is now complete.`;
+        }
+      } else {
+        // Handle single subtask response (backward compatible)
+        responseText = `Subtask '${updatedSubtask.name}' (Database ID: ${updatedSubtask.id}) status updated to '${updatedSubtask.status}'.`;
+        if (params.notes) {
+          responseText += ` Provided notes: "${params.notes}" (Note: not directly stored on subtask via this tool, use add_note_to_subtask).`;
+        }
+        if (planStatusUpdated) {
+          responseText += ` All subtasks for the plan are now complete. The Implementation Plan may be considered complete.`;
+        }
       }
-      if (planStatusUpdated) {
-        responseText += ` All subtasks for the plan are now complete. The Implementation Plan may be considered complete.`;
-      }
+
       return {
         content: [
           {
