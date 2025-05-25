@@ -17,6 +17,7 @@ import { PerformanceBenchmarkService } from './services/performance-benchmark.se
 import { ChartGenerationRefactoredService } from './services/chart-generation-refactored.service';
 import { RecommendationEngineService } from './services/recommendation-engine.service';
 import { ReportTemplateService } from './services/report-template.service';
+import { ContentGeneratorService } from './services/content-generator.service';
 
 /**
  * Report Generator Service
@@ -42,6 +43,7 @@ export class ReportGeneratorService {
     private readonly recommendationEngine: RecommendationEngineService,
     private readonly reportTemplate: ReportTemplateService,
     private readonly enhancedInsightsGenerator: EnhancedInsightsGeneratorService,
+    private readonly contentGenerator: ContentGeneratorService,
   ) {}
 
   /**
@@ -120,9 +122,13 @@ export class ReportGeneratorService {
         reportData,
       );
 
+    // Generate dynamic content using ContentGeneratorService
+    const dynamicContent = this.generateDynamicContent(reportType, reportData);
+
     return {
       ...reportData,
       enhancedInsights,
+      dynamicContent,
     };
   }
 
@@ -153,13 +159,21 @@ export class ReportGeneratorService {
       ),
     ]);
 
-    return {
+    const reportData: ReportData = {
       title: this.getTaskReportTitle(reportType, taskId),
       generatedAt: new Date(),
       taskId,
       metrics: { taskSpecific: taskMetrics },
       charts,
       recommendations,
+    };
+
+    // Generate dynamic content for individual task reports
+    const dynamicContent = this.generateDynamicContent(reportType, reportData);
+
+    return {
+      ...reportData,
+      dynamicContent,
     };
   }
 
@@ -209,6 +223,37 @@ export class ReportGeneratorService {
       reportData,
       filePath,
     );
+  }
+
+  /**
+   * Generate dynamic content using ContentGeneratorService
+   * Provides executive summaries, key insights, and actionable recommendations
+   */
+  private generateDynamicContent(
+    reportType: ReportType,
+    data: ReportData,
+  ): {
+    executiveSummary: string;
+    keyInsights: string[];
+    actionableRecommendations: string[];
+    detailedAnalysis: string;
+  } {
+    return {
+      executiveSummary: this.contentGenerator.generateExecutiveSummary(
+        reportType,
+        data,
+      ),
+      keyInsights: this.contentGenerator.generateKeyInsights(reportType, data),
+      actionableRecommendations:
+        this.contentGenerator.generateActionableRecommendations(
+          reportType,
+          data,
+        ),
+      detailedAnalysis: this.contentGenerator.generateDetailedAnalysis(
+        reportType,
+        data,
+      ),
+    };
   }
 
   // Private orchestration methods
