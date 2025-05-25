@@ -43,10 +43,7 @@ export class EnhancedInsightsGeneratorService {
     this.logger.log(`Generating enhanced insights for ${reportType} report`);
 
     // Generate comprehensive insights
-    const insights = await this.generateEnhancedInsights(
-      reportType,
-      reportData,
-    );
+    const insights = this.generateEnhancedInsights(reportType, reportData);
 
     // Get smart MCP response
     const smartResponse =
@@ -65,10 +62,10 @@ export class EnhancedInsightsGeneratorService {
   /**
    * Generate enhanced insights based on report type and data
    */
-  async generateEnhancedInsights(
+  generateEnhancedInsights(
     reportType: ReportType,
     reportData: ReportData,
-  ): Promise<EnhancedInsight[]> {
+  ): EnhancedInsight[] {
     const insights: EnhancedInsight[] = [];
 
     switch (reportType) {
