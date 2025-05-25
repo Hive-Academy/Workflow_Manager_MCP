@@ -8,6 +8,13 @@ import {
   ImplementationPlanMetrics,
   CodeReviewInsights,
   DelegationFlowMetrics,
+  // Individual Task Metrics (B005)
+  TaskProgressHealthMetrics,
+  ImplementationExecutionMetrics,
+  CodeReviewQualityMetrics,
+  TaskDelegationFlowMetrics,
+  ResearchDocumentationMetrics,
+  CommunicationCollaborationMetrics,
 } from './metrics.interface';
 import { TimeSeriesMetrics } from './time-series.interface';
 import { PerformanceBenchmark } from './benchmarks.interface';
@@ -20,7 +27,14 @@ export type ReportType =
   | 'comprehensive'
   | 'implementation_plan_analytics'
   | 'code_review_insights'
-  | 'delegation_flow_analysis';
+  | 'delegation_flow_analysis'
+  // Individual Task Report Types (B005)
+  | 'task_progress_health'
+  | 'implementation_execution'
+  | 'code_review_quality'
+  | 'delegation_flow_analysis_task'
+  | 'research_documentation'
+  | 'communication_collaboration';
 
 export interface WhereClause {
   creationDate?: {
@@ -30,6 +44,7 @@ export interface WhereClause {
   owner?: string;
   currentMode?: string;
   priority?: string;
+  taskId?: string; // For individual task reports (B005)
   [key: string]: any;
 }
 
@@ -49,6 +64,26 @@ export interface IMetricsCalculatorService {
   getDelegationFlowMetrics(
     whereClause: WhereClause,
   ): Promise<DelegationFlowMetrics>;
+
+  // Individual Task Metrics Methods (B005)
+  getTaskProgressHealthMetrics(
+    taskId: string,
+  ): Promise<TaskProgressHealthMetrics>;
+  getImplementationExecutionMetrics(
+    taskId: string,
+  ): Promise<ImplementationExecutionMetrics>;
+  getCodeReviewQualityMetrics(
+    taskId: string,
+  ): Promise<CodeReviewQualityMetrics>;
+  getTaskDelegationFlowMetrics(
+    taskId: string,
+  ): Promise<TaskDelegationFlowMetrics>;
+  getResearchDocumentationMetrics(
+    taskId: string,
+  ): Promise<ResearchDocumentationMetrics>;
+  getCommunicationCollaborationMetrics(
+    taskId: string,
+  ): Promise<CommunicationCollaborationMetrics>;
 }
 
 /**
@@ -93,6 +128,12 @@ export interface IChartGenerationService {
       performanceBenchmarks?: PerformanceBenchmark;
     },
   ): ChartData[];
+
+  // Individual Task Chart Generation (B005)
+  generateTaskSpecificChartData(
+    reportType: ReportType,
+    taskMetrics: any,
+  ): ChartData[];
 }
 
 /**
@@ -112,6 +153,12 @@ export interface IRecommendationEngineService {
       timeSeriesAnalysis?: TimeSeriesMetrics;
       performanceBenchmarks?: PerformanceBenchmark;
     },
+  ): string[];
+
+  // Individual Task Recommendations (B005)
+  generateTaskSpecificRecommendations(
+    reportType: ReportType,
+    taskMetrics: any,
   ): string[];
 }
 
