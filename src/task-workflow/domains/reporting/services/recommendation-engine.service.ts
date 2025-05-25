@@ -115,4 +115,16 @@ export class RecommendationEngineService
 
     return recommendations;
   }
+
+  generateTaskSpecificRecommendations(
+    _taskId: string,
+    _taskMetrics: any,
+  ): string[] {
+    // Simplified implementation for task-specific recommendations
+    return [
+      'Continue monitoring task progress and address any bottlenecks.',
+      'Ensure all acceptance criteria are clearly defined and tracked.',
+      'Maintain regular communication between roles during delegation.',
+    ];
+  }
 }
