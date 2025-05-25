@@ -1,4 +1,4 @@
-// src/task-workflow/domains/reporting/services/chart-generation.service.ts
+// src/task-workflow/domains/reporting/services/chart-generation-refactored.service.ts
 
 import { Injectable, Logger } from '@nestjs/common';
 import {
@@ -16,22 +16,29 @@ import {
 import { TimeSeriesMetrics } from '../interfaces/time-series.interface';
 import { PerformanceBenchmark } from '../interfaces/benchmarks.interface';
 import { ChartData } from '../interfaces/report-data.interface';
-import { ChartGenerationRefactoredService } from './chart-generation-refactored.service';
+import { ChartFactoryService } from './chart-factory.service';
 
 /**
- * Legacy Chart Generation Service - Delegates to Refactored Implementation
- * Maintains backward compatibility while using SOLID principles internally
- *
- * @deprecated Use ChartGenerationRefactoredService directly for new implementations
+ * Refactored Chart Generation Service
+ * Follows SOLID principles:
+ * - SRP: Single responsibility for coordinating chart generation
+ * - OCP: Open for extension through factory pattern
+ * - LSP: Substitutable with original interface
+ * - ISP: Uses specific interfaces for different chart types
+ * - DIP: Depends on abstractions (ChartFactoryService)
  */
 @Injectable()
-export class ChartGenerationService implements IChartGenerationService {
-  private readonly logger = new Logger(ChartGenerationService.name);
+export class ChartGenerationRefactoredService
+  implements IChartGenerationService
+{
+  private readonly logger = new Logger(ChartGenerationRefactoredService.name);
 
-  constructor(
-    private readonly refactoredService: ChartGenerationRefactoredService,
-  ) {}
+  constructor(private readonly chartFactory: ChartFactoryService) {}
 
+  /**
+   * Main entry point for chart generation
+   * Delegates to specialized factory service
+   */
   generateChartData(
     taskMetrics: TaskMetrics,
     delegationMetrics: DelegationMetrics,
@@ -45,21 +52,36 @@ export class ChartGenerationService implements IChartGenerationService {
       performanceBenchmarks?: PerformanceBenchmark;
     },
   ): ChartData[] {
-    this.logger.warn(
-      'Using deprecated ChartGenerationService. Consider migrating to ChartGenerationRefactoredService.',
-    );
+    this.logger.log(`Generating charts for report type: ${reportType}`);
 
-    return this.refactoredService.generateChartData(
-      taskMetrics,
-      delegationMetrics,
-      codeReviewMetrics,
-      reportType,
-      additionalMetrics,
-    );
+    try {
+      const baseData = {
+        taskMetrics,
+        delegationMetrics,
+        codeReviewMetrics,
+      };
+
+      const charts = this.chartFactory.createCharts(
+        reportType,
+        baseData,
+        additionalMetrics,
+      );
+
+      this.logger.log(`Generated ${charts.length} charts successfully`);
+      return charts;
+    } catch (error) {
+      this.logger.error(
+        `Error generating charts: ${error.message}`,
+        error.stack,
+      );
+      throw new Error(`Chart generation failed: ${error.message}`);
+    }
   }
 
-  // Legacy method delegates for backward compatibility
-  generateTrendLineChart(
+  /**
+   * Generate specific chart types (public API for advanced usage)
+   */
+  generateTrendChart(
     data: { date: Date; value: number }[],
     title: string,
     options?: {
@@ -69,7 +91,7 @@ export class ChartGenerationService implements IChartGenerationService {
       dataColor?: string;
     },
   ): ChartData {
-    return this.refactoredService.generateTrendChart(data, title, options);
+    return this.chartFactory.generateTrendChart(data, title, options);
   }
 
   generateCorrelationChart(
@@ -84,7 +106,7 @@ export class ChartGenerationService implements IChartGenerationService {
       colorByValue?: boolean;
     },
   ): ChartData {
-    return this.refactoredService.generateCorrelationChart(
+    return this.chartFactory.generateCorrelationChart(
       xData,
       yData,
       xLabel,
@@ -94,7 +116,7 @@ export class ChartGenerationService implements IChartGenerationService {
     );
   }
 
-  generateQualityHeatmap(
+  generateHeatmap(
     data: { x: string; y: string; value: number }[],
     title: string,
     options?: {
@@ -104,10 +126,10 @@ export class ChartGenerationService implements IChartGenerationService {
       maxValue?: number;
     },
   ): ChartData {
-    return this.refactoredService.generateHeatmap(data, title, options);
+    return this.chartFactory.generateHeatmap(data, title, options);
   }
 
-  generateQualityRadarChart(
+  generateRadarChart(
     data: { metric: string; value: number; benchmark?: number }[],
     title: string,
     options?: {
@@ -115,6 +137,6 @@ export class ChartGenerationService implements IChartGenerationService {
       maxValue?: number;
     },
   ): ChartData {
-    return this.refactoredService.generateRadarChart(data, title, options);
+    return this.chartFactory.generateRadarChart(data, title, options);
   }
 }

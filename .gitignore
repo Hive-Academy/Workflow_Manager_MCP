@@ -16,3 +16,5 @@ prisma/migrations/*/*.sql
 /logs
 /.env.docker.example
 prisma/workflow-manager.db
+/prisma/data/**
+/workflow-manager-mcp-reports

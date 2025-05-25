@@ -38,12 +38,14 @@ import { PerformanceAnalyticsService } from './domains/query/performance-analyti
 import { MetricsCalculatorService } from './domains/reporting/services/metrics-calculator.service';
 import { TimeSeriesAnalysisService } from './domains/reporting/services/time-series-analysis.service';
 import { PerformanceBenchmarkService } from './domains/reporting/services/performance-benchmark.service';
-import { ChartGenerationService } from './domains/reporting/services/chart-generation.service';
 import { RecommendationEngineService } from './domains/reporting/services/recommendation-engine.service';
 import { ReportTemplateService } from './domains/reporting/services/report-template.service';
 
+// Chart Generation Module
+import { ChartGenerationModule } from './domains/reporting/chart-generation.module';
+
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, ChartGenerationModule],
   providers: [
     // Core Business Logic Services
     TaskCrudService,
@@ -80,7 +82,6 @@ import { ReportTemplateService } from './domains/reporting/services/report-templ
     MetricsCalculatorService,
     TimeSeriesAnalysisService,
     PerformanceBenchmarkService,
-    ChartGenerationService,
     RecommendationEngineService,
     ReportTemplateService,
 
@@ -97,7 +98,6 @@ import { ReportTemplateService } from './domains/reporting/services/report-templ
       provide: 'IPerformanceBenchmarkService',
       useClass: PerformanceBenchmarkService,
     },
-    { provide: 'IChartGenerationService', useClass: ChartGenerationService },
     {
       provide: 'IRecommendationEngineService',
       useClass: RecommendationEngineService,

@@ -60,9 +60,19 @@ export class ReportGeneratorService {
   ): Promise<ReportData> {
     this.logger.log(`Generating ${reportType} report data`);
 
+    // Check if this is an individual task report (B005)
+    if (this.isIndividualTaskReport(reportType)) {
+      if (!filters?.taskId) {
+        throw new Error(
+          `Individual task report ${reportType} requires taskId filter`,
+        );
+      }
+      return this.generateIndividualTaskReportData(reportType, filters.taskId);
+    }
+
     const whereClause = this.buildWhereClause(startDate, endDate, filters);
 
-    // Get base metrics (always required)
+    // Get base metrics (always required for aggregate reports)
     const baseMetrics = await this.getBaseMetrics(whereClause);
 
     // Get enhanced metrics based on report type (OCP in action)
@@ -109,6 +119,43 @@ export class ReportGeneratorService {
   }
 
   /**
+   * Individual task report generation (B005)
+   * Following SRP: Specialized method for task-specific reports
+   */
+  async generateIndividualTaskReportData(
+    reportType: ReportType,
+    taskId: string,
+  ): Promise<ReportData> {
+    this.logger.log(
+      `Generating individual task report ${reportType} for task ${taskId}`,
+    );
+
+    // Get task-specific metrics based on report type
+    const taskMetrics = await this.getIndividualTaskMetrics(reportType, taskId);
+
+    // Generate task-specific charts and recommendations
+    const [charts, recommendations] = await Promise.all([
+      this.chartGeneration.generateTaskSpecificChartData(
+        reportType,
+        taskMetrics,
+      ),
+      this.recommendationEngine.generateTaskSpecificRecommendations(
+        reportType,
+        taskMetrics,
+      ),
+    ]);
+
+    return {
+      title: this.getTaskReportTitle(reportType, taskId),
+      generatedAt: new Date(),
+      taskId,
+      metrics: { taskSpecific: taskMetrics },
+      charts,
+      recommendations,
+    };
+  }
+
+  /**
    * Template rendering - delegates to specialized service
    */
   async renderReportTemplate(
@@ -133,7 +180,12 @@ export class ReportGeneratorService {
   }
 
   // Private orchestration methods
-  private async getBaseMetrics(whereClause: WhereClause) {
+  private async getBaseMetrics(whereClause: WhereClause): Promise<{
+    tasks: import('./interfaces/metrics.interface').TaskMetrics;
+    delegations: import('./interfaces/metrics.interface').DelegationMetrics;
+    codeReviews: import('./interfaces/metrics.interface').CodeReviewMetrics;
+    performance: import('./interfaces/metrics.interface').PerformanceMetrics;
+  }> {
     const [tasks, delegations, codeReviews, performance] = await Promise.all([
       this.metricsCalculator.getTaskMetrics(whereClause),
       this.metricsCalculator.getDelegationMetrics(whereClause),
@@ -255,7 +307,58 @@ export class ReportGeneratorService {
       implementation_plan_analytics: 'Implementation Plan Analytics Report',
       code_review_insights: 'Code Review Insights Report',
       delegation_flow_analysis: 'Delegation Flow Analysis Report',
+      // Individual Task Report Types (B005)
+      task_progress_health: 'Task Progress Health Report',
+      implementation_execution: 'Implementation Execution Report',
+      code_review_quality: 'Code Review Quality Report',
+      delegation_flow_analysis_task: 'Task Delegation Flow Analysis Report',
+      research_documentation: 'Research Documentation Report',
+      communication_collaboration: 'Communication Collaboration Report',
     };
     return titles[reportType] || 'Workflow Report';
+  }
+
+  // Individual task report helper methods (B005)
+  private isIndividualTaskReport(reportType: ReportType): boolean {
+    const individualTaskReports: ReportType[] = [
+      'task_progress_health',
+      'implementation_execution',
+      'code_review_quality',
+      'delegation_flow_analysis_task',
+      'research_documentation',
+      'communication_collaboration',
+    ];
+    return individualTaskReports.includes(reportType);
+  }
+
+  private async getIndividualTaskMetrics(
+    reportType: ReportType,
+    taskId: string,
+  ): Promise<any> {
+    switch (reportType) {
+      case 'task_progress_health':
+        return this.metricsCalculator.getTaskProgressHealthMetrics(taskId);
+      case 'implementation_execution':
+        return this.metricsCalculator.getImplementationExecutionMetrics(taskId);
+      case 'code_review_quality':
+        return this.metricsCalculator.getCodeReviewQualityMetrics(taskId);
+      case 'delegation_flow_analysis_task':
+        return this.metricsCalculator.getTaskDelegationFlowMetrics(taskId);
+      case 'research_documentation':
+        return this.metricsCalculator.getResearchDocumentationMetrics(taskId);
+      case 'communication_collaboration':
+        return this.metricsCalculator.getCommunicationCollaborationMetrics(
+          taskId,
+        );
+      default:
+        throw new Error(
+          `Unsupported individual task report type: ${reportType}`,
+        );
+    }
+  }
+
+  private getTaskReportTitle(reportType: ReportType, taskId: string): string {
+    const baseTitle = this.getReportTitle(reportType);
+    return `${baseTitle} - ${taskId}`;
   }
 }
