@@ -139,4 +139,35 @@ export class ChartGenerationRefactoredService
   ): ChartData {
     return this.chartFactory.generateRadarChart(data, title, options);
   }
+
+  /**
+   * Generate task-specific charts for individual task reports (B005)
+   * Handles the 6 individual task report types with specialized visualizations
+   */
+  generateTaskSpecificChartData(
+    reportType: ReportType,
+    taskMetrics: any,
+  ): ChartData[] {
+    this.logger.log(`Generating task-specific charts for type: ${reportType}`);
+
+    try {
+      const charts = this.chartFactory.createTaskSpecificCharts(
+        reportType,
+        taskMetrics,
+      );
+
+      this.logger.log(
+        `Generated ${charts.length} task-specific charts successfully`,
+      );
+      return charts;
+    } catch (error) {
+      this.logger.error(
+        `Error generating task-specific charts: ${error.message}`,
+        error.stack,
+      );
+      throw new Error(
+        `Task-specific chart generation failed: ${error.message}`,
+      );
+    }
+  }
 }
