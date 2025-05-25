@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Workflow Report' %> - Task Workflow Manager</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/1.30.1/index.min.js"></script>
+    <style>
+        /* CSS Variables for Theme System */
+        :root {
+            /* Color Palette */
+            --primary-50: #eff6ff;
+            --primary-100: #dbeafe;
+            --primary-500: #3b82f6;
+            --primary-600: #2563eb;
+            --primary-700: #1d4ed8;
+            --primary-900: #1e3a8a;
+            
+            --secondary-500: #8b5cf6;
+            --secondary-600: #7c3aed;
+            
+            --success-50: #ecfdf5;
+            --success-500: #10b981;
+            --success-600: #059669;
+            --success-700: #047857;
+            
+            --warning-50: #fffbeb;
+            --warning-500: #f59e0b;
+            --warning-600: #d97706;
+            
+            --danger-50: #fef2f2;
+            --danger-500: #ef4444;
+            --danger-600: #dc2626;
+            
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Dark Theme Colors */
+            --dark-bg: #0f172a;
+            --dark-surface: #1e293b;
+            --dark-surface-light: #334155;
+            --dark-border: #475569;
+            --dark-text: #e2e8f0;
+            --dark-text-muted: #94a3b8;
+            
+            /* Typography */
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            
+            /* Transitions */
+            --transition-fast: 150ms ease-in-out;
+            --transition-normal: 250ms ease-in-out;
+            --transition-slow: 350ms ease-in-out;
+        }
+        
+        /* Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            line-height: 1.6;
+            color: var(--dark-text);
+            background: var(--dark-bg);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        /* Layout Components */
+        .layout-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .layout-header {
+            background: linear-gradient(135deg, var(--primary-600) 0%, var(--secondary-600) 50%, var(--danger-500) 100%);
+            color: white;
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .layout-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .layout-header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .layout-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .layout-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: var(--spacing-sm);
+            font-weight: 400;
+        }
+        
+        .layout-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-md);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .layout-main {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+            width: 100%;
+        }
+        
+        .layout-footer {
+            background: var(--dark-surface);
+            border-top: 1px solid var(--dark-border);
+            padding: var(--spacing-lg);
+            text-align: center;
+            color: var(--dark-text-muted);
+            font-size: 0.875rem;
+        }
+        
+        /* Navigation Component */
+        .layout-nav {
+            background: var(--dark-surface);
+            border-bottom: 1px solid var(--dark-border);
+            padding: 0 var(--spacing-xl);
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+        
+        .nav-brand {
+            font-weight: 600;
+            color: var(--primary-500);
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: var(--spacing-lg);
+            list-style: none;
+        }
+        
+        .nav-link {
+            color: var(--dark-text-muted);
+            text-decoration: none;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--dark-text);
+            background: var(--dark-surface-light);
+        }
+        
+        /* Card Components */
+        .card {
+            background: var(--dark-surface);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-normal);
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--dark-border);
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark-text);
+            margin: 0;
+        }
+        
+        .card-subtitle {
+            color: var(--dark-text-muted);
+            font-size: 0.875rem;
+            margin-top: var(--spacing-xs);
+        }
+        
+        .card-body {
+            color: var(--dark-text);
+        }
+        
+        /* Grid System */
+        .grid {
+            display: grid;
+            gap: var(--spacing-lg);
+        }
+        
+        .grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+        .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+        
+        .grid-auto-fit {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+        
+        .grid-auto-fill {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+        
+        /* Metric Components */
+        .metric-card {
+            background: linear-gradient(135deg, var(--dark-surface) 0%, var(--dark-surface-light) 100%);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-500);
+            transition: all var(--transition-normal);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .metric-card:hover::before {
+            width: 6px;
+        }
+        
+        .metric-card.success::before { background: var(--success-500); }
+        .metric-card.warning::before { background: var(--warning-500); }
+        .metric-card.danger::before { background: var(--danger-500); }
+        
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .metric-title {
+            color: var(--dark-text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .metric-trend {
+            font-size: 0.75rem;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .trend-up {
+            background: var(--success-50);
+            color: var(--success-700);
+        }
+        
+        .trend-down {
+            background: var(--danger-50);
+            color: var(--danger-600);
+        }
+        
+        .trend-stable {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-xs);
+            color: var(--dark-text);
+        }
+        
+        .metric-value.success { color: var(--success-500); }
+        .metric-value.warning { color: var(--warning-500); }
+        .metric-value.danger { color: var(--danger-500); }
+        .metric-value.info { color: var(--primary-500); }
+        
+        .metric-subtitle {
+            color: var(--dark-text-muted);
+            font-size: 0.875rem;
+        }
+        
+        /* Chart Components */
+        .chart-container {
+            background: var(--dark-surface);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .chart-header {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .chart-subtitle {
+            color: var(--dark-text-muted);
+            font-size: 0.875rem;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+        
+        .chart-wrapper canvas {
+            max-height: 100% !important;
+        }
+        
+        /* Status Indicators */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .status-indicator.success {
+            background: var(--success-50);
+            color: var(--success-700);
+        }
+        
+        .status-indicator.warning {
+            background: var(--warning-50);
+            color: var(--warning-600);
+        }
+        
+        .status-indicator.danger {
+            background: var(--danger-50);
+            color: var(--danger-600);
+        }
+        
+        .status-indicator.info {
+            background: var(--primary-50);
+            color: var(--primary-700);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+        
+        /* Section Components */
+        .section {
+            margin-bottom: var(--spacing-2xl);
+        }
+        
+        .section-header {
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 2px solid var(--dark-border);
+        }
+        
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--dark-text);
+            margin: 0;
+        }
+        
+        .section-subtitle {
+            color: var(--dark-text-muted);
+            font-size: 1rem;
+            margin-top: var(--spacing-xs);
+        }
+        
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+        
+        .font-mono { font-family: var(--font-mono); }
+        
+        .mb-0 { margin-bottom: 0; }
+        .mb-sm { margin-bottom: var(--spacing-sm); }
+        .mb-md { margin-bottom: var(--spacing-md); }
+        .mb-lg { margin-bottom: var(--spacing-lg); }
+        .mb-xl { margin-bottom: var(--spacing-xl); }
+        
+        .mt-0 { margin-top: 0; }
+        .mt-sm { margin-top: var(--spacing-sm); }
+        .mt-md { margin-top: var(--spacing-md); }
+        .mt-lg { margin-top: var(--spacing-lg); }
+        .mt-xl { margin-top: var(--spacing-xl); }
+        
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .layout-main {
+                padding: var(--spacing-lg);
+            }
+            
+            .grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .grid-cols-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .layout-header {
+                padding: var(--spacing-xl);
+            }
+            
+            .layout-title {
+                font-size: 2rem;
+            }
+            
+            .layout-main {
+                padding: var(--spacing-md);
+            }
+            
+            .grid-cols-4,
+            .grid-cols-3,
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                padding: var(--spacing-md) 0;
+                gap: var(--spacing-md);
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .metric-value {
+                font-size: 2rem;
+            }
+            
+            .chart-wrapper {
+                height: 250px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .layout-title {
+                font-size: 1.75rem;
+            }
+            
+            .layout-subtitle {
+                font-size: 1rem;
+            }
+            
+            .card,
+            .metric-card,
+            .chart-container {
+                padding: var(--spacing-lg);
+            }
+            
+            .metric-value {
+                font-size: 1.75rem;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            
+            .layout-header {
+                background: #f8fafc !important;
+                color: black !important;
+                box-shadow: none;
+            }
+            
+            .card,
+            .metric-card,
+            .chart-container {
+                background: white;
+                border: 1px solid #e5e7eb;
+                box-shadow: none;
+            }
+            
+            .nav-container {
+                display: none;
+            }
+        }
+    </style>
+    
+    <!-- Extended Styles Block for Template Inheritance -->
+    <% if (typeof additionalStyles !== 'undefined') { %>
+        <style>
+            <%= additionalStyles %>
+        </style>
+    <% } %>
+</head>
+<body>
+    <div class="layout-container">
+        <!-- Navigation -->
+        <% if (typeof showNavigation === 'undefined' || showNavigation) { %>
+        <nav class="layout-nav">
+            <div class="nav-container">
+                <a href="#" class="nav-brand">📊 Task Workflow Manager</a>
+                <ul class="nav-links">
+                    <li><a href="#" class="nav-link">Dashboard</a></li>
+                    <li><a href="#" class="nav-link">Reports</a></li>
+                    <li><a href="#" class="nav-link">Analytics</a></li>
+                    <li><a href="#" class="nav-link">Settings</a></li>
+                </ul>
+            </div>
+        </nav>
+        <% } %>
+        
+        <!-- Header -->
+        <header class="layout-header">
+            <div class="layout-header-content">
+                <h1 class="layout-title">
+                    <%= typeof headerIcon !== 'undefined' ? headerIcon : '📊' %> 
+                    <%= title || 'Workflow Report' %>
+                </h1>
+                <% if (typeof subtitle !== 'undefined') { %>
+                    <div class="layout-subtitle"><%= subtitle %></div>
+                <% } %>
+                <div class="layout-meta">
+                    <span>📅 Generated: <%= (typeof generatedAt !== 'undefined' ? generatedAt : new Date()).toLocaleString() %></span>
+                    <% if (typeof dateRange !== 'undefined' && dateRange) { %>
+                        <span>📊 Period: <%= dateRange.startDate.toLocaleDateString() %> - <%= dateRange.endDate.toLocaleDateString() %></span>
+                    <% } %>
+                    <% if (typeof reportType !== 'undefined') { %>
+                        <span>📋 Type: <%= reportType %></span>
+                    <% } %>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="layout-main">
+            <!-- Content Block for Template Inheritance -->
+            <% if (typeof content !== 'undefined') { %>
+                <%- content %>
+            <% } else { %>
+                <!-- Default content if no content block provided -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">Report Content</h2>
+                        <p class="section-subtitle">This is the base layout template. Extend this template to create specialized reports.</p>
+                    </div>
+                    
+                    <div class="grid grid-auto-fit">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <div class="metric-title">Sample Metric</div>
+                                <div class="metric-trend trend-up">↗ +5.2%</div>
+                            </div>
+                            <div class="metric-value success">85.4%</div>
+                            <div class="metric-subtitle">This is a sample metric card</div>
+                        </div>
+                        
+                        <div class="metric-card warning">
+                            <div class="metric-header">
+                                <div class="metric-title">Another Metric</div>
+                                <div class="metric-trend trend-stable">→ Stable</div>
+                            </div>
+                            <div class="metric-value warning">42</div>
+                            <div class="metric-subtitle">Sample warning metric</div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="layout-footer">
+            <p>&copy; <%= new Date().getFullYear() %> Task Workflow Manager. Generated with ❤️ by the reporting system.</p>
+        </footer>
+    </div>
+    
+    <!-- Extended Scripts Block for Template Inheritance -->
+    <% if (typeof additionalScripts !== 'undefined') { %>
+        <script>
+            <%= additionalScripts %>
+        </script>
+    <% } %>
+    
+    <!-- Chart.js Configuration -->
+    <script>
+        // Global Chart.js configuration for dark theme
+        Chart.defaults.color = '#e2e8f0';
+        Chart.defaults.borderColor = '#475569';
+        Chart.defaults.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+        
+        // Utility functions for template inheritance
+        window.ReportUtils = {
+            formatNumber: (num) => {
+                if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+                if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+                return num.toString();
+            },
+            
+            formatPercentage: (num) => {
+                return num.toFixed(1) + '%';
+            },
+            
+            formatDuration: (hours) => {
+                if (hours < 1) return Math.round(hours * 60) + 'm';
+                if (hours < 24) return hours.toFixed(1) + 'h';
+                return Math.round(hours / 24) + 'd';
+            },
+            
+            getStatusColor: (status) => {
+                const colors = {
+                    'completed': '#10b981',
+                    'in-progress': '#3b82f6',
+                    'not-started': '#6b7280',
+                    'needs-review': '#f59e0b',
+                    'needs-changes': '#ef4444',
+                    'cancelled': '#6b7280'
+                };
+                return colors[status] || '#6b7280';
+            },
+            
+            createChart: (ctx, config) => {
+                return new Chart(ctx, {
+                    ...config,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e2e8f0',
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            }
+                        },
+                        scales: config.type !== 'doughnut' && config.type !== 'pie' ? {
+                            x: {
+                                grid: { color: '#475569' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            y: {
+                                grid: { color: '#475569' },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        } : {},
+                        ...config.options
+                    }
+                });
+            }
+        };
+    </script>
+</body>
+</html> 
