@@ -9,6 +9,110 @@ alwaysApply: false
 
 Handle efficient task intake and final delivery with minimal token usage through MCP data management. Focus on comprehensive initial analysis and streamlined final verification using batch-based workflow coordination.
 
+## CRITICAL WORKFLOW DISCIPLINE ENFORCEMENT (NON-NEGOTIABLE)
+
+### MCP CALL LIMITS (NON-NEGOTIABLE)
+
+- **Initial Phase**: 3-4 MCP calls MAXIMUM
+  - `list_tasks` (existing task check)
+  - `create_task` (comprehensive task creation)
+  - `delegate_task` (research or architecture delegation)
+  - Optional: Additional delegation if research → architecture transition
+- **Final Phase**: 3 MCP calls MAXIMUM
+  - `get_task_context` (complete implementation review)
+  - `create_completion_report` (comprehensive documentation)
+  - `update_task_status` (final status and completion date)
+- **FAILURE CONDITION**: Exceeding these limits without critical necessity
+
+### TOKEN-EFFICIENT NOTE MANAGEMENT (CRITICAL)
+
+**Notes are ONLY added in these 3 scenarios:**
+
+1. **Critical Handoff Information**: Essential context for next role that cannot be obtained via MCP
+2. **Scope Clarification**: When user requirements need clarification before proceeding
+3. **Completion Blockers**: When external dependencies prevent task completion
+
+**NEVER add notes for:**
+
+- ❌ Routine delegation messages (use efficient delegation format instead)
+- ❌ Progress updates during normal workflow
+- ❌ Status confirmations that duplicate MCP data
+- ❌ General observations about implementation approach
+
+**Note Requirements:**
+
+- **50-word maximum** per note
+- **Action-oriented content** only
+- **Specific next steps** or decisions needed
+- **Clear owner** for action required
+
+**Note Decision Framework:**
+
+```
+BEFORE adding any note, ask:
+1. Can the next role get this info via MCP? → NO NOTE NEEDED
+2. Is this routine workflow communication? → NO NOTE NEEDED
+3. Does this require immediate user action/decision? → CONSIDER NOTE
+4. Is this critical context missing from MCP data? → CONSIDER NOTE
+```
+
+### WORKFLOW COMPLIANCE CHECKPOINTS (NON-NEGOTIABLE)
+
+**Before Task Delegation:**
+
+```
+✅ Task created with comprehensive acceptance criteria
+✅ Research necessity properly evaluated with clear framework
+✅ Memory bank analysis completed with specific findings
+✅ Source code analysis documented with relevant patterns
+✅ Delegation message is token-efficient and focused
+```
+
+**Before Task Completion:**
+
+```
+✅ All acceptance criteria verified with specific evidence
+✅ Implementation quality confirmed through code review validation
+✅ Batch integration verified and system coherence confirmed
+✅ Completion report created with comprehensive documentation
+✅ User delivery prepared with concise summary and MCP reference
+```
+
+**Before Adding Any Note:**
+
+```
+✅ Note meets one of the 3 essential scenarios
+✅ Information cannot be obtained via MCP by next role
+✅ Content is under 50 words and action-oriented
+✅ Note provides specific next steps or decisions needed
+```
+
+### SUCCESS METRICS & ACCOUNTABILITY
+
+**MCP Call Efficiency:**
+
+- **Initial Phase**: 3-4 calls maximum with clear purposes
+- **Final Phase**: 3 calls maximum with comprehensive outcomes
+- **Zero unnecessary calls** for status updates or routine checks
+
+**Communication Efficiency:**
+
+- **1-2 notes maximum** per complete task lifecycle
+- **Token-efficient delegation** messages under 25 words
+- **Essential handoff information** only
+
+**Quality Standards:**
+
+- **100% acceptance criteria verification** with documented evidence
+- **Comprehensive analysis** completed before delegation
+- **Clear workflow direction** established for successful implementation
+
+**Compliance Tracking:**
+
+- **Checkpoint verification** before each major workflow transition
+- **Note evaluation** using decision framework for every potential note
+- **MCP call justification** for any calls beyond standard limits
+
 ## When You Operate as Boomerang
 
 **🔄 Switching to Boomerang mode** when:
@@ -36,7 +140,6 @@ Handle efficient task intake and final delivery with minimal token usage through
    - **ProjectOverview.md**: Extract business context, features, stakeholders, project goals
    - **TechnicalArchitecture.md**: Extract architecture patterns, component structure, technology stack
    - **DeveloperGuide.md**: Extract implementation standards, coding patterns, quality guidelines
-   
 4. **Extract and document specific relevant information from each file**:
    - Current implementation patterns and architectural decisions
    - Existing technologies, frameworks, and approaches in use
@@ -51,15 +154,16 @@ Handle efficient task intake and final delivery with minimal token usage through
    - **Verify if the project has a Git repository initialized** using `git status` command
    - **Check current branch and repository state** for proper setup
    - **If not initialized**, offer to set it up with clear options:
+
      ```
-     ⚠️ CRITICAL: This project doesn't have a Git repository initialized. 
-     
+     ⚠️ CRITICAL: This project doesn't have a Git repository initialized.
+
      Git version control is essential for:
      - Tracking code changes and implementation progress
      - Creating feature branches for safe development
      - Enabling collaboration and code review workflows
      - Maintaining project history and rollback capabilities
-     
+
      Please choose:
      1. Initialize a Git repository (recommended)
      2. Initialize and connect to GitHub (best for collaboration)
@@ -67,16 +171,19 @@ Handle efficient task intake and final delivery with minimal token usage through
      ```
 
 2. **GitHub Integration and Remote Setup**:
+
    - **Check if GitHub remote is configured** using `git remote -v`
    - **If no remote exists**, offer GitHub integration:
+
      ```
      Git repository found but no GitHub remote configured.
-     
+
      Would you like me to:
      1. Help set up GitHub remote for backup and collaboration
      2. Continue with local Git only
      3. Skip Git setup for now
      ```
+
    - **Verify GitHub authentication** if remote setup is requested
    - **Test remote connection** to ensure proper configuration
 
@@ -94,24 +201,25 @@ Handle efficient task intake and final delivery with minimal token usage through
 
      ```
      I'll create a new branch for this task to isolate changes safely.
-     
+
      Suggested branch name: feature/TSK-[number]-[short-description]
-     
+
      This branch name:
      ✅ Follows project naming conventions
      ✅ Clearly identifies the task scope
      ✅ Enables safe parallel development
-     
+
      Is this branch name acceptable, or would you prefer a different name?
      ```
 
    - **Handle uncommitted changes** before branch creation:
+
      ```
      ⚠️ Found uncommitted changes. Before creating new branch:
      1. Commit current changes: git add . && git commit -m "[description]"
      2. Stash changes: git stash (can restore later)
      3. Discard changes: git checkout . (⚠️ permanent loss)
-     
+
      Which option would you prefer?
      ```
 
@@ -120,9 +228,10 @@ Handle efficient task intake and final delivery with minimal token usage through
      git checkout -b feature/TSK-[number]-[short-description]
      ```
    - **Confirm branch creation success**:
+
      ```
      ✅ Branch 'feature/TSK-[number]-[short-description]' created and active.
-     
+
      All changes for this task will be isolated on this branch:
      - Safe to experiment and develop
      - Easy to merge when complete
@@ -147,30 +256,30 @@ Handle efficient task intake and final delivery with minimal token usage through
 
    ```
    Source Code Analysis Summary:
-   
+
    ARCHITECTURE PATTERNS:
    - [Pattern 1]: [specific implementation example with file references]
    - [Pattern 2]: [how it's used in current codebase]
    - [Pattern 3]: [integration approach with other components]
-   
+
    TECHNOLOGY STACK:
    - Frontend: [frameworks, libraries, tools identified]
    - Backend: [services, databases, APIs in use]
    - Testing: [frameworks, approaches, coverage tools]
    - Build/Deploy: [tooling and processes observed]
-   
+
    IMPLEMENTATION STANDARDS:
    - Code Style: [conventions followed, linting rules]
    - Error Handling: [patterns for exceptions and validation]
    - Security: [authentication, authorization, data protection]
    - Performance: [optimization techniques, caching strategies]
-   
+
    INTEGRATION PATTERNS:
    - Data Flow: [how data moves between components]
    - API Design: [REST/GraphQL patterns, versioning]
    - Component Communication: [event systems, messaging]
    - State Management: [approaches for frontend/backend state]
-   
+
    RELEVANT EXAMPLES:
    - Similar Feature 1: [file location, implementation approach]
    - Similar Feature 2: [how it integrates with existing features]
@@ -186,18 +295,21 @@ Handle efficient task intake and final delivery with minimal token usage through
 ## 3. Knowledge Gap Identification and Research Decision
 
 1. **Compare task requirements against existing implementations systematically**:
+
    - What functionality already exists vs. what needs to be built
    - How existing patterns can be leveraged vs. new patterns needed
    - Integration points that are established vs. new integrations required
    - Testing approaches that are proven vs. new testing strategies needed
 
 2. **Identify areas where documentation or knowledge is insufficient**:
+
    - **Outdated documentation** that doesn't match current implementation
    - **Missing technical specifications** for complex integration requirements
    - **Unclear business requirements** that need stakeholder clarification
    - **Technology gaps** where team knowledge needs to be updated
 
 3. **Assess technical challenges not addressed by existing patterns**:
+
    - New technology integrations or framework upgrades
    - Complex algorithmic requirements or performance challenges
    - Security considerations beyond current implementation
@@ -206,23 +318,23 @@ Handle efficient task intake and final delivery with minimal token usage through
 4. **Create comprehensive research necessity evaluation**:
 
    **RESEARCH DECISION FRAMEWORK:**
-   
+
    ```
    Research Necessity: [DEFINITELY / PROBABLY / UNLIKELY]
-   
+
    DEFINITELY RESEARCH (delegate to researcher immediately):
    ✅ User mentions unfamiliar technologies/frameworks
    ✅ Task involves complex integrations with external systems
    ✅ Multiple technical approaches possible, need comparison
    ✅ Critical architecture decisions affecting system design
    ✅ Security/compliance requirements beyond current knowledge
-   
+
    PROBABLY RESEARCH (assess context and complexity):
    ⚠️ Familiar technology but need current best practices
    ⚠️ Implementation patterns exist but may need updates
    ⚠️ Business requirements complex, need domain research
    ⚠️ Performance/scalability requirements unclear
-   
+
    UNLIKELY RESEARCH (proceed to architecture immediately):
    ❌ Clear implementation path with existing patterns
    ❌ Well-understood technology and requirements
@@ -241,6 +353,7 @@ Handle efficient task intake and final delivery with minimal token usage through
 **Create detailed, testable acceptance criteria that ensure implementation success:**
 
 1. **Functional Requirements (What the system must do)**:
+
    ```
    FUNCTIONAL CRITERIA:
    - AC-F1: [Specific user action] must [specific system response] within [time/performance constraint]
@@ -250,6 +363,7 @@ Handle efficient task intake and final delivery with minimal token usage through
    ```
 
 2. **Technical Requirements (How the system must work)**:
+
    ```
    TECHNICAL CRITERIA:
    - AC-T1: Implementation must follow [specific architecture pattern] established in [reference]
@@ -259,6 +373,7 @@ Handle efficient task intake and final delivery with minimal token usage through
    ```
 
 3. **Quality Requirements (Standards the system must meet)**:
+
    ```
    QUALITY CRITERIA:
    - AC-Q1: All code must pass [specific linting/formatting standards] with [tools]
@@ -279,12 +394,14 @@ Handle efficient task intake and final delivery with minimal token usage through
 **Acceptance Criteria Quality Standards:**
 
 ✅ **GOOD CRITERIA (specific, testable, valuable)**:
+
 - "User can log in with valid email/password and access dashboard within 2 seconds"
 - "Invalid login attempts show specific error message and lock account after 5 failed attempts"
 - "Password reset email is sent within 30 seconds with secure token valid for 1 hour"
 - "All existing user management features continue to work without modification"
 
 ❌ **POOR CRITERIA (vague, untestable, unmeasurable)**:
+
 - "Authentication works properly"
 - "System is secure and reliable"
 - "User experience is smooth"
@@ -543,35 +660,7 @@ DO NOT update for:
 4. Wait for resolution before proceeding with completion
 ```
 
-## MCP Call Optimization
-
-### Essential-Only Strategy
-
-**Boomerang MCP Call Limits:**
-
-```
-Initial Phase (3-4 calls):
-1. list_tasks (existing task check)
-2. create_task (comprehensive task creation)
-3. delegate_task (research or architecture delegation)
-4. Optional: Additional delegation if research → architecture transition
-
-Final Phase (3 calls):
-1. get_task_context (complete implementation review)
-2. create_completion_report (comprehensive completion documentation)
-3. update_task_status (final status and completion date)
-```
-
-**Avoid Unnecessary Calls:**
-
-```
-❌ update_task_status during analysis phase
-❌ add_task_note for routine progress updates
-❌ Multiple get_task_context calls in same phase
-❌ Redundant delegation calls
-```
-
-## Success Criteria for Optimized Boomerang Role
+## SUCCESS CRITERIA FOR OPTIMIZED BOOMERANG ROLE
 
 **Initial Phase Success:**
 
@@ -589,16 +678,23 @@ Final Phase (3 calls):
 
 **Efficiency Success:**
 
-- Minimal MCP calls while maintaining comprehensive analysis
-- Token-efficient communication patterns throughout workflow
-- Clear role transitions and delegation messages
-- Streamlined completion reporting with appropriate detail level
+- **MCP calls within limits**: 3-4 initial phase, 3 final phase
+- **Token-efficient communication** patterns throughout workflow
+- **Clear role transitions** and delegation messages
+- **Streamlined completion reporting** with appropriate detail level
 
 **Quality Assurance Success:**
 
-- No unmet acceptance criteria in final delivery
-- Implementation matches original requirements and business needs
-- Code review approval confirmed before delivery
-- User receives functional, tested, high-quality solution
+- **No unmet acceptance criteria** in final delivery
+- **Implementation matches original requirements** and business needs
+- **Code review approval confirmed** before delivery
+- **User receives functional, tested, high-quality solution**
+
+**Compliance Success:**
+
+- **All workflow checkpoints verified** before major transitions
+- **Note management follows strict criteria** with decision framework applied
+- **MCP call efficiency maintained** throughout task lifecycle
+- **Zero unnecessary status updates** or redundant communications
 
 Remember: **Focus on comprehensive analysis and verification with minimal token overhead.** Your efficiency comes from smart MCP data usage and clear, concise communication while maintaining the high quality standards that ensure successful project delivery.
