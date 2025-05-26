@@ -1,0 +1,1090 @@
+<%
+// Template Variables
+const title = "🔄 Delegation Flow Analysis";
+const subtitle = "Workflow Bottlenecks & Role Transition Analytics";
+const headerIcon = "🔄";
+const reportType = "Delegation Flow Analysis";
+const generatedAt = data.generatedAt || new Date();
+const dateRange = data.dateRange;
+
+// Additional Styles for Delegation Flow Analysis
+const additionalStyles = `
+    /* Delegation Flow Specific Styles */
+    .workflow-overview {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .flow-diagram {
+        background: var(--dark-surface-light);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+        position: relative;
+        overflow-x: auto;
+    }
+    
+    .flow-path {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin: var(--spacing-lg) 0;
+        min-width: 800px;
+    }
+    
+    .role-node {
+        background: var(--dark-surface);
+        border: 2px solid var(--primary-500);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        text-align: center;
+        min-width: 120px;
+        position: relative;
+        transition: all var(--transition-normal);
+    }
+    
+    .role-node:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+    }
+    
+    .role-node.boomerang {
+        border-color: var(--primary-500);
+        background: linear-gradient(135deg, var(--dark-surface) 0%, rgba(59, 130, 246, 0.1) 100%);
+    }
+    
+    .role-node.researcher {
+        border-color: var(--secondary-500);
+        background: linear-gradient(135deg, var(--dark-surface) 0%, rgba(139, 92, 246, 0.1) 100%);
+    }
+    
+    .role-node.architect {
+        border-color: var(--success-500);
+        background: linear-gradient(135deg, var(--dark-surface) 0%, rgba(16, 185, 129, 0.1) 100%);
+    }
+    
+    .role-node.senior-developer {
+        border-color: var(--warning-500);
+        background: linear-gradient(135deg, var(--dark-surface) 0%, rgba(245, 158, 11, 0.1) 100%);
+    }
+    
+    .role-node.code-review {
+        border-color: var(--danger-500);
+        background: linear-gradient(135deg, var(--dark-surface) 0%, rgba(239, 68, 68, 0.1) 100%);
+    }
+    
+    .role-icon {
+        font-size: 2rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .role-name {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-xs);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .role-stats {
+        font-size: 0.75rem;
+        color: var(--dark-text-muted);
+    }
+    
+    .flow-arrow {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-xs);
+        color: var(--primary-500);
+        font-weight: 600;
+    }
+    
+    .arrow-icon {
+        font-size: 1.5rem;
+    }
+    
+    .arrow-label {
+        font-size: 0.75rem;
+        color: var(--dark-text-muted);
+        text-align: center;
+        max-width: 80px;
+    }
+    
+    .bottleneck-analysis {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .bottleneck-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-lg);
+    }
+    
+    .bottleneck-card {
+        background: var(--dark-surface-light);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        border-left: 4px solid var(--danger-500);
+        position: relative;
+    }
+    
+    .bottleneck-card.minor {
+        border-left-color: var(--warning-500);
+    }
+    
+    .bottleneck-card.resolved {
+        border-left-color: var(--success-500);
+    }
+    
+    .bottleneck-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .bottleneck-title {
+        font-weight: 600;
+        color: var(--dark-text);
+    }
+    
+    .bottleneck-severity {
+        font-size: 0.75rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .bottleneck-severity.critical {
+        background: var(--danger-500);
+        color: white;
+    }
+    
+    .bottleneck-severity.major {
+        background: var(--warning-500);
+        color: white;
+    }
+    
+    .bottleneck-severity.minor {
+        background: var(--info-500);
+        color: white;
+    }
+    
+    .bottleneck-description {
+        color: var(--dark-text-muted);
+        margin-bottom: var(--spacing-md);
+        line-height: 1.5;
+    }
+    
+    .bottleneck-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-md);
+    }
+    
+    .bottleneck-metric {
+        text-align: center;
+        padding: var(--spacing-sm);
+        background: var(--dark-surface);
+        border-radius: var(--radius-md);
+    }
+    
+    .bottleneck-metric-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--danger-500);
+    }
+    
+    .bottleneck-metric.minor .bottleneck-metric-value {
+        color: var(--warning-500);
+    }
+    
+    .bottleneck-metric.resolved .bottleneck-metric-value {
+        color: var(--success-500);
+    }
+    
+    .bottleneck-metric-label {
+        font-size: 0.75rem;
+        color: var(--dark-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .transition-matrix {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+        overflow-x: auto;
+    }
+    
+    .matrix-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+    }
+    
+    .matrix-table th,
+    .matrix-table td {
+        padding: var(--spacing-md);
+        text-align: center;
+        border: 1px solid var(--dark-border);
+    }
+    
+    .matrix-table th {
+        background: var(--dark-surface-light);
+        color: var(--dark-text);
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .matrix-table td {
+        background: var(--dark-surface);
+        color: var(--dark-text-muted);
+        font-family: var(--font-mono);
+        font-size: 0.875rem;
+    }
+    
+    .matrix-cell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+    
+    .matrix-count {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-500);
+    }
+    
+    .matrix-percentage {
+        font-size: 0.75rem;
+        color: var(--dark-text-muted);
+    }
+    
+    .efficiency-metrics {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .efficiency-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--spacing-lg);
+    }
+    
+    .efficiency-card {
+        background: var(--dark-surface-light);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        text-align: center;
+        border-left: 4px solid var(--primary-500);
+    }
+    
+    .efficiency-icon {
+        font-size: 2.5rem;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .efficiency-title {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .efficiency-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-500);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .efficiency-description {
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+    }
+    
+    .workflow-recommendations {
+        background: linear-gradient(135deg, var(--dark-surface) 0%, var(--dark-surface-light) 100%);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .recommendation-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: var(--dark-surface);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .recommendation-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        margin-top: var(--spacing-xs);
+    }
+    
+    .recommendation-content {
+        flex: 1;
+    }
+    
+    .recommendation-title {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .recommendation-description {
+        color: var(--dark-text-muted);
+        font-size: 0.9rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .recommendation-impact {
+        font-size: 0.75rem;
+        color: var(--primary-500);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+`;
+
+// Additional Scripts for Delegation Flow Analysis
+const additionalScripts = `
+    // Delegation Flow Analysis specific functionality
+    function initializeDelegationCharts() {
+        // Role Transition Flow Chart
+        const transitionFlowCtx = document.getElementById('transitionFlowChart');
+        if (transitionFlowCtx) {
+            const flowData = ${JSON.stringify(data.analytics?.transitionFlow || [])};
+            
+            ReportUtils.createChart(transitionFlowCtx, {
+                type: 'sankey',
+                data: {
+                    datasets: [{
+                        data: flowData,
+                        colorFrom: (c) => ReportUtils.getStatusColor(c.parsed.from),
+                        colorTo: (c) => ReportUtils.getStatusColor(c.parsed.to),
+                        colorMode: 'gradient'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Delegation Timeline Chart
+        const delegationTimelineCtx = document.getElementById('delegationTimelineChart');
+        if (delegationTimelineCtx) {
+            const timelineData = ${JSON.stringify(data.analytics?.delegationTimeline || [])};
+            
+            ReportUtils.createChart(delegationTimelineCtx, {
+                type: 'line',
+                data: {
+                    labels: timelineData.map(t => t.date),
+                    datasets: [{
+                        label: 'Delegations per Day',
+                        data: timelineData.map(t => t.delegations),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Avg Delegation Time',
+                        data: timelineData.map(t => t.avgTime),
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Role Efficiency Chart
+        const roleEfficiencyCtx = document.getElementById('roleEfficiencyChart');
+        if (roleEfficiencyCtx) {
+            const efficiencyData = ${JSON.stringify(data.analytics?.roleEfficiency || {})};
+            
+            ReportUtils.createChart(roleEfficiencyCtx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(efficiencyData),
+                    datasets: [{
+                        label: 'Efficiency Score',
+                        data: Object.values(efficiencyData),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#10b981'
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Bottleneck Impact Chart
+        const bottleneckImpactCtx = document.getElementById('bottleneckImpactChart');
+        if (bottleneckImpactCtx) {
+            const bottleneckData = ${JSON.stringify(data.analytics?.bottleneckImpact || [])};
+            
+            ReportUtils.createChart(bottleneckImpactCtx, {
+                type: 'bar',
+                data: {
+                    labels: bottleneckData.map(b => b.role),
+                    datasets: [{
+                        label: 'Delay Hours',
+                        data: bottleneckData.map(b => b.delayHours),
+                        backgroundColor: bottleneckData.map(b => 
+                            b.severity === 'critical' ? '#ef4444' :
+                            b.severity === 'major' ? '#f59e0b' : '#3b82f6'
+                        ),
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + 'h';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    // Initialize charts when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initializeDelegationCharts);
+`;
+
+// Content for the template
+const content = `
+    <!-- Workflow Overview Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">🔄 Workflow Overview</h2>
+            <p class="section-subtitle">Comprehensive analysis of delegation patterns, role transitions, and workflow efficiency</p>
+        </div>
+        
+        <!-- Key Metrics Grid -->
+        <div class="grid grid-auto-fit">
+            <div class="metric-card info">
+                <div class="metric-header">
+                    <div class="metric-title">🔄 Total Delegations</div>
+                    <div class="metric-trend trend-up">↗ +15%</div>
+                </div>
+                <div class="metric-value info">${data.metrics?.delegation?.totalDelegations || 0}</div>
+                <div class="metric-subtitle">${data.metrics?.delegation?.successfulDelegations || 0} successful, ${data.metrics?.delegation?.redelegations || 0} redelegations</div>
+            </div>
+            
+            <div class="metric-card success">
+                <div class="metric-header">
+                    <div class="metric-title">⚡ Avg Delegation Time</div>
+                    <div class="metric-trend trend-down">↘ -25min</div>
+                </div>
+                <div class="metric-value success">${(data.metrics?.delegation?.avgDelegationTimeHours || 0).toFixed(1)}h</div>
+                <div class="metric-subtitle">Target: ${data.metrics?.delegation?.targetDelegationTime || '2h'}</div>
+            </div>
+            
+            <div class="metric-card warning">
+                <div class="metric-header">
+                    <div class="metric-title">🚧 Active Bottlenecks</div>
+                    <div class="metric-trend trend-stable">→ Monitoring</div>
+                </div>
+                <div class="metric-value warning">${data.metrics?.delegation?.activeBottlenecks || 0}</div>
+                <div class="metric-subtitle">${data.metrics?.delegation?.resolvedBottlenecks || 0} resolved this period</div>
+            </div>
+            
+            <div class="metric-card ${(data.metrics?.delegation?.workflowEfficiency || 0) > 85 ? 'success' : (data.metrics?.delegation?.workflowEfficiency || 0) > 70 ? 'warning' : 'danger'}">
+                <div class="metric-header">
+                    <div class="metric-title">📈 Workflow Efficiency</div>
+                    <div class="metric-trend trend-up">↗ +8.3%</div>
+                </div>
+                <div class="metric-value ${(data.metrics?.delegation?.workflowEfficiency || 0) > 85 ? 'success' : (data.metrics?.delegation?.workflowEfficiency || 0) > 70 ? 'warning' : 'danger'}">${(data.metrics?.delegation?.workflowEfficiency || 0).toFixed(1)}%</div>
+                <div class="metric-subtitle">Based on delegation speed and success rate</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delegation Flow Diagram -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">🗺️ Delegation Flow Diagram</h2>
+            <p class="section-subtitle">Visual representation of role transitions and workflow paths</p>
+        </div>
+        
+        <div class="workflow-overview">
+            <div class="flow-diagram">
+                <div class="flow-path">
+                    <div class="role-node boomerang">
+                        <div class="role-icon">🪃</div>
+                        <div class="role-name">Boomerang</div>
+                        <div class="role-stats">
+                            ${data.roleStats?.boomerang?.tasks || 0} tasks<br>
+                            ${(data.roleStats?.boomerang?.avgTime || 0).toFixed(1)}h avg
+                        </div>
+                    </div>
+                    
+                    <div class="flow-arrow">
+                        <div class="arrow-icon">→</div>
+                        <div class="arrow-label">Research Needed</div>
+                    </div>
+                    
+                    <div class="role-node researcher">
+                        <div class="role-icon">🔬</div>
+                        <div class="role-name">Researcher</div>
+                        <div class="role-stats">
+                            ${data.roleStats?.researcher?.tasks || 0} tasks<br>
+                            ${(data.roleStats?.researcher?.avgTime || 0).toFixed(1)}h avg
+                        </div>
+                    </div>
+                    
+                    <div class="flow-arrow">
+                        <div class="arrow-icon">→</div>
+                        <div class="arrow-label">Research Complete</div>
+                    </div>
+                    
+                    <div class="role-node boomerang">
+                        <div class="role-icon">🪃</div>
+                        <div class="role-name">Boomerang</div>
+                        <div class="role-stats">
+                            Analysis &<br>
+                            Planning
+                        </div>
+                    </div>
+                    
+                    <div class="flow-arrow">
+                        <div class="arrow-icon">→</div>
+                        <div class="arrow-label">Ready for Architecture</div>
+                    </div>
+                    
+                    <div class="role-node architect">
+                        <div class="role-icon">🏛️</div>
+                        <div class="role-name">Architect</div>
+                        <div class="role-stats">
+                            ${data.roleStats?.architect?.tasks || 0} tasks<br>
+                            ${(data.roleStats?.architect?.avgTime || 0).toFixed(1)}h avg
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flow-path">
+                    <div class="role-node architect">
+                        <div class="role-icon">🏛️</div>
+                        <div class="role-name">Architect</div>
+                        <div class="role-stats">
+                            Plan Creation &<br>
+                            Oversight
+                        </div>
+                    </div>
+                    
+                    <div class="flow-arrow">
+                        <div class="arrow-icon">→</div>
+                        <div class="arrow-label">Implementation Ready</div>
+                    </div>
+                    
+                    <div class="role-node senior-developer">
+                        <div class="role-icon">👨‍💻</div>
+                        <div class="role-name">Senior Developer</div>
+                        <div class="role-stats">
+                            ${data.roleStats?.seniorDeveloper?.tasks || 0} tasks<br>
+                            ${(data.roleStats?.seniorDeveloper?.avgTime || 0).toFixed(1)}h avg
+                        </div>
+                    </div>
+                    
+                    <div class="flow-arrow">
+                        <div class="arrow-icon">→</div>
+                        <div class="arrow-label">Code Complete</div>
+                    </div>
+                    
+                    <div class="role-node code-review">
+                        <div class="role-icon">🔍</div>
+                        <div class="role-name">Code Review</div>
+                        <div class="role-stats">
+                            ${data.roleStats?.codeReview?.tasks || 0} tasks<br>
+                            ${(data.roleStats?.codeReview?.avgTime || 0).toFixed(1)}h avg
+                        </div>
+                    </div>
+                    
+                    <div class="flow-arrow">
+                        <div class="arrow-icon">→</div>
+                        <div class="arrow-label">Quality Approved</div>
+                    </div>
+                    
+                    <div class="role-node boomerang">
+                        <div class="role-icon">🪃</div>
+                        <div class="role-name">Boomerang</div>
+                        <div class="role-stats">
+                            Final Delivery &<br>
+                            Completion
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottleneck Analysis Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">🚧 Bottleneck Analysis</h2>
+            <p class="section-subtitle">Identification and analysis of workflow bottlenecks and delay patterns</p>
+        </div>
+        
+        <div class="bottleneck-analysis">
+            <div class="bottleneck-grid">
+                ${(data.bottlenecks || [
+                    {
+                        title: 'Code Review Queue',
+                        severity: 'critical',
+                        description: 'High volume of tasks waiting for code review causing delays in final delivery.',
+                        delayHours: 8.5,
+                        affectedTasks: 5,
+                        frequency: 'Daily'
+                    },
+                    {
+                        title: 'Research Complexity',
+                        severity: 'major',
+                        description: 'Complex research requirements taking longer than estimated time allocations.',
+                        delayHours: 4.2,
+                        affectedTasks: 3,
+                        frequency: 'Weekly'
+                    },
+                    {
+                        title: 'Architecture Dependencies',
+                        severity: 'minor',
+                        description: 'Waiting for external dependencies and third-party integrations.',
+                        delayHours: 2.1,
+                        affectedTasks: 2,
+                        frequency: 'Monthly'
+                    }
+                ]).map(bottleneck => `
+                    <div class="bottleneck-card ${bottleneck.severity}">
+                        <div class="bottleneck-header">
+                            <div class="bottleneck-title">${bottleneck.title}</div>
+                            <div class="bottleneck-severity ${bottleneck.severity}">${bottleneck.severity}</div>
+                        </div>
+                        <div class="bottleneck-description">${bottleneck.description}</div>
+                        <div class="bottleneck-metrics">
+                            <div class="bottleneck-metric ${bottleneck.severity}">
+                                <div class="bottleneck-metric-value">${bottleneck.delayHours}h</div>
+                                <div class="bottleneck-metric-label">Avg Delay</div>
+                            </div>
+                            <div class="bottleneck-metric ${bottleneck.severity}">
+                                <div class="bottleneck-metric-value">${bottleneck.affectedTasks}</div>
+                                <div class="bottleneck-metric-label">Tasks Affected</div>
+                            </div>
+                            <div class="bottleneck-metric ${bottleneck.severity}">
+                                <div class="bottleneck-metric-value">${bottleneck.frequency}</div>
+                                <div class="bottleneck-metric-label">Frequency</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Role Transition Matrix -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">📊 Role Transition Matrix</h2>
+            <p class="section-subtitle">Detailed analysis of delegation patterns between roles</p>
+        </div>
+        
+        <div class="transition-matrix">
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>From / To</th>
+                        <th>🪃 Boomerang</th>
+                        <th>🔬 Researcher</th>
+                        <th>🏛️ Architect</th>
+                        <th>👨‍💻 Sr. Developer</th>
+                        <th>🔍 Code Review</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>🪃 Boomerang</th>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">-</div>
+                                <div class="matrix-percentage">-</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">${data.transitionMatrix?.boomerangToResearcher?.count || 8}</div>
+                                <div class="matrix-percentage">${(data.transitionMatrix?.boomerangToResearcher?.percentage || 25).toFixed(1)}%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">${data.transitionMatrix?.boomerangToArchitect?.count || 12}</div>
+                                <div class="matrix-percentage">${(data.transitionMatrix?.boomerangToArchitect?.percentage || 35).toFixed(1)}%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">0</div>
+                                <div class="matrix-percentage">0%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">0</div>
+                                <div class="matrix-percentage">0%</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>🔬 Researcher</th>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">${data.transitionMatrix?.researcherToBoomerang?.count || 8}</div>
+                                <div class="matrix-percentage">${(data.transitionMatrix?.researcherToBoomerang?.percentage || 100).toFixed(1)}%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">-</div>
+                                <div class="matrix-percentage">-</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">0</div>
+                                <div class="matrix-percentage">0%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">0</div>
+                                <div class="matrix-percentage">0%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">0</div>
+                                <div class="matrix-percentage">0%</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>🏛️ Architect</th>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">${data.transitionMatrix?.architectToBoomerang?.count || 2}</div>
+                                <div class="matrix-percentage">${(data.transitionMatrix?.architectToBoomerang?.percentage || 8).toFixed(1)}%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">0</div>
+                                <div class="matrix-percentage">0%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">-</div>
+                                <div class="matrix-percentage">-</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">${data.transitionMatrix?.architectToSeniorDeveloper?.count || 18}</div>
+                                <div class="matrix-percentage">${(data.transitionMatrix?.architectToSeniorDeveloper?.percentage || 75).toFixed(1)}%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">${data.transitionMatrix?.architectToCodeReview?.count || 4}</div>
+                                <div class="matrix-percentage">${(data.transitionMatrix?.architectToCodeReview?.percentage || 17).toFixed(1)}%</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>👨‍💻 Sr. Developer</th>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">0</div>
+                                <div class="matrix-percentage">0%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">0</div>
+                                <div class="matrix-percentage">0%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">${data.transitionMatrix?.seniorDeveloperToArchitect?.count || 18}</div>
+                                <div class="matrix-percentage">${(data.transitionMatrix?.seniorDeveloperToArchitect?.percentage || 100).toFixed(1)}%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">-</div>
+                                <div class="matrix-percentage">-</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">0</div>
+                                <div class="matrix-percentage">0%</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>🔍 Code Review</th>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">${data.transitionMatrix?.codeReviewToBoomerang?.count || 15}</div>
+                                <div class="matrix-percentage">${(data.transitionMatrix?.codeReviewToBoomerang?.percentage || 75).toFixed(1)}%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">0</div>
+                                <div class="matrix-percentage">0%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">${data.transitionMatrix?.codeReviewToArchitect?.count || 5}</div>
+                                <div class="matrix-percentage">${(data.transitionMatrix?.codeReviewToArchitect?.percentage || 25).toFixed(1)}%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">0</div>
+                                <div class="matrix-percentage">0%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="matrix-cell">
+                                <div class="matrix-count">-</div>
+                                <div class="matrix-percentage">-</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Charts Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">📊 Delegation Analytics</h2>
+            <p class="section-subtitle">Visual analysis of delegation patterns, efficiency metrics, and bottleneck impacts</p>
+        </div>
+        
+        <div class="grid grid-cols-2">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Delegation Timeline</h3>
+                    <p class="chart-subtitle">Daily delegation volume and average processing time</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="delegationTimelineChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Role Efficiency Radar</h3>
+                    <p class="chart-subtitle">Efficiency scores across all workflow roles</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="roleEfficiencyChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 mt-lg">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Bottleneck Impact Analysis</h3>
+                    <p class="chart-subtitle">Delay hours caused by bottlenecks per role</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="bottleneckImpactChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Efficiency Metrics Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">⚡ Efficiency Metrics</h2>
+            <p class="section-subtitle">Key performance indicators for workflow optimization</p>
+        </div>
+        
+        <div class="efficiency-metrics">
+            <div class="efficiency-grid">
+                <div class="efficiency-card">
+                    <div class="efficiency-icon">🎯</div>
+                    <div class="efficiency-title">Delegation Success Rate</div>
+                    <div class="efficiency-value">${(data.efficiency?.delegationSuccessRate || 0).toFixed(1)}%</div>
+                    <div class="efficiency-description">Percentage of delegations completed without redelegation</div>
+                </div>
+                
+                <div class="efficiency-card">
+                    <div class="efficiency-icon">⏱️</div>
+                    <div class="efficiency-title">Average Cycle Time</div>
+                    <div class="efficiency-value">${(data.efficiency?.avgCycleTimeHours || 0).toFixed(1)}h</div>
+                    <div class="efficiency-description">End-to-end time from task creation to completion</div>
+                </div>
+                
+                <div class="efficiency-card">
+                    <div class="efficiency-icon">🔄</div>
+                    <div class="efficiency-title">Redelegation Rate</div>
+                    <div class="efficiency-value">${(data.efficiency?.redelegationRate || 0).toFixed(1)}%</div>
+                    <div class="efficiency-description">Tasks requiring multiple delegation attempts</div>
+                </div>
+                
+                <div class="efficiency-card">
+                    <div class="efficiency-icon">📈</div>
+                    <div class="efficiency-title">Throughput</div>
+                    <div class="efficiency-value">${(data.efficiency?.tasksPerDay || 0).toFixed(1)}</div>
+                    <div class="efficiency-description">Average tasks completed per day</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Workflow Recommendations Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">💡 Workflow Recommendations</h2>
+            <p class="section-subtitle">Actionable insights for optimizing delegation flow and reducing bottlenecks</p>
+        </div>
+        
+        <div class="workflow-recommendations">
+            ${(data.recommendations || []).map(rec => `
+                <div class="recommendation-item">
+                    <div class="recommendation-icon">${rec.icon || '💡'}</div>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">${rec.title}</div>
+                        <div class="recommendation-description">${rec.description}</div>
+                        <div class="recommendation-impact">Impact: ${rec.impact || 'Medium'}</div>
+                    </div>
+                </div>
+            `).join('')}
+            
+            ${(data.recommendations || []).length === 0 ? `
+                <div class="recommendation-item">
+                    <div class="recommendation-icon">🚀</div>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">Implement Parallel Processing</div>
+                        <div class="recommendation-description">Enable parallel execution of independent batches to reduce overall cycle time by up to 40%.</div>
+                        <div class="recommendation-impact">Impact: High</div>
+                    </div>
+                </div>
+                
+                <div class="recommendation-item">
+                    <div class="recommendation-icon">🎯</div>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">Optimize Code Review Queue</div>
+                        <div class="recommendation-description">Implement automated pre-review checks and prioritization to reduce code review bottlenecks.</div>
+                        <div class="recommendation-impact">Impact: High</div>
+                    </div>
+                </div>
+                
+                <div class="recommendation-item">
+                    <div class="recommendation-icon">📊</div>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">Enhance Role Load Balancing</div>
+                        <div class="recommendation-description">Monitor role workloads and implement dynamic task distribution to prevent overload.</div>
+                        <div class="recommendation-impact">Impact: Medium</div>
+                    </div>
+                </div>
+                
+                <div class="recommendation-item">
+                    <div class="recommendation-icon">🔄</div>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">Standardize Handoff Procedures</div>
+                        <div class="recommendation-description">Create standardized delegation templates and checklists to reduce handoff time and errors.</div>
+                        <div class="recommendation-impact">Impact: Medium</div>
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+    </div>
+`;
+%>
+
+<!-- Include Base Layout -->
+<%- include('base-layout', { 
+    title, 
+    subtitle, 
+    headerIcon, 
+    reportType, 
+    generatedAt, 
+    dateRange, 
+    content, 
+    additionalStyles, 
+    additionalScripts 
+}) %> 
