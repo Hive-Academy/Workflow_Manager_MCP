@@ -1,0 +1,1016 @@
+<%
+// Template Variables
+const title = "🔍 Code Review Insights";
+const subtitle = "Quality Metrics & Approval Analytics";
+const headerIcon = "🔍";
+const reportType = "Code Review Insights";
+const generatedAt = data.generatedAt || new Date();
+const dateRange = data.dateRange;
+
+// Additional Styles for Code Review Insights
+const additionalStyles = `
+    /* Code Review Specific Styles */
+    .review-summary {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .review-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .review-stat-card {
+        background: var(--dark-surface-light);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        text-align: center;
+        border-left: 4px solid var(--primary-500);
+        transition: all var(--transition-fast);
+    }
+    
+    .review-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .review-stat-card.approved {
+        border-left-color: var(--success-500);
+    }
+    
+    .review-stat-card.rejected {
+        border-left-color: var(--danger-500);
+    }
+    
+    .review-stat-card.pending {
+        border-left-color: var(--warning-500);
+    }
+    
+    .review-stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-500);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .review-stat-card.approved .review-stat-value {
+        color: var(--success-500);
+    }
+    
+    .review-stat-card.rejected .review-stat-value {
+        color: var(--danger-500);
+    }
+    
+    .review-stat-card.pending .review-stat-value {
+        color: var(--warning-500);
+    }
+    
+    .review-stat-label {
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .review-stat-description {
+        font-size: 0.75rem;
+        color: var(--dark-text-muted);
+    }
+    
+    .quality-trends {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .trend-indicators {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .trend-indicator {
+        background: var(--dark-surface-light);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .trend-indicator::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-500), var(--secondary-500));
+    }
+    
+    .trend-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .trend-title {
+        font-weight: 600;
+        color: var(--dark-text);
+    }
+    
+    .trend-change {
+        font-size: 0.875rem;
+        font-weight: 600;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+    }
+    
+    .trend-change.positive {
+        color: var(--success-500);
+        background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .trend-change.negative {
+        color: var(--danger-500);
+        background: rgba(239, 68, 68, 0.1);
+    }
+    
+    .trend-change.neutral {
+        color: var(--gray-400);
+        background: rgba(156, 163, 175, 0.1);
+    }
+    
+    .trend-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-500);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .trend-description {
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+    }
+    
+    .issues-analysis {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .issues-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-lg);
+    }
+    
+    .issue-category {
+        background: var(--dark-surface-light);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        border-left: 4px solid var(--secondary-500);
+    }
+    
+    .issue-category.critical {
+        border-left-color: var(--danger-500);
+    }
+    
+    .issue-category.major {
+        border-left-color: var(--warning-500);
+    }
+    
+    .issue-category.minor {
+        border-left-color: var(--info-500);
+    }
+    
+    .issue-category-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .issue-category-title {
+        font-weight: 600;
+        color: var(--dark-text);
+    }
+    
+    .issue-count {
+        background: var(--dark-surface);
+        color: var(--dark-text-muted);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .issue-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .issue-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm) 0;
+        border-bottom: 1px solid var(--dark-border);
+    }
+    
+    .issue-item:last-child {
+        border-bottom: none;
+    }
+    
+    .issue-severity {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-top: 6px;
+        flex-shrink: 0;
+    }
+    
+    .issue-severity.critical {
+        background: var(--danger-500);
+    }
+    
+    .issue-severity.major {
+        background: var(--warning-500);
+    }
+    
+    .issue-severity.minor {
+        background: var(--info-500);
+    }
+    
+    .issue-description {
+        flex: 1;
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+    }
+    
+    .testing-results {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .testing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--spacing-lg);
+    }
+    
+    .test-category {
+        background: var(--dark-surface-light);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        text-align: center;
+    }
+    
+    .test-icon {
+        font-size: 2.5rem;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .test-title {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .test-score {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .test-score.excellent {
+        color: var(--success-500);
+    }
+    
+    .test-score.good {
+        color: var(--info-500);
+    }
+    
+    .test-score.needs-improvement {
+        color: var(--warning-500);
+    }
+    
+    .test-score.poor {
+        color: var(--danger-500);
+    }
+    
+    .test-details {
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+    }
+    
+    .reviewer-performance {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .reviewer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--spacing-lg);
+    }
+    
+    .reviewer-card {
+        background: var(--dark-surface-light);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        border-left: 4px solid var(--primary-500);
+    }
+    
+    .reviewer-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .reviewer-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-500);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: white;
+    }
+    
+    .reviewer-info {
+        flex: 1;
+    }
+    
+    .reviewer-name {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .reviewer-role {
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+    }
+    
+    .reviewer-metrics {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+    }
+    
+    .reviewer-metric {
+        text-align: center;
+    }
+    
+    .reviewer-metric-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-500);
+    }
+    
+    .reviewer-metric-label {
+        font-size: 0.75rem;
+        color: var(--dark-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .recommendations {
+        background: linear-gradient(135deg, var(--dark-surface) 0%, var(--dark-surface-light) 100%);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .recommendation-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: var(--dark-surface);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .recommendation-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        margin-top: var(--spacing-xs);
+    }
+    
+    .recommendation-content {
+        flex: 1;
+    }
+    
+    .recommendation-title {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .recommendation-description {
+        color: var(--dark-text-muted);
+        font-size: 0.9rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .recommendation-impact {
+        font-size: 0.75rem;
+        color: var(--primary-500);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+`;
+
+// Additional Scripts for Code Review Insights
+const additionalScripts = `
+    // Code Review Insights specific functionality
+    function initializeCodeReviewCharts() {
+        // Approval Rate Trend Chart
+        const approvalTrendCtx = document.getElementById('approvalTrendChart');
+        if (approvalTrendCtx) {
+            const trendData = ${JSON.stringify(data.analytics?.approvalTrend || [])};
+            
+            ReportUtils.createChart(approvalTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: trendData.map(t => t.date),
+                    datasets: [{
+                        label: 'Approval Rate',
+                        data: trendData.map(t => t.approvalRate),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'First-Pass Approval',
+                        data: trendData.map(t => t.firstPassRate),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Issue Distribution Chart
+        const issueDistributionCtx = document.getElementById('issueDistributionChart');
+        if (issueDistributionCtx) {
+            const issueData = ${JSON.stringify(data.analytics?.issueDistribution || {})};
+            
+            ReportUtils.createChart(issueDistributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(issueData),
+                    datasets: [{
+                        data: Object.values(issueData),
+                        backgroundColor: [
+                            '#ef4444', // Critical
+                            '#f59e0b', // Major
+                            '#3b82f6', // Minor
+                            '#10b981'  // Suggestions
+                        ]
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Quality Score Timeline
+        const qualityTimelineCtx = document.getElementById('qualityTimelineChart');
+        if (qualityTimelineCtx) {
+            const qualityData = ${JSON.stringify(data.analytics?.qualityTimeline || [])};
+            
+            ReportUtils.createChart(qualityTimelineCtx, {
+                type: 'bar',
+                data: {
+                    labels: qualityData.map(q => q.date),
+                    datasets: [{
+                        label: 'Code Quality Score',
+                        data: qualityData.map(q => q.qualityScore),
+                        backgroundColor: qualityData.map(q => 
+                            q.qualityScore >= 90 ? '#10b981' :
+                            q.qualityScore >= 80 ? '#3b82f6' :
+                            q.qualityScore >= 70 ? '#f59e0b' : '#ef4444'
+                        ),
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Review Time Distribution
+        const reviewTimeCtx = document.getElementById('reviewTimeChart');
+        if (reviewTimeCtx) {
+            const timeData = ${JSON.stringify(data.analytics?.reviewTimeDistribution || [])};
+            
+            ReportUtils.createChart(reviewTimeCtx, {
+                type: 'histogram',
+                data: {
+                    labels: timeData.map(t => t.timeRange),
+                    datasets: [{
+                        label: 'Number of Reviews',
+                        data: timeData.map(t => t.count),
+                        backgroundColor: '#8b5cf6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    // Initialize charts when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initializeCodeReviewCharts);
+`;
+
+// Content for the template
+const content = `
+    <!-- Review Summary Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">📊 Review Summary</h2>
+            <p class="section-subtitle">Comprehensive overview of code review performance and quality metrics</p>
+        </div>
+        
+        <!-- Key Metrics Grid -->
+        <div class="grid grid-auto-fit">
+            <div class="metric-card success">
+                <div class="metric-header">
+                    <div class="metric-title">✅ Approval Rate</div>
+                    <div class="metric-trend trend-up">↗ +5.2%</div>
+                </div>
+                <div class="metric-value success">${(data.metrics?.codeReview?.approvalRate || 0).toFixed(1)}%</div>
+                <div class="metric-subtitle">${data.metrics?.codeReview?.approvedReviews || 0} of ${data.metrics?.codeReview?.totalReviews || 0} reviews approved</div>
+            </div>
+            
+            <div class="metric-card info">
+                <div class="metric-header">
+                    <div class="metric-title">⚡ Avg Review Time</div>
+                    <div class="metric-trend trend-down">↘ -12min</div>
+                </div>
+                <div class="metric-value info">${(data.metrics?.codeReview?.avgReviewTimeHours || 0).toFixed(1)}h</div>
+                <div class="metric-subtitle">Target: ${data.metrics?.codeReview?.targetReviewTime || '4h'}</div>
+            </div>
+            
+            <div class="metric-card warning">
+                <div class="metric-header">
+                    <div class="metric-title">🔄 Revision Rate</div>
+                    <div class="metric-trend trend-stable">→ Stable</div>
+                </div>
+                <div class="metric-value warning">${(data.metrics?.codeReview?.revisionRate || 0).toFixed(1)}%</div>
+                <div class="metric-subtitle">${data.metrics?.codeReview?.revisionsRequired || 0} reviews needed changes</div>
+            </div>
+            
+            <div class="metric-card ${(data.metrics?.codeReview?.qualityScore || 0) > 85 ? 'success' : (data.metrics?.codeReview?.qualityScore || 0) > 70 ? 'warning' : 'danger'}">
+                <div class="metric-header">
+                    <div class="metric-title">🎯 Quality Score</div>
+                    <div class="metric-trend trend-up">↗ +2.8%</div>
+                </div>
+                <div class="metric-value ${(data.metrics?.codeReview?.qualityScore || 0) > 85 ? 'success' : (data.metrics?.codeReview?.qualityScore || 0) > 70 ? 'warning' : 'danger'}">${(data.metrics?.codeReview?.qualityScore || 0).toFixed(1)}%</div>
+                <div class="metric-subtitle">Based on SOLID principles, testing, security</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Review Statistics -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">📈 Review Statistics</h2>
+            <p class="section-subtitle">Detailed breakdown of review outcomes and performance indicators</p>
+        </div>
+        
+        <div class="review-summary">
+            <div class="review-stats-grid">
+                <div class="review-stat-card approved">
+                    <div class="review-stat-value">${data.reviewStats?.approved || 0}</div>
+                    <div class="review-stat-label">Approved</div>
+                    <div class="review-stat-description">Reviews passed without changes</div>
+                </div>
+                
+                <div class="review-stat-card">
+                    <div class="review-stat-value">${data.reviewStats?.approvedWithReservations || 0}</div>
+                    <div class="review-stat-label">Approved with Reservations</div>
+                    <div class="review-stat-description">Minor issues noted but approved</div>
+                </div>
+                
+                <div class="review-stat-card rejected">
+                    <div class="review-stat-value">${data.reviewStats?.needsChanges || 0}</div>
+                    <div class="review-stat-label">Needs Changes</div>
+                    <div class="review-stat-description">Significant issues requiring fixes</div>
+                </div>
+                
+                <div class="review-stat-card pending">
+                    <div class="review-stat-value">${data.reviewStats?.pending || 0}</div>
+                    <div class="review-stat-label">Pending Review</div>
+                    <div class="review-stat-description">Awaiting reviewer assignment</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quality Trends Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">📊 Quality Trends</h2>
+            <p class="section-subtitle">Analysis of code quality improvements and performance trends over time</p>
+        </div>
+        
+        <div class="quality-trends">
+            <div class="trend-indicators">
+                <div class="trend-indicator">
+                    <div class="trend-header">
+                        <div class="trend-title">First-Pass Approval Rate</div>
+                        <div class="trend-change positive">+8.5%</div>
+                    </div>
+                    <div class="trend-value">${(data.trends?.firstPassApproval || 0).toFixed(1)}%</div>
+                    <div class="trend-description">Reviews approved without requiring changes</div>
+                </div>
+                
+                <div class="trend-indicator">
+                    <div class="trend-header">
+                        <div class="trend-title">Average Issues per Review</div>
+                        <div class="trend-change negative">-1.2</div>
+                    </div>
+                    <div class="trend-value">${(data.trends?.avgIssuesPerReview || 0).toFixed(1)}</div>
+                    <div class="trend-description">Decreasing trend indicates improving code quality</div>
+                </div>
+                
+                <div class="trend-indicator">
+                    <div class="trend-header">
+                        <div class="trend-title">Security Issues Found</div>
+                        <div class="trend-change positive">-45%</div>
+                    </div>
+                    <div class="trend-value">${data.trends?.securityIssues || 0}</div>
+                    <div class="trend-description">Critical security vulnerabilities identified</div>
+                </div>
+                
+                <div class="trend-indicator">
+                    <div class="trend-header">
+                        <div class="trend-title">Test Coverage Impact</div>
+                        <div class="trend-change positive">+12%</div>
+                    </div>
+                    <div class="trend-value">${(data.trends?.testCoverageImprovement || 0).toFixed(1)}%</div>
+                    <div class="trend-description">Average test coverage improvement per review</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">📊 Review Analytics</h2>
+            <p class="section-subtitle">Visual analysis of approval trends, issue distribution, and quality metrics</p>
+        </div>
+        
+        <div class="grid grid-cols-2">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Approval Rate Trends</h3>
+                    <p class="chart-subtitle">Overall and first-pass approval rates over time</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="approvalTrendChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Issue Distribution</h3>
+                    <p class="chart-subtitle">Breakdown of issues by severity level</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="issueDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-2 mt-lg">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Quality Score Timeline</h3>
+                    <p class="chart-subtitle">Code quality scores over review periods</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="qualityTimelineChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Review Time Distribution</h3>
+                    <p class="chart-subtitle">Distribution of review completion times</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="reviewTimeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Issues Analysis Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">🐛 Common Issues Analysis</h2>
+            <p class="section-subtitle">Categorized analysis of frequently identified issues and improvement opportunities</p>
+        </div>
+        
+        <div class="issues-analysis">
+            <div class="issues-grid">
+                <div class="issue-category critical">
+                    <div class="issue-category-header">
+                        <div class="issue-category-title">🚨 Critical Issues</div>
+                        <div class="issue-count">${(data.issues?.critical || []).length}</div>
+                    </div>
+                    <ul class="issue-list">
+                        ${(data.issues?.critical || [
+                            'Security vulnerabilities in input validation',
+                            'Memory leaks in async operations',
+                            'SQL injection risks in database queries'
+                        ]).map(issue => `
+                            <li class="issue-item">
+                                <div class="issue-severity critical"></div>
+                                <div class="issue-description">${issue}</div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                
+                <div class="issue-category major">
+                    <div class="issue-category-header">
+                        <div class="issue-category-title">⚠️ Major Issues</div>
+                        <div class="issue-count">${(data.issues?.major || []).length}</div>
+                    </div>
+                    <ul class="issue-list">
+                        ${(data.issues?.major || [
+                            'SOLID principle violations',
+                            'Insufficient error handling',
+                            'Performance bottlenecks',
+                            'Missing unit tests for critical paths'
+                        ]).map(issue => `
+                            <li class="issue-item">
+                                <div class="issue-severity major"></div>
+                                <div class="issue-description">${issue}</div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                
+                <div class="issue-category minor">
+                    <div class="issue-category-header">
+                        <div class="issue-category-title">ℹ️ Minor Issues</div>
+                        <div class="issue-count">${(data.issues?.minor || []).length}</div>
+                    </div>
+                    <ul class="issue-list">
+                        ${(data.issues?.minor || [
+                            'Code formatting inconsistencies',
+                            'Missing JSDoc documentation',
+                            'Unused imports and variables',
+                            'Non-descriptive variable names'
+                        ]).map(issue => `
+                            <li class="issue-item">
+                                <div class="issue-severity minor"></div>
+                                <div class="issue-description">${issue}</div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Testing Results Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">🧪 Testing Results</h2>
+            <p class="section-subtitle">Comprehensive testing validation and coverage analysis from code reviews</p>
+        </div>
+        
+        <div class="testing-results">
+            <div class="testing-grid">
+                <div class="test-category">
+                    <div class="test-icon">🔬</div>
+                    <div class="test-title">Unit Testing</div>
+                    <div class="test-score excellent">${(data.testing?.unitTestCoverage || 0).toFixed(1)}%</div>
+                    <div class="test-details">
+                        ${data.testing?.unitTestsPassed || 0}/${data.testing?.totalUnitTests || 0} tests passing<br>
+                        Coverage target: 90%
+                    </div>
+                </div>
+                
+                <div class="test-category">
+                    <div class="test-icon">🔗</div>
+                    <div class="test-title">Integration Testing</div>
+                    <div class="test-score good">${(data.testing?.integrationTestCoverage || 0).toFixed(1)}%</div>
+                    <div class="test-details">
+                        ${data.testing?.integrationTestsPassed || 0}/${data.testing?.totalIntegrationTests || 0} tests passing<br>
+                        API endpoints validated
+                    </div>
+                </div>
+                
+                <div class="test-category">
+                    <div class="test-icon">🎭</div>
+                    <div class="test-title">E2E Testing</div>
+                    <div class="test-score good">${(data.testing?.e2eTestCoverage || 0).toFixed(1)}%</div>
+                    <div class="test-details">
+                        ${data.testing?.e2eTestsPassed || 0}/${data.testing?.totalE2eTests || 0} scenarios passing<br>
+                        User workflows validated
+                    </div>
+                </div>
+                
+                <div class="test-category">
+                    <div class="test-icon">👤</div>
+                    <div class="test-title">Manual Testing</div>
+                    <div class="test-score excellent">${(data.testing?.manualTestingScore || 0).toFixed(1)}%</div>
+                    <div class="test-details">
+                        All acceptance criteria verified<br>
+                        User experience validated
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reviewer Performance Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">👥 Reviewer Performance</h2>
+            <p class="section-subtitle">Individual reviewer statistics and performance metrics</p>
+        </div>
+        
+        <div class="reviewer-performance">
+            <div class="reviewer-grid">
+                ${(data.reviewers || [
+                    { name: 'Code Review AI', role: 'Quality Assurance', reviewsCompleted: 12, avgReviewTime: '2.3h', approvalRate: 85.5, issuesFound: 28 },
+                    { name: 'Senior Architect', role: 'Technical Lead', reviewsCompleted: 8, avgReviewTime: '1.8h', approvalRate: 92.1, issuesFound: 15 },
+                    { name: 'Security Specialist', role: 'Security Review', reviewsCompleted: 5, avgReviewTime: '3.1h', approvalRate: 78.2, issuesFound: 22 }
+                ]).map(reviewer => `
+                    <div class="reviewer-card">
+                        <div class="reviewer-header">
+                            <div class="reviewer-avatar">${reviewer.name.split(' ').map(n => n[0]).join('')}</div>
+                            <div class="reviewer-info">
+                                <div class="reviewer-name">${reviewer.name}</div>
+                                <div class="reviewer-role">${reviewer.role}</div>
+                            </div>
+                        </div>
+                        <div class="reviewer-metrics">
+                            <div class="reviewer-metric">
+                                <div class="reviewer-metric-value">${reviewer.reviewsCompleted}</div>
+                                <div class="reviewer-metric-label">Reviews</div>
+                            </div>
+                            <div class="reviewer-metric">
+                                <div class="reviewer-metric-value">${reviewer.avgReviewTime}</div>
+                                <div class="reviewer-metric-label">Avg Time</div>
+                            </div>
+                            <div class="reviewer-metric">
+                                <div class="reviewer-metric-value">${reviewer.approvalRate.toFixed(1)}%</div>
+                                <div class="reviewer-metric-label">Approval</div>
+                            </div>
+                            <div class="reviewer-metric">
+                                <div class="reviewer-metric-value">${reviewer.issuesFound}</div>
+                                <div class="reviewer-metric-label">Issues Found</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recommendations Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">💡 Recommendations</h2>
+            <p class="section-subtitle">Actionable insights for improving code review process and quality outcomes</p>
+        </div>
+        
+        <div class="recommendations">
+            ${(data.recommendations || []).map(rec => `
+                <div class="recommendation-item">
+                    <div class="recommendation-icon">${rec.icon || '💡'}</div>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">${rec.title}</div>
+                        <div class="recommendation-description">${rec.description}</div>
+                        <div class="recommendation-impact">Impact: ${rec.impact || 'Medium'}</div>
+                    </div>
+                </div>
+            `).join('')}
+            
+            ${(data.recommendations || []).length === 0 ? `
+                <div class="recommendation-item">
+                    <div class="recommendation-icon">🎯</div>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">Implement Automated Quality Gates</div>
+                        <div class="recommendation-description">Add automated linting, security scanning, and test coverage checks before manual review to catch common issues early.</div>
+                        <div class="recommendation-impact">Impact: High</div>
+                    </div>
+                </div>
+                
+                <div class="recommendation-item">
+                    <div class="recommendation-icon">📚</div>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">Establish Review Guidelines</div>
+                        <div class="recommendation-description">Create comprehensive code review checklists and guidelines to ensure consistent quality standards across all reviewers.</div>
+                        <div class="recommendation-impact">Impact: Medium</div>
+                    </div>
+                </div>
+                
+                <div class="recommendation-item">
+                    <div class="recommendation-icon">⚡</div>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">Optimize Review Batch Size</div>
+                        <div class="recommendation-description">Limit review batches to 3-5 subtasks to maintain reviewer focus and reduce cognitive load for better issue detection.</div>
+                        <div class="recommendation-impact">Impact: Medium</div>
+                    </div>
+                </div>
+                
+                <div class="recommendation-item">
+                    <div class="recommendation-icon">🔄</div>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">Implement Review Feedback Loop</div>
+                        <div class="recommendation-description">Track and analyze review feedback patterns to identify recurring issues and improve development practices proactively.</div>
+                        <div class="recommendation-impact">Impact: High</div>
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+    </div>
+`;
+%>
+
+<!-- Include Base Layout -->
+<%- include('base-layout', { 
+    title, 
+    subtitle, 
+    headerIcon, 
+    reportType, 
+    generatedAt, 
+    dateRange, 
+    content, 
+    additionalStyles, 
+    additionalScripts 
+}) %> 
