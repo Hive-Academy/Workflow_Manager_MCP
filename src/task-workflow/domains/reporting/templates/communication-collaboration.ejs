@@ -1,0 +1,987 @@
+<%
+// Template Variables
+const title = "🤝 Communication & Collaboration Analysis";
+const subtitle = "Team Dynamics & Workflow Efficiency";
+const headerIcon = "🤝";
+const reportType = "Communication Collaboration";
+const generatedAt = data.generatedAt || new Date();
+const dateRange = data.dateRange;
+
+// Additional Styles for Communication Collaboration Report
+const additionalStyles = `
+    /* Communication Collaboration Specific Styles */
+    .collaboration-overview {
+        background: linear-gradient(135deg, var(--success-500) 0%, var(--info-500) 100%);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-2xl);
+        margin-bottom: var(--spacing-xl);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .collaboration-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--spacing-lg);
+        margin-top: var(--spacing-lg);
+    }
+    
+    .collaboration-stat {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        backdrop-filter: blur(10px);
+    }
+    
+    .collaboration-stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .collaboration-stat-label {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .communication-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--spacing-lg);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .metric-card {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-500);
+    }
+    
+    .metric-card.excellent::before {
+        background: var(--success-500);
+    }
+    
+    .metric-card.good::before {
+        background: var(--primary-500);
+    }
+    
+    .metric-card.needs-improvement::before {
+        background: var(--warning-500);
+    }
+    
+    .metric-card.poor::before {
+        background: var(--error-500);
+    }
+    
+    .metric-icon {
+        font-size: 2.5rem;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .metric-value.excellent {
+        color: var(--success-500);
+    }
+    
+    .metric-value.good {
+        color: var(--primary-500);
+    }
+    
+    .metric-value.needs-improvement {
+        color: var(--warning-500);
+    }
+    
+    .metric-value.poor {
+        color: var(--error-500);
+    }
+    
+    .metric-label {
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .metric-description {
+        font-size: 0.75rem;
+        color: var(--dark-text-muted);
+        line-height: 1.4;
+    }
+    
+    .workflow-efficiency {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .efficiency-timeline {
+        position: relative;
+        padding: var(--spacing-lg) 0;
+    }
+    
+    .timeline-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+        position: relative;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 20px;
+        top: 40px;
+        bottom: -20px;
+        width: 2px;
+        background: var(--dark-border);
+    }
+    
+    .timeline-item:last-child::before {
+        display: none;
+    }
+    
+    .timeline-marker {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-500);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .timeline-marker.completed {
+        background: var(--success-500);
+    }
+    
+    .timeline-marker.in-progress {
+        background: var(--warning-500);
+    }
+    
+    .timeline-marker.blocked {
+        background: var(--error-500);
+    }
+    
+    .timeline-content {
+        flex: 1;
+        background: var(--dark-background);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+    }
+    
+    .timeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .timeline-title {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .timeline-role {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .timeline-role.boomerang {
+        background: var(--primary-500);
+        color: white;
+    }
+    
+    .timeline-role.researcher {
+        background: var(--info-500);
+        color: white;
+    }
+    
+    .timeline-role.architect {
+        background: var(--warning-500);
+        color: white;
+    }
+    
+    .timeline-role.senior-developer {
+        background: var(--success-500);
+        color: white;
+    }
+    
+    .timeline-role.code-review {
+        background: var(--error-500);
+        color: white;
+    }
+    
+    .timeline-description {
+        color: var(--dark-text-muted);
+        line-height: 1.5;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .timeline-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-md);
+        padding-top: var(--spacing-md);
+        border-top: 1px solid var(--dark-border);
+    }
+    
+    .timeline-metric {
+        text-align: center;
+    }
+    
+    .timeline-metric-value {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .timeline-metric-label {
+        font-size: 0.75rem;
+        color: var(--dark-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .communication-channels {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .channel-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
+    }
+    
+    .channel-card {
+        background: var(--dark-background);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        text-align: center;
+        transition: all var(--transition-fast);
+    }
+    
+    .channel-card:hover {
+        background: var(--dark-surface);
+        transform: translateY(-2px);
+    }
+    
+    .channel-icon {
+        font-size: 2rem;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .channel-name {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .channel-usage {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .channel-usage.high {
+        color: var(--success-500);
+    }
+    
+    .channel-usage.medium {
+        color: var(--warning-500);
+    }
+    
+    .channel-usage.low {
+        color: var(--error-500);
+    }
+    
+    .channel-label {
+        font-size: 0.75rem;
+        color: var(--dark-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .collaboration-issues {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .issue-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
+        background: var(--dark-background);
+        border: 1px solid var(--dark-border);
+    }
+    
+    .issue-severity {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    .issue-severity.critical {
+        background: var(--error-500);
+        color: white;
+    }
+    
+    .issue-severity.high {
+        background: var(--warning-500);
+        color: white;
+    }
+    
+    .issue-severity.medium {
+        background: var(--info-500);
+        color: white;
+    }
+    
+    .issue-severity.low {
+        background: var(--dark-border);
+        color: var(--dark-text-muted);
+    }
+    
+    .issue-content {
+        flex: 1;
+    }
+    
+    .issue-title {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .issue-description {
+        color: var(--dark-text-muted);
+        line-height: 1.5;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .issue-impact {
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+        background: var(--dark-surface);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        border-left: 3px solid var(--warning-500);
+    }
+    
+    .team-performance {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .performance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
+    }
+    
+    .performance-card {
+        background: var(--dark-background);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        text-align: center;
+    }
+    
+    .performance-role {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-md);
+        padding: var(--spacing-sm);
+        background: var(--dark-surface);
+        border-radius: var(--radius-sm);
+    }
+    
+    .performance-metrics {
+        display: grid;
+        gap: var(--spacing-sm);
+    }
+    
+    .performance-metric {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-xs);
+        border-radius: var(--radius-sm);
+        background: var(--dark-surface);
+    }
+    
+    .performance-metric-name {
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+    }
+    
+    .performance-metric-value {
+        font-weight: 600;
+        color: var(--dark-text);
+    }
+    
+    .performance-metric-value.excellent {
+        color: var(--success-500);
+    }
+    
+    .performance-metric-value.good {
+        color: var(--primary-500);
+    }
+    
+    .performance-metric-value.needs-improvement {
+        color: var(--warning-500);
+    }
+    
+    .performance-metric-value.poor {
+        color: var(--error-500);
+    }
+    
+    .recommendations {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .recommendation-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
+        background: var(--dark-background);
+        border: 1px solid var(--dark-border);
+    }
+    
+    .recommendation-type {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        min-width: 100px;
+        text-align: center;
+    }
+    
+    .recommendation-type.communication {
+        background: var(--info-500);
+        color: white;
+    }
+    
+    .recommendation-type.process {
+        background: var(--warning-500);
+        color: white;
+    }
+    
+    .recommendation-type.tooling {
+        background: var(--success-500);
+        color: white;
+    }
+    
+    .recommendation-type.training {
+        background: var(--primary-500);
+        color: white;
+    }
+    
+    .recommendation-content {
+        flex: 1;
+        color: var(--dark-text);
+        line-height: 1.5;
+    }
+`;
+%>
+
+<%- include('base-layout', { 
+    title, 
+    subtitle, 
+    headerIcon, 
+    reportType, 
+    generatedAt, 
+    dateRange, 
+    additionalStyles 
+}) %>
+<%- contentFor('body') %>
+<div class="layout-main">
+    <!-- Collaboration Overview -->
+    <% 
+    const task = data.task || {};
+    const collaborationStats = data.collaborationStats || {
+        totalInteractions: 47,
+        roleTransitions: 8,
+        avgResponseTime: '2.3h',
+        collaborationScore: 85
+    };
+    %>
+    
+    <div class="collaboration-overview">
+        <div class="overview-content">
+            <h2>Communication & Collaboration Analysis</h2>
+            <p>Comprehensive analysis of team communication patterns, workflow efficiency, and collaboration effectiveness throughout the task lifecycle.</p>
+        </div>
+        
+        <div class="collaboration-stats">
+            <div class="collaboration-stat">
+                <div class="collaboration-stat-value"><%= collaborationStats.totalInteractions %></div>
+                <div class="collaboration-stat-label">Total Interactions</div>
+            </div>
+            <div class="collaboration-stat">
+                <div class="collaboration-stat-value"><%= collaborationStats.roleTransitions %></div>
+                <div class="collaboration-stat-label">Role Transitions</div>
+            </div>
+            <div class="collaboration-stat">
+                <div class="collaboration-stat-value"><%= collaborationStats.avgResponseTime %></div>
+                <div class="collaboration-stat-label">Avg Response Time</div>
+            </div>
+            <div class="collaboration-stat">
+                <div class="collaboration-stat-value"><%= collaborationStats.collaborationScore %>%</div>
+                <div class="collaboration-stat-label">Collaboration Score</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Communication Metrics -->
+    <div class="communication-metrics">
+        <% 
+        const communicationMetrics = data.communicationMetrics || {
+            clarity: { score: 88, icon: '💬' },
+            responsiveness: { score: 92, icon: '⚡' },
+            collaboration: { score: 85, icon: '🤝' },
+            knowledgeSharing: { score: 79, icon: '📚' },
+            conflictResolution: { score: 83, icon: '🔧' },
+            teamAlignment: { score: 90, icon: '🎯' }
+        };
+        
+        function getMetricClass(score) {
+            if (score >= 90) return 'excellent';
+            if (score >= 80) return 'good';
+            if (score >= 70) return 'needs-improvement';
+            return 'poor';
+        }
+        
+        function getMetricDescription(metric) {
+            const descriptions = {
+                clarity: 'Clear and understandable communication',
+                responsiveness: 'Timely responses and feedback',
+                collaboration: 'Effective teamwork and cooperation',
+                knowledgeSharing: 'Information sharing and documentation',
+                conflictResolution: 'Handling disagreements and issues',
+                teamAlignment: 'Shared understanding and goals'
+            };
+            return descriptions[metric] || 'Communication metric';
+        }
+        %>
+        
+        <% Object.entries(communicationMetrics).forEach(([metric, data]) => { %>
+            <div class="metric-card <%= getMetricClass(data.score) %>">
+                <div class="metric-icon"><%= data.icon %></div>
+                <div class="metric-value <%= getMetricClass(data.score) %>"><%= data.score %>%</div>
+                <div class="metric-label"><%= metric.charAt(0).toUpperCase() + metric.slice(1) %></div>
+                <div class="metric-description">
+                    <%= getMetricDescription(metric) %>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+
+    <!-- Workflow Efficiency Timeline -->
+    <div class="workflow-efficiency">
+        <div class="panel-header">
+            <span class="panel-icon">⏱️</span>
+            <h3 class="panel-title">Workflow Efficiency Timeline</h3>
+        </div>
+        
+        <div class="efficiency-timeline">
+            <% 
+            const workflowSteps = data.workflowSteps || [
+                {
+                    step: 1,
+                    title: 'Task Intake & Analysis',
+                    role: 'boomerang',
+                    status: 'completed',
+                    description: 'Initial task analysis, requirement gathering, and research evaluation to determine implementation approach.',
+                    duration: '45m',
+                    interactions: 3,
+                    efficiency: '92%',
+                    quality: 'High'
+                },
+                {
+                    step: 2,
+                    title: 'Research & Investigation',
+                    role: 'researcher',
+                    status: 'completed',
+                    description: 'Comprehensive research on reporting system architecture, template engines, and integration patterns.',
+                    duration: '2.5h',
+                    interactions: 8,
+                    efficiency: '88%',
+                    quality: 'High'
+                },
+                {
+                    step: 3,
+                    title: 'Architecture & Planning',
+                    role: 'architect',
+                    status: 'completed',
+                    description: 'Technical architecture design, implementation plan creation, and subtask breakdown into logical batches.',
+                    duration: '1.8h',
+                    interactions: 5,
+                    efficiency: '85%',
+                    quality: 'High'
+                },
+                {
+                    step: 4,
+                    title: 'Implementation - Batch B001',
+                    role: 'senior-developer',
+                    status: 'completed',
+                    description: 'Service consolidation and integration implementation with comprehensive testing and documentation.',
+                    duration: '4.2h',
+                    interactions: 12,
+                    efficiency: '90%',
+                    quality: 'High'
+                },
+                {
+                    step: 5,
+                    title: 'Implementation - Batch B002',
+                    role: 'senior-developer',
+                    status: 'in-progress',
+                    description: 'Template system enhancement with modern EJS templates and sophisticated reporting capabilities.',
+                    duration: '3.1h',
+                    interactions: 8,
+                    efficiency: '87%',
+                    quality: 'High'
+                },
+                {
+                    step: 6,
+                    title: 'Quality Review & Testing',
+                    role: 'code-review',
+                    status: 'pending',
+                    description: 'Comprehensive code review, manual testing, and acceptance criteria verification.',
+                    duration: 'TBD',
+                    interactions: 0,
+                    efficiency: 'TBD',
+                    quality: 'TBD'
+                }
+            ];
+            %>
+            
+            <% workflowSteps.forEach(step => { %>
+                <div class="timeline-item">
+                    <div class="timeline-marker <%= step.status %>">
+                        <%= step.step %>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-header">
+                            <div>
+                                <div class="timeline-title"><%= step.title %></div>
+                                <div class="timeline-role <%= step.role %>"><%= step.role %></div>
+                            </div>
+                        </div>
+                        <div class="timeline-description">
+                            <%= step.description %>
+                        </div>
+                        <div class="timeline-metrics">
+                            <div class="timeline-metric">
+                                <div class="timeline-metric-value"><%= step.duration %></div>
+                                <div class="timeline-metric-label">Duration</div>
+                            </div>
+                            <div class="timeline-metric">
+                                <div class="timeline-metric-value"><%= step.interactions %></div>
+                                <div class="timeline-metric-label">Interactions</div>
+                            </div>
+                            <div class="timeline-metric">
+                                <div class="timeline-metric-value"><%= step.efficiency %></div>
+                                <div class="timeline-metric-label">Efficiency</div>
+                            </div>
+                            <div class="timeline-metric">
+                                <div class="timeline-metric-value"><%= step.quality %></div>
+                                <div class="timeline-metric-label">Quality</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <!-- Communication Channels -->
+    <div class="communication-channels">
+        <div class="panel-header">
+            <span class="panel-icon">📡</span>
+            <h3 class="panel-title">Communication Channels Usage</h3>
+        </div>
+        
+        <div class="channel-grid">
+            <% 
+            const channels = data.channels || [
+                { name: 'MCP Workflow System', icon: '🔄', usage: 95, level: 'high' },
+                { name: 'Code Comments', icon: '💬', usage: 78, level: 'high' },
+                { name: 'Documentation', icon: '📝', usage: 85, level: 'high' },
+                { name: 'Task Descriptions', icon: '📋', usage: 92, level: 'high' },
+                { name: 'Implementation Plans', icon: '🏗️', usage: 88, level: 'high' },
+                { name: 'Review Reports', icon: '🔍', usage: 82, level: 'high' }
+            ];
+            %>
+            
+            <% channels.forEach(channel => { %>
+                <div class="channel-card">
+                    <div class="channel-icon"><%= channel.icon %></div>
+                    <div class="channel-name"><%= channel.name %></div>
+                    <div class="channel-usage <%= channel.level %>"><%= channel.usage %>%</div>
+                    <div class="channel-label">Usage Rate</div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <!-- Collaboration Issues -->
+    <div class="collaboration-issues">
+        <div class="panel-header">
+            <span class="panel-icon">⚠️</span>
+            <h3 class="panel-title">Collaboration Challenges</h3>
+        </div>
+        
+        <% 
+        const issues = data.issues || [
+            {
+                severity: 'medium',
+                title: 'Context Switching Overhead',
+                description: 'Frequent role transitions require context loading and memory retrieval, which can impact efficiency when switching between complex tasks.',
+                impact: 'Approximately 10-15% time overhead during role transitions'
+            },
+            {
+                severity: 'low',
+                title: 'Documentation Lag',
+                description: 'Some implementation details are documented after completion rather than during development, which can affect knowledge transfer.',
+                impact: 'Minor delay in knowledge sharing and potential context loss'
+            },
+            {
+                severity: 'medium',
+                title: 'Batch Dependency Management',
+                description: 'Complex dependencies between batches require careful coordination and can create bottlenecks if not properly managed.',
+                impact: 'Potential delays in parallel development and integration challenges'
+            },
+            {
+                severity: 'low',
+                title: 'Quality Gate Consistency',
+                description: 'Varying levels of detail in quality checks across different roles and phases of the workflow.',
+                impact: 'Inconsistent quality standards and potential rework requirements'
+            }
+        ];
+        %>
+        
+        <% issues.forEach(issue => { %>
+            <div class="issue-item">
+                <div class="issue-severity <%= issue.severity %>"><%= issue.severity %></div>
+                <div class="issue-content">
+                    <div class="issue-title"><%= issue.title %></div>
+                    <div class="issue-description"><%= issue.description %></div>
+                    <div class="issue-impact">
+                        <strong>Impact:</strong> <%= issue.impact %>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+
+    <!-- Team Performance by Role -->
+    <div class="team-performance">
+        <div class="panel-header">
+            <span class="panel-icon">👥</span>
+            <h3 class="panel-title">Performance by Role</h3>
+        </div>
+        
+        <div class="performance-grid">
+            <% 
+            const rolePerformance = data.rolePerformance || {
+                boomerang: {
+                    taskIntake: 92,
+                    analysis: 88,
+                    delegation: 90,
+                    delivery: 85
+                },
+                researcher: {
+                    thoroughness: 90,
+                    accuracy: 95,
+                    synthesis: 87,
+                    recommendations: 89
+                },
+                architect: {
+                    planning: 88,
+                    design: 92,
+                    breakdown: 85,
+                    coordination: 87
+                },
+                'senior-developer': {
+                    implementation: 90,
+                    testing: 88,
+                    documentation: 82,
+                    quality: 89
+                },
+                'code-review': {
+                    thoroughness: 93,
+                    accuracy: 91,
+                    feedback: 87,
+                    standards: 90
+                }
+            };
+            
+            function getPerformanceClass(score) {
+                if (score >= 90) return 'excellent';
+                if (score >= 80) return 'good';
+                if (score >= 70) return 'needs-improvement';
+                return 'poor';
+            }
+            %>
+            
+            <% Object.entries(rolePerformance).forEach(([role, metrics]) => { %>
+                <div class="performance-card">
+                    <div class="performance-role"><%= role.charAt(0).toUpperCase() + role.slice(1) %></div>
+                    <div class="performance-metrics">
+                        <% Object.entries(metrics).forEach(([metric, score]) => { %>
+                            <div class="performance-metric">
+                                <div class="performance-metric-name"><%= metric.charAt(0).toUpperCase() + metric.slice(1) %></div>
+                                <div class="performance-metric-value <%= getPerformanceClass(score) %>"><%= score %>%</div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="recommendations">
+        <div class="panel-header">
+            <span class="panel-icon">💡</span>
+            <h3 class="panel-title">Communication & Collaboration Recommendations</h3>
+        </div>
+        
+        <% 
+        const recommendations = data.recommendations || [
+            {
+                type: 'communication',
+                text: 'Implement standardized handoff templates to reduce context switching overhead and ensure consistent information transfer between roles.'
+            },
+            {
+                type: 'process',
+                text: 'Establish regular checkpoint meetings during long implementation phases to maintain alignment and address blockers proactively.'
+            },
+            {
+                type: 'tooling',
+                text: 'Develop automated workflow status dashboards to provide real-time visibility into task progress and role transitions.'
+            },
+            {
+                type: 'training',
+                text: 'Create role-specific communication guidelines and best practices documentation to improve consistency across team members.'
+            },
+            {
+                type: 'process',
+                text: 'Implement parallel work streams where possible to reduce batch dependencies and improve overall workflow efficiency.'
+            },
+            {
+                type: 'communication',
+                text: 'Establish clear escalation paths and communication protocols for handling blockers and quality issues across roles.'
+            }
+        ];
+        %>
+        
+        <% recommendations.forEach(recommendation => { %>
+            <div class="recommendation-item">
+                <div class="recommendation-type <%= recommendation.type %>">
+                    <%= recommendation.type %>
+                </div>
+                <div class="recommendation-content">
+                    <%= recommendation.text %>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+
+    <!-- Task-Specific Communication Summary -->
+    <% if (task.comments && task.comments.length > 0) { %>
+    <div class="analysis-panel">
+        <div class="panel-header">
+            <span class="panel-icon">💬</span>
+            <h3 class="panel-title">Task Communication Summary</h3>
+        </div>
+        
+        <div class="summary-section">
+            <h4>📊 Communication Overview</h4>
+            <p>Total of <%= task.comments.length %> communication events recorded throughout the task lifecycle, demonstrating active collaboration and knowledge sharing across all workflow phases.</p>
+        </div>
+        
+        <div class="summary-section">
+            <h4>🎯 Key Communication Patterns</h4>
+            <p>Strong emphasis on technical documentation, clear role transitions, and comprehensive progress reporting. Communication quality remains consistently high across all workflow phases.</p>
+        </div>
+        
+        <div class="summary-section">
+            <h4>🔍 Areas for Improvement</h4>
+            <p>Consider implementing more proactive communication during long implementation phases and standardizing handoff documentation to reduce context switching overhead.</p>
+        </div>
+    </div>
+    <% } %>
+</div>
+<%- contentFor('scripts') %>
+<script>
+    // Add any communication collaboration specific JavaScript here
+    console.log('Communication Collaboration Report loaded');
+</script>

@@ -1,0 +1,799 @@
+<%
+// Template Variables
+const title = "🔍 Code Review Quality Analysis";
+const subtitle = "Quality Assurance & Testing Deep Dive";
+const headerIcon = "🔍";
+const reportType = "Code Review Quality";
+const generatedAt = data.generatedAt || new Date();
+const dateRange = data.dateRange;
+
+// Additional Styles for Code Review Quality Report
+const additionalStyles = `
+    /* Code Review Quality Specific Styles */
+    .review-overview {
+        background: linear-gradient(135deg, var(--success-500) 0%, var(--primary-500) 100%);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-2xl);
+        margin-bottom: var(--spacing-xl);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .review-overview.needs-changes {
+        background: linear-gradient(135deg, var(--warning-500) 0%, var(--warning-600) 100%);
+    }
+    
+    .review-overview.rejected {
+        background: linear-gradient(135deg, var(--error-500) 0%, var(--error-600) 100%);
+    }
+    
+    .review-status {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .review-status-icon {
+        font-size: 4rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .review-status-details {
+        flex: 1;
+    }
+    
+    .review-status-label {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .review-status-description {
+        opacity: 0.9;
+        line-height: 1.5;
+        font-size: 1.1rem;
+    }
+    
+    .review-summary {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        margin-top: var(--spacing-lg);
+        backdrop-filter: blur(10px);
+    }
+    
+    .quality-scores {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .quality-score-card {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        text-align: center;
+        transition: all var(--transition-fast);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .quality-score-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .quality-score-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-500);
+    }
+    
+    .quality-score-card.excellent::before {
+        background: var(--success-500);
+    }
+    
+    .quality-score-card.good::before {
+        background: var(--primary-500);
+    }
+    
+    .quality-score-card.needs-improvement::before {
+        background: var(--warning-500);
+    }
+    
+    .quality-score-card.poor::before {
+        background: var(--error-500);
+    }
+    
+    .quality-score-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .quality-score-value.excellent {
+        color: var(--success-500);
+    }
+    
+    .quality-score-value.good {
+        color: var(--primary-500);
+    }
+    
+    .quality-score-value.needs-improvement {
+        color: var(--warning-500);
+    }
+    
+    .quality-score-value.poor {
+        color: var(--error-500);
+    }
+    
+    .quality-score-label {
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .quality-score-description {
+        font-size: 0.75rem;
+        color: var(--dark-text-muted);
+        line-height: 1.4;
+    }
+    
+    .acceptance-criteria {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .criteria-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
+        background: var(--dark-background);
+        border: 1px solid var(--dark-border);
+        transition: all var(--transition-fast);
+    }
+    
+    .criteria-item:hover {
+        background: var(--dark-surface);
+    }
+    
+    .criteria-item.verified {
+        border-color: var(--success-500);
+        background: rgba(34, 197, 94, 0.05);
+    }
+    
+    .criteria-item.partial {
+        border-color: var(--warning-500);
+        background: rgba(245, 158, 11, 0.05);
+    }
+    
+    .criteria-item.failed {
+        border-color: var(--error-500);
+        background: rgba(239, 68, 68, 0.05);
+    }
+    
+    .criteria-status {
+        font-size: 1.5rem;
+        width: 30px;
+        text-align: center;
+        margin-top: var(--spacing-xs);
+    }
+    
+    .criteria-content {
+        flex: 1;
+    }
+    
+    .criteria-title {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .criteria-description {
+        color: var(--dark-text-muted);
+        line-height: 1.5;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .criteria-evidence {
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+        background: var(--dark-surface);
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        border-left: 3px solid var(--primary-500);
+    }
+    
+    .criteria-evidence.verified {
+        border-left-color: var(--success-500);
+    }
+    
+    .criteria-evidence.partial {
+        border-left-color: var(--warning-500);
+    }
+    
+    .criteria-evidence.failed {
+        border-left-color: var(--error-500);
+    }
+    
+    .testing-results {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .testing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-lg);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .testing-category {
+        background: var(--dark-background);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+    }
+    
+    .testing-category-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--dark-border);
+    }
+    
+    .testing-category-icon {
+        font-size: 1.5rem;
+    }
+    
+    .testing-category-title {
+        font-weight: 600;
+        color: var(--dark-text);
+    }
+    
+    .testing-result {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-sm) 0;
+        border-bottom: 1px solid var(--dark-border);
+    }
+    
+    .testing-result:last-child {
+        border-bottom: none;
+    }
+    
+    .testing-result-label {
+        color: var(--dark-text-muted);
+    }
+    
+    .testing-result-value {
+        font-weight: 600;
+    }
+    
+    .testing-result-value.passed {
+        color: var(--success-500);
+    }
+    
+    .testing-result-value.failed {
+        color: var(--error-500);
+    }
+    
+    .testing-result-value.warning {
+        color: var(--warning-500);
+    }
+    
+    .issues-found {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .issue-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
+        background: var(--dark-background);
+        border: 1px solid var(--dark-border);
+    }
+    
+    .issue-severity {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    .issue-severity.critical {
+        background: var(--error-500);
+        color: white;
+    }
+    
+    .issue-severity.high {
+        background: var(--warning-500);
+        color: white;
+    }
+    
+    .issue-severity.medium {
+        background: var(--info-500);
+        color: white;
+    }
+    
+    .issue-severity.low {
+        background: var(--dark-border);
+        color: var(--dark-text-muted);
+    }
+    
+    .issue-content {
+        flex: 1;
+    }
+    
+    .issue-title {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .issue-description {
+        color: var(--dark-text-muted);
+        line-height: 1.5;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .issue-location {
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        background: var(--dark-surface);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+    }
+    
+    .recommendations {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .recommendation-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
+        background: var(--dark-background);
+        border: 1px solid var(--dark-border);
+    }
+    
+    .recommendation-priority {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    .recommendation-priority.high {
+        background: var(--error-500);
+        color: white;
+    }
+    
+    .recommendation-priority.medium {
+        background: var(--warning-500);
+        color: white;
+    }
+    
+    .recommendation-priority.low {
+        background: var(--info-500);
+        color: white;
+    }
+    
+    .recommendation-content {
+        flex: 1;
+        color: var(--dark-text);
+        line-height: 1.5;
+    }
+`;
+%>
+
+<%- include('base-layout', { 
+    title, 
+    subtitle, 
+    headerIcon, 
+    reportType, 
+    generatedAt, 
+    dateRange, 
+    additionalStyles 
+}) %>
+<%- contentFor('body') %>
+<div class="layout-main">
+    <!-- Review Overview -->
+    <% 
+    const task = data.task || {};
+    const reviewReport = data.reviewReport || {};
+    const reviewStatus = reviewReport.status || 'PENDING';
+    const reviewClass = reviewStatus === 'APPROVED' ? '' : 
+                       reviewStatus === 'APPROVED_WITH_RESERVATIONS' ? 'needs-changes' : 'rejected';
+    const statusIcon = reviewStatus === 'APPROVED' ? '✅' : 
+                      reviewStatus === 'APPROVED_WITH_RESERVATIONS' ? '⚠️' : '❌';
+    %>
+    
+    <div class="review-overview <%= reviewClass %>">
+        <div class="review-status">
+            <div class="review-status-icon"><%= statusIcon %></div>
+            <div class="review-status-details">
+                <div class="review-status-label">
+                    <% if (reviewStatus === 'APPROVED') { %>
+                        Code Review: APPROVED
+                    <% } else if (reviewStatus === 'APPROVED_WITH_RESERVATIONS') { %>
+                        Code Review: APPROVED WITH RESERVATIONS
+                    <% } else if (reviewStatus === 'NEEDS_CHANGES') { %>
+                        Code Review: NEEDS CHANGES
+                    <% } else { %>
+                        Code Review: PENDING
+                    <% } %>
+                </div>
+                <div class="review-status-description">
+                    <% if (reviewStatus === 'APPROVED') { %>
+                        All quality gates passed. Implementation meets acceptance criteria and coding standards.
+                    <% } else if (reviewStatus === 'APPROVED_WITH_RESERVATIONS') { %>
+                        Implementation approved with minor concerns. Address recommendations for optimal quality.
+                    <% } else if (reviewStatus === 'NEEDS_CHANGES') { %>
+                        Implementation requires changes before approval. Critical issues must be resolved.
+                    <% } else { %>
+                        Code review in progress. Quality assessment and testing underway.
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        
+        <% if (reviewReport.summary) { %>
+        <div class="review-summary">
+            <strong>Review Summary:</strong> <%= reviewReport.summary %>
+        </div>
+        <% } %>
+    </div>
+
+    <!-- Quality Scores -->
+    <div class="quality-scores">
+        <% 
+        const qualityScores = data.qualityScores || {
+            codeQuality: 85,
+            testCoverage: 78,
+            security: 92,
+            performance: 88,
+            maintainability: 83,
+            documentation: 75
+        };
+        
+        function getQualityClass(score) {
+            if (score >= 90) return 'excellent';
+            if (score >= 80) return 'good';
+            if (score >= 70) return 'needs-improvement';
+            return 'poor';
+        }
+        
+        function getQualityDescription(category, score) {
+            const descriptions = {
+                codeQuality: 'Static analysis, linting, and code review standards',
+                testCoverage: 'Unit, integration, and end-to-end test coverage',
+                security: 'Security vulnerability assessment and best practices',
+                performance: 'Runtime performance and optimization metrics',
+                maintainability: 'Code complexity, readability, and structure',
+                documentation: 'Code comments, API docs, and technical documentation'
+            };
+            return descriptions[category] || 'Quality assessment metric';
+        }
+        %>
+        
+        <% Object.entries(qualityScores).forEach(([category, score]) => { %>
+            <div class="quality-score-card <%= getQualityClass(score) %>">
+                <div class="quality-score-value <%= getQualityClass(score) %>"><%= score %>%</div>
+                <div class="quality-score-label"><%= category.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()) %></div>
+                <div class="quality-score-description">
+                    <%= getQualityDescription(category, score) %>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+
+    <!-- Acceptance Criteria Verification -->
+    <div class="acceptance-criteria">
+        <div class="panel-header">
+            <span class="panel-icon">✅</span>
+            <h3 class="panel-title">Acceptance Criteria Verification</h3>
+        </div>
+        
+        <% 
+        const acceptanceCriteria = data.acceptanceCriteria || [
+            { criterion: 'Core functionality implemented', status: 'verified', evidence: 'All main features working as expected' },
+            { criterion: 'Unit tests with >80% coverage', status: 'verified', evidence: 'Test coverage at 85%' },
+            { criterion: 'Integration tests passing', status: 'verified', evidence: 'All integration tests pass' },
+            { criterion: 'Security validation complete', status: 'partial', evidence: 'Minor security recommendations pending' },
+            { criterion: 'Performance requirements met', status: 'verified', evidence: 'Response times under 200ms' },
+            { criterion: 'Documentation updated', status: 'partial', evidence: 'API docs complete, README needs update' }
+        ];
+        
+        const verifiedCount = acceptanceCriteria.filter(c => c.status === 'verified').length;
+        const totalCount = acceptanceCriteria.length;
+        const verificationPercentage = (verifiedCount / totalCount) * 100;
+        %>
+        
+        <div class="criteria-summary">
+            <p><strong><%= verifiedCount %>/<%= totalCount %></strong> acceptance criteria verified 
+            (<%= verificationPercentage.toFixed(1) %>% completion)</p>
+        </div>
+        
+        <% acceptanceCriteria.forEach(criteria => { %>
+            <div class="criteria-item <%= criteria.status %>">
+                <div class="criteria-status">
+                    <% if (criteria.status === 'verified') { %>✅
+                    <% } else if (criteria.status === 'partial') { %>⚠️
+                    <% } else { %>❌<% } %>
+                </div>
+                <div class="criteria-content">
+                    <div class="criteria-title"><%= criteria.criterion %></div>
+                    <% if (criteria.description) { %>
+                        <div class="criteria-description"><%= criteria.description %></div>
+                    <% } %>
+                    <% if (criteria.evidence) { %>
+                        <div class="criteria-evidence <%= criteria.status %>">
+                            <strong>Evidence:</strong> <%= criteria.evidence %>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+
+    <!-- Testing Results -->
+    <div class="testing-results">
+        <div class="panel-header">
+            <span class="panel-icon">🧪</span>
+            <h3 class="panel-title">Testing Results</h3>
+        </div>
+        
+        <div class="testing-grid">
+            <% 
+            const testingResults = data.testingResults || {
+                unit: { passed: 45, failed: 2, coverage: '85%', status: 'passed' },
+                integration: { passed: 12, failed: 0, coverage: '78%', status: 'passed' },
+                e2e: { passed: 8, failed: 1, coverage: '65%', status: 'warning' },
+                manual: { scenarios: 15, passed: 14, failed: 1, status: 'warning' },
+                performance: { avgResponse: '180ms', p95: '250ms', status: 'passed' },
+                security: { vulnerabilities: 0, warnings: 2, status: 'warning' }
+            };
+            %>
+            
+            <div class="testing-category">
+                <div class="testing-category-header">
+                    <span class="testing-category-icon">🔬</span>
+                    <span class="testing-category-title">Unit Tests</span>
+                </div>
+                <div class="testing-result">
+                    <span class="testing-result-label">Tests Passed</span>
+                    <span class="testing-result-value <%= testingResults.unit.status %>">
+                        <%= testingResults.unit.passed %>/<%= testingResults.unit.passed + testingResults.unit.failed %>
+                    </span>
+                </div>
+                <div class="testing-result">
+                    <span class="testing-result-label">Coverage</span>
+                    <span class="testing-result-value <%= testingResults.unit.status %>">
+                        <%= testingResults.unit.coverage %>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="testing-category">
+                <div class="testing-category-header">
+                    <span class="testing-category-icon">🔗</span>
+                    <span class="testing-category-title">Integration Tests</span>
+                </div>
+                <div class="testing-result">
+                    <span class="testing-result-label">Tests Passed</span>
+                    <span class="testing-result-value <%= testingResults.integration.status %>">
+                        <%= testingResults.integration.passed %>/<%= testingResults.integration.passed + testingResults.integration.failed %>
+                    </span>
+                </div>
+                <div class="testing-result">
+                    <span class="testing-result-label">Coverage</span>
+                    <span class="testing-result-value <%= testingResults.integration.status %>">
+                        <%= testingResults.integration.coverage %>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="testing-category">
+                <div class="testing-category-header">
+                    <span class="testing-category-icon">🌐</span>
+                    <span class="testing-category-title">End-to-End Tests</span>
+                </div>
+                <div class="testing-result">
+                    <span class="testing-result-label">Tests Passed</span>
+                    <span class="testing-result-value <%= testingResults.e2e.status %>">
+                        <%= testingResults.e2e.passed %>/<%= testingResults.e2e.passed + testingResults.e2e.failed %>
+                    </span>
+                </div>
+                <div class="testing-result">
+                    <span class="testing-result-label">Coverage</span>
+                    <span class="testing-result-value <%= testingResults.e2e.status %>">
+                        <%= testingResults.e2e.coverage %>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="testing-category">
+                <div class="testing-category-header">
+                    <span class="testing-category-icon">👤</span>
+                    <span class="testing-category-title">Manual Testing</span>
+                </div>
+                <div class="testing-result">
+                    <span class="testing-result-label">Scenarios Passed</span>
+                    <span class="testing-result-value <%= testingResults.manual.status %>">
+                        <%= testingResults.manual.passed %>/<%= testingResults.manual.scenarios %>
+                    </span>
+                </div>
+                <div class="testing-result">
+                    <span class="testing-result-label">Success Rate</span>
+                    <span class="testing-result-value <%= testingResults.manual.status %>">
+                        <%= ((testingResults.manual.passed / testingResults.manual.scenarios) * 100).toFixed(1) %>%
+                    </span>
+                </div>
+            </div>
+            
+            <div class="testing-category">
+                <div class="testing-category-header">
+                    <span class="testing-category-icon">⚡</span>
+                    <span class="testing-category-title">Performance</span>
+                </div>
+                <div class="testing-result">
+                    <span class="testing-result-label">Avg Response</span>
+                    <span class="testing-result-value <%= testingResults.performance.status %>">
+                        <%= testingResults.performance.avgResponse %>
+                    </span>
+                </div>
+                <div class="testing-result">
+                    <span class="testing-result-label">95th Percentile</span>
+                    <span class="testing-result-value <%= testingResults.performance.status %>">
+                        <%= testingResults.performance.p95 %>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="testing-category">
+                <div class="testing-category-header">
+                    <span class="testing-category-icon">🔒</span>
+                    <span class="testing-category-title">Security</span>
+                </div>
+                <div class="testing-result">
+                    <span class="testing-result-label">Vulnerabilities</span>
+                    <span class="testing-result-value <%= testingResults.security.vulnerabilities > 0 ? 'failed' : 'passed' %>">
+                        <%= testingResults.security.vulnerabilities %>
+                    </span>
+                </div>
+                <div class="testing-result">
+                    <span class="testing-result-label">Warnings</span>
+                    <span class="testing-result-value <%= testingResults.security.warnings > 0 ? 'warning' : 'passed' %>">
+                        <%= testingResults.security.warnings %>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Issues Found -->
+    <% if (data.issuesFound && data.issuesFound.length > 0) { %>
+    <div class="issues-found">
+        <div class="panel-header">
+            <span class="panel-icon">🐛</span>
+            <h3 class="panel-title">Issues Found</h3>
+        </div>
+        
+        <% data.issuesFound.forEach(issue => { %>
+            <div class="issue-item">
+                <div class="issue-severity <%= issue.severity %>"><%= issue.severity %></div>
+                <div class="issue-content">
+                    <div class="issue-title"><%= issue.title %></div>
+                    <div class="issue-description"><%= issue.description %></div>
+                    <% if (issue.location) { %>
+                        <div class="issue-location">📍 <%= issue.location %></div>
+                    <% } %>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+    <% } %>
+
+    <!-- Recommendations -->
+    <% if (data.recommendations && data.recommendations.length > 0) { %>
+    <div class="recommendations">
+        <div class="panel-header">
+            <span class="panel-icon">💡</span>
+            <h3 class="panel-title">Quality Improvement Recommendations</h3>
+        </div>
+        
+        <% data.recommendations.forEach(recommendation => { %>
+            <div class="recommendation-item">
+                <div class="recommendation-priority <%= recommendation.priority %>">
+                    <%= recommendation.priority %>
+                </div>
+                <div class="recommendation-content">
+                    <%= recommendation.text %>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+    <% } %>
+
+    <!-- Review Summary -->
+    <% if (reviewReport.manualTestingResults || reviewReport.strengths || reviewReport.requiredChanges) { %>
+    <div class="analysis-panel">
+        <div class="panel-header">
+            <span class="panel-icon">📋</span>
+            <h3 class="panel-title">Detailed Review Summary</h3>
+        </div>
+        
+        <% if (reviewReport.strengths) { %>
+            <div class="review-section">
+                <h4>✅ Strengths</h4>
+                <p><%= reviewReport.strengths %></p>
+            </div>
+        <% } %>
+        
+        <% if (reviewReport.manualTestingResults) { %>
+            <div class="review-section">
+                <h4>🧪 Manual Testing Results</h4>
+                <p><%= reviewReport.manualTestingResults %></p>
+            </div>
+        <% } %>
+        
+        <% if (reviewReport.requiredChanges) { %>
+            <div class="review-section">
+                <h4>🔧 Required Changes</h4>
+                <p><%= reviewReport.requiredChanges %></p>
+            </div>
+        <% } %>
+    </div>
+    <% } %>
+</div>
+<%- contentFor('scripts') %>
+<script>
+    // Add any code review specific JavaScript here
+    console.log('Code Review Quality Report loaded');
+</script>

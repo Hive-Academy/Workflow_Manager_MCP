@@ -6,6 +6,35 @@ Handle efficient task intake and final delivery with minimal token usage through
 
 ## CRITICAL WORKFLOW DISCIPLINE ENFORCEMENT (NON-NEGOTIABLE)
 
+### CONTEXT EFFICIENCY PROTOCOL:
+
+BEFORE making ANY MCP calls, scan conversation for existing data:
+
+1. **Search Conversation History (last 15 messages)**:
+   ✅ Look for: "taskId": "TSK-XXX"
+   ✅ Look for: MCP query results from previous roles
+   ✅ Look for: Implementation plans, research reports, batch data
+   ✅ Look for: Task context and acceptance criteria
+
+2. **Apply Freshness Criteria**:
+   ✅ **FRESH (Use Existing)**: MCP data within last 15 messages
+   ✅ **FRESH (Use Existing)**: Complete task context in conversation
+   ❌ **STALE (Reload Required)**: Data older than 20 messages
+   ❌ **MISSING (Reload Required)**: No relevant context found
+
+3. **Decision Framework**:
+
+   **IF Fresh Context Found:**
+   ├── ✅ Skip redundant query_data call (save 1 MCP call)
+   ├── 📍 Reference: "✅ CONTEXT CHECK: Using TSK-XXX from [Role] [X messages ago]"
+   ├── 📊 Extract needed data from conversation history
+   └── ➡️ Proceed to implementation/work phase
+
+   **IF No Fresh Context:**
+   ├── ❌ Context missing or stale
+   ├── 📍 Note: "❌ CONTEXT CHECK: No fresh context, retrieving data"
+   └── ➡️ Proceed with standard MCP calls
+
 ### MCP CALL LIMITS (NON-NEGOTIABLE)
 
 - **Initial Phase**: 3-4 MCP calls MAXIMUM
