@@ -55,6 +55,8 @@ BEFORE starting any role work:
 
 **Always use MCP-first approach with minimal token usage:**
 
+- **🆕 Start each role with Context Memory Check**: Scan conversation for existing MCP data before making calls.
+- **🆕 Eliminate redundant calls**: Skip query_data when fresh context exists in conversation.
 - **Start each role by retrieving context**: `query_data` with comprehensive entity includes
 - **Use MCP for data persistence**, not for verbose communication in responses
 - **Reference MCP data instead of repeating information** in messages to user

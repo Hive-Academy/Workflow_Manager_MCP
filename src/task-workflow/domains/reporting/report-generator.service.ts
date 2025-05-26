@@ -20,6 +20,9 @@ import { ReportTemplateService } from './services/report-template.service';
 import { ContentGeneratorService } from './services/content-generator.service';
 import { SchemaDrivenIntelligenceService } from './services/schema-driven-intelligence.service';
 import { SmartResponseSummarizationService } from './services/smart-response-summarization.service';
+import { ChartFactoryService } from './services/chart-factory.service';
+import { TemplateFactoryService } from './services/template-factory.service';
+import { ReportPathGeneratorService } from './services/report-path-generator.service';
 
 /**
  * Report Generator Service
@@ -48,6 +51,9 @@ export class ReportGeneratorService {
     private readonly contentGenerator: ContentGeneratorService,
     private readonly schemaIntelligence: SchemaDrivenIntelligenceService,
     private readonly smartSummarization: SmartResponseSummarizationService,
+    private readonly chartFactory: ChartFactoryService,
+    private readonly templateFactory: TemplateFactoryService,
+    private readonly reportPathGenerator: ReportPathGeneratorService,
   ) {}
 
   /**
@@ -91,8 +97,8 @@ export class ReportGeneratorService {
       ...enhancedMetrics,
     };
 
-    // Generate charts and recommendations
-    const [charts, recommendations] = await Promise.all([
+    // Generate charts and recommendations using both chart services for enhanced visualization
+    const [charts, enhancedCharts, recommendations] = await Promise.all([
       this.chartGeneration.generateChartData(
         baseMetrics.tasks,
         baseMetrics.delegations,
@@ -100,6 +106,7 @@ export class ReportGeneratorService {
         reportType,
         enhancedMetrics,
       ),
+      this.generateEnhancedChartData(reportType, allMetrics),
       this.recommendationEngine.generateRecommendations(
         baseMetrics.tasks,
         baseMetrics.delegations,
@@ -115,7 +122,7 @@ export class ReportGeneratorService {
       dateRange: startDate && endDate ? { startDate, endDate } : undefined,
       filters,
       metrics: allMetrics,
-      charts,
+      charts: { ...charts, ...enhancedCharts },
       recommendations,
     };
 
@@ -523,5 +530,79 @@ export class ReportGeneratorService {
   private getTaskReportTitle(reportType: ReportType, taskId: string): string {
     const baseTitle = this.getReportTitle(reportType);
     return `${baseTitle} - ${taskId}`;
+  }
+
+  /**
+   * Generate enhanced chart data using ChartFactoryService
+   * Integrates the sophisticated 2,532-line ChartFactoryService for advanced visualizations
+   */
+  private async generateEnhancedChartData(
+    reportType: ReportType,
+    metrics: ReportMetrics,
+  ): Promise<any> {
+    try {
+      // Use ChartFactoryService for advanced chart generation
+      return this.chartFactory.createCharts(
+        reportType,
+        {
+          taskMetrics: metrics.tasks,
+          delegationMetrics: metrics.delegations,
+          codeReviewMetrics: metrics.codeReviews,
+        },
+        metrics,
+      );
+    } catch (error) {
+      this.logger.warn(`Failed to generate enhanced charts: ${error.message}`);
+      return {};
+    }
+  }
+
+  /**
+   * Generate optimized report path using ReportPathGeneratorService
+   * Provides intelligent file organization and naming
+   */
+  generateOptimizedReportPath(options: {
+    reportType: ReportType;
+    outputFormat: string;
+    taskId?: string;
+    startDate?: Date;
+    endDate?: Date;
+    filters?: ReportFilters;
+    basePath?: string;
+  }): { filename: string; folderPath: string; fullPath: string } {
+    return this.reportPathGenerator.generateReportPath({
+      reportType: options.reportType,
+      outputFormat: options.outputFormat,
+      taskId: options.taskId,
+      startDate: options.startDate,
+      endDate: options.endDate,
+      filters: options.filters,
+      basePath: options.basePath,
+    });
+  }
+
+  /**
+   * Generate enhanced template using TemplateFactoryService
+   * Provides sophisticated template generation and customization
+   */
+  async generateEnhancedTemplate(
+    reportType: ReportType,
+    data: ReportData,
+    customizations?: any,
+  ): Promise<string> {
+    try {
+      // Use TemplateFactoryService for advanced template generation
+      return await this.templateFactory.generateAdvancedTemplate(
+        reportType,
+        data,
+        customizations,
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Failed to generate enhanced template: ${error.message}`,
+      );
+      // Fallback to standard template service
+      return this.reportTemplate.renderReportTemplate(reportType, data);
+    }
   }
 }
