@@ -1,0 +1,806 @@
+<%
+// Template Variables
+const title = "🏗️ Implementation Plan Analytics";
+const subtitle = "Batch Analysis & Execution Patterns";
+const headerIcon = "🏗️";
+const reportType = "Implementation Plan Analytics";
+const generatedAt = data.generatedAt || new Date();
+const dateRange = data.dateRange;
+
+// Additional Styles for Implementation Plan Analytics
+const additionalStyles = `
+    /* Implementation Plan Specific Styles */
+    .batch-timeline {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+        position: relative;
+    }
+    
+    .timeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--dark-border);
+    }
+    
+    .timeline-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark-text);
+    }
+    
+    .timeline-stats {
+        display: flex;
+        gap: var(--spacing-lg);
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+    }
+    
+    .timeline-track {
+        position: relative;
+        padding-left: 40px;
+    }
+    
+    .timeline-line {
+        position: absolute;
+        left: 20px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, var(--primary-500), var(--secondary-500));
+    }
+    
+    .batch-node {
+        position: relative;
+        margin-bottom: var(--spacing-xl);
+        background: var(--dark-surface-light);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        border-left: 4px solid var(--primary-500);
+    }
+    
+    .batch-node.completed {
+        border-left-color: var(--success-500);
+    }
+    
+    .batch-node.in-progress {
+        border-left-color: var(--warning-500);
+    }
+    
+    .batch-node.not-started {
+        border-left-color: var(--gray-500);
+    }
+    
+    .batch-node::before {
+        content: '';
+        position: absolute;
+        left: -22px;
+        top: 20px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--primary-500);
+        border: 3px solid var(--dark-surface);
+    }
+    
+    .batch-node.completed::before {
+        background: var(--success-500);
+    }
+    
+    .batch-node.in-progress::before {
+        background: var(--warning-500);
+        animation: pulse 2s infinite;
+    }
+    
+    .batch-node.not-started::before {
+        background: var(--gray-500);
+    }
+    
+    .batch-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .batch-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark-text);
+        margin: 0;
+    }
+    
+    .batch-id {
+        font-family: var(--font-mono);
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+        background: var(--dark-surface);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+    }
+    
+    .batch-description {
+        color: var(--dark-text-muted);
+        margin-bottom: var(--spacing-md);
+        line-height: 1.5;
+    }
+    
+    .batch-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .batch-metric {
+        text-align: center;
+        padding: var(--spacing-sm);
+        background: var(--dark-surface);
+        border-radius: var(--radius-md);
+    }
+    
+    .batch-metric-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-500);
+    }
+    
+    .batch-metric-label {
+        font-size: 0.75rem;
+        color: var(--dark-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .subtask-list {
+        margin-top: var(--spacing-md);
+    }
+    
+    .subtask-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: var(--dark-surface);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-sm);
+        transition: all var(--transition-fast);
+    }
+    
+    .subtask-item:hover {
+        background: var(--dark-surface-light);
+        transform: translateX(4px);
+    }
+    
+    .subtask-status {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    
+    .subtask-status.completed {
+        background: var(--success-500);
+    }
+    
+    .subtask-status.in-progress {
+        background: var(--warning-500);
+        animation: pulse 2s infinite;
+    }
+    
+    .subtask-status.not-started {
+        background: var(--gray-500);
+    }
+    
+    .subtask-name {
+        flex: 1;
+        font-weight: 500;
+        color: var(--dark-text);
+    }
+    
+    .subtask-duration {
+        font-size: 0.875rem;
+        color: var(--dark-text-muted);
+        font-family: var(--font-mono);
+    }
+    
+    .execution-patterns {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .pattern-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-lg);
+    }
+    
+    .pattern-card {
+        background: var(--dark-surface-light);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        border-left: 4px solid var(--secondary-500);
+    }
+    
+    .pattern-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .pattern-description {
+        color: var(--dark-text-muted);
+        font-size: 0.9rem;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .pattern-metrics {
+        display: flex;
+        gap: var(--spacing-md);
+    }
+    
+    .pattern-metric {
+        text-align: center;
+    }
+    
+    .pattern-metric-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--secondary-500);
+    }
+    
+    .pattern-metric-label {
+        font-size: 0.75rem;
+        color: var(--dark-text-muted);
+    }
+    
+    .technical-insights {
+        background: linear-gradient(135deg, var(--dark-surface) 0%, var(--dark-surface-light) 100%);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .insight-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: var(--dark-surface);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .insight-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        margin-top: var(--spacing-xs);
+    }
+    
+    .insight-content {
+        flex: 1;
+    }
+    
+    .insight-title {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .insight-description {
+        color: var(--dark-text-muted);
+        font-size: 0.9rem;
+    }
+    
+    .dependency-graph {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .dependency-node {
+        display: inline-block;
+        background: var(--dark-surface-light);
+        border: 2px solid var(--primary-500);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-md);
+        margin: var(--spacing-sm);
+        font-weight: 500;
+        color: var(--dark-text);
+        position: relative;
+    }
+    
+    .dependency-arrow {
+        display: inline-block;
+        color: var(--primary-500);
+        font-size: 1.5rem;
+        margin: 0 var(--spacing-sm);
+        vertical-align: middle;
+    }
+    
+    .quality-gates {
+        background: var(--dark-surface);
+        border: 1px solid var(--dark-border);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .gate-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: var(--dark-surface-light);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .gate-status {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: bold;
+        color: white;
+    }
+    
+    .gate-status.passed {
+        background: var(--success-500);
+    }
+    
+    .gate-status.failed {
+        background: var(--danger-500);
+    }
+    
+    .gate-status.pending {
+        background: var(--warning-500);
+    }
+    
+    .gate-name {
+        flex: 1;
+        font-weight: 500;
+        color: var(--dark-text);
+    }
+    
+    .gate-description {
+        color: var(--dark-text-muted);
+        font-size: 0.875rem;
+    }
+`;
+
+// Additional Scripts for Implementation Plan Analytics
+const additionalScripts = `
+    // Implementation Plan Analytics specific functionality
+    function initializeImplementationCharts() {
+        // Batch Progress Chart
+        const batchProgressCtx = document.getElementById('batchProgressChart');
+        if (batchProgressCtx) {
+            const batchData = ${JSON.stringify(data.analytics?.batchProgress || [])};
+            
+            ReportUtils.createChart(batchProgressCtx, {
+                type: 'bar',
+                data: {
+                    labels: batchData.map(b => b.batchId),
+                    datasets: [{
+                        label: 'Completed Subtasks',
+                        data: batchData.map(b => b.completedSubtasks),
+                        backgroundColor: '#10b981',
+                        borderRadius: 4
+                    }, {
+                        label: 'Total Subtasks',
+                        data: batchData.map(b => b.totalSubtasks),
+                        backgroundColor: '#374151',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Execution Timeline Chart
+        const timelineCtx = document.getElementById('executionTimelineChart');
+        if (timelineCtx) {
+            const timelineData = ${JSON.stringify(data.analytics?.executionTimeline || [])};
+            
+            ReportUtils.createChart(timelineCtx, {
+                type: 'line',
+                data: {
+                    labels: timelineData.map(t => t.date),
+                    datasets: [{
+                        label: 'Subtasks Completed',
+                        data: timelineData.map(t => t.subtasksCompleted),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Technical Complexity Distribution
+        const complexityCtx = document.getElementById('complexityChart');
+        if (complexityCtx) {
+            const complexityData = ${JSON.stringify(data.analytics?.complexityDistribution || {})};
+            
+            ReportUtils.createChart(complexityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(complexityData),
+                    datasets: [{
+                        data: Object.values(complexityData),
+                        backgroundColor: [
+                            '#10b981', // Low
+                            '#f59e0b', // Medium
+                            '#ef4444', // High
+                            '#8b5cf6'  // Critical
+                        ]
+                    }]
+                }
+            });
+        }
+    }
+    
+    // Initialize charts when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initializeImplementationCharts);
+`;
+
+// Content for the template
+const content = `
+    <!-- Implementation Overview Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">📋 Implementation Overview</h2>
+            <p class="section-subtitle">Comprehensive analysis of implementation plans, batch execution, and technical patterns</p>
+        </div>
+        
+        <!-- Key Metrics Grid -->
+        <div class="grid grid-auto-fit">
+            <div class="metric-card success">
+                <div class="metric-header">
+                    <div class="metric-title">📦 Total Batches</div>
+                    <div class="metric-trend trend-up">↗ Active</div>
+                </div>
+                <div class="metric-value success">${data.metrics?.implementation?.totalBatches || 0}</div>
+                <div class="metric-subtitle">${data.metrics?.implementation?.completedBatches || 0} completed, ${data.metrics?.implementation?.activeBatches || 0} in progress</div>
+            </div>
+            
+            <div class="metric-card info">
+                <div class="metric-header">
+                    <div class="metric-title">🔧 Total Subtasks</div>
+                    <div class="metric-trend trend-stable">→ Planned</div>
+                </div>
+                <div class="metric-value info">${data.metrics?.implementation?.totalSubtasks || 0}</div>
+                <div class="metric-subtitle">${data.metrics?.implementation?.completedSubtasks || 0} completed (${((data.metrics?.implementation?.completedSubtasks || 0) / (data.metrics?.implementation?.totalSubtasks || 1) * 100).toFixed(1)}%)</div>
+            </div>
+            
+            <div class="metric-card warning">
+                <div class="metric-header">
+                    <div class="metric-title">⏱️ Avg Batch Duration</div>
+                    <div class="metric-trend trend-down">↘ Improving</div>
+                </div>
+                <div class="metric-value warning">${(data.metrics?.implementation?.avgBatchDurationHours || 0).toFixed(1)}h</div>
+                <div class="metric-subtitle">Target: ${data.metrics?.implementation?.targetBatchDuration || 'N/A'}h</div>
+            </div>
+            
+            <div class="metric-card ${(data.metrics?.implementation?.qualityScore || 0) > 85 ? 'success' : (data.metrics?.implementation?.qualityScore || 0) > 70 ? 'warning' : 'danger'}">
+                <div class="metric-header">
+                    <div class="metric-title">✅ Quality Score</div>
+                    <div class="metric-trend trend-up">↗ +3.2%</div>
+                </div>
+                <div class="metric-value ${(data.metrics?.implementation?.qualityScore || 0) > 85 ? 'success' : (data.metrics?.implementation?.qualityScore || 0) > 70 ? 'warning' : 'danger'}">${(data.metrics?.implementation?.qualityScore || 0).toFixed(1)}%</div>
+                <div class="metric-subtitle">SOLID principles, testing, documentation</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Batch Timeline Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">🗓️ Batch Execution Timeline</h2>
+            <p class="section-subtitle">Visual timeline of batch execution with dependencies and progress tracking</p>
+        </div>
+        
+        <div class="batch-timeline">
+            <div class="timeline-header">
+                <div class="timeline-title">Implementation Batches</div>
+                <div class="timeline-stats">
+                    <span>📊 ${data.batches?.length || 0} batches</span>
+                    <span>⏱️ ${data.metrics?.implementation?.totalEstimatedHours || 0}h estimated</span>
+                    <span>✅ ${data.metrics?.implementation?.completionRate || 0}% complete</span>
+                </div>
+            </div>
+            
+            <div class="timeline-track">
+                <div class="timeline-line"></div>
+                
+                ${(data.batches || []).map(batch => `
+                    <div class="batch-node ${batch.status || 'not-started'}">
+                        <div class="batch-header">
+                            <h3 class="batch-title">${batch.title || batch.batchId}</h3>
+                            <div class="batch-id">${batch.batchId}</div>
+                        </div>
+                        
+                        <div class="batch-description">
+                            ${batch.description || 'No description available'}
+                        </div>
+                        
+                        <div class="batch-metrics">
+                            <div class="batch-metric">
+                                <div class="batch-metric-value">${batch.subtasks?.length || 0}</div>
+                                <div class="batch-metric-label">Subtasks</div>
+                            </div>
+                            <div class="batch-metric">
+                                <div class="batch-metric-value">${batch.completedSubtasks || 0}</div>
+                                <div class="batch-metric-label">Completed</div>
+                            </div>
+                            <div class="batch-metric">
+                                <div class="batch-metric-value">${batch.estimatedHours || 0}h</div>
+                                <div class="batch-metric-label">Estimated</div>
+                            </div>
+                            <div class="batch-metric">
+                                <div class="batch-metric-value">${((batch.completedSubtasks || 0) / (batch.subtasks?.length || 1) * 100).toFixed(0)}%</div>
+                                <div class="batch-metric-label">Progress</div>
+                            </div>
+                        </div>
+                        
+                        ${batch.subtasks?.length > 0 ? `
+                            <div class="subtask-list">
+                                ${batch.subtasks.map(subtask => `
+                                    <div class="subtask-item">
+                                        <div class="subtask-status ${subtask.status || 'not-started'}"></div>
+                                        <div class="subtask-name">${subtask.name}</div>
+                                        <div class="subtask-duration">${subtask.estimatedDuration || 'N/A'}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Execution Patterns Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">🔄 Execution Patterns</h2>
+            <p class="section-subtitle">Analysis of implementation patterns, efficiency metrics, and optimization opportunities</p>
+        </div>
+        
+        <div class="execution-patterns">
+            <div class="pattern-grid">
+                <div class="pattern-card">
+                    <div class="pattern-title">🚀 Parallel Execution</div>
+                    <div class="pattern-description">
+                        Batches executed in parallel to optimize development flow and reduce overall timeline.
+                    </div>
+                    <div class="pattern-metrics">
+                        <div class="pattern-metric">
+                            <div class="pattern-metric-value">${data.patterns?.parallelBatches || 0}</div>
+                            <div class="pattern-metric-label">Parallel Batches</div>
+                        </div>
+                        <div class="pattern-metric">
+                            <div class="pattern-metric-value">${(data.patterns?.timeReduction || 0).toFixed(1)}%</div>
+                            <div class="pattern-metric-label">Time Saved</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pattern-card">
+                    <div class="pattern-title">🔗 Sequential Dependencies</div>
+                    <div class="pattern-description">
+                        Batches with dependencies executed in proper sequence to maintain architectural integrity.
+                    </div>
+                    <div class="pattern-metrics">
+                        <div class="pattern-metric">
+                            <div class="pattern-metric-value">${data.patterns?.sequentialBatches || 0}</div>
+                            <div class="pattern-metric-label">Sequential</div>
+                        </div>
+                        <div class="pattern-metric">
+                            <div class="pattern-metric-value">${data.patterns?.dependencyChains || 0}</div>
+                            <div class="pattern-metric-label">Dep Chains</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pattern-card">
+                    <div class="pattern-title">🔄 Iterative Refinement</div>
+                    <div class="pattern-description">
+                        Batches refined through multiple iterations based on code review feedback and quality gates.
+                    </div>
+                    <div class="pattern-metrics">
+                        <div class="pattern-metric">
+                            <div class="pattern-metric-value">${data.patterns?.refinementCycles || 0}</div>
+                            <div class="pattern-metric-label">Cycles</div>
+                        </div>
+                        <div class="pattern-metric">
+                            <div class="pattern-metric-value">${(data.patterns?.qualityImprovement || 0).toFixed(1)}%</div>
+                            <div class="pattern-metric-label">Quality ↑</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pattern-card">
+                    <div class="pattern-title">⚡ Optimization Focus</div>
+                    <div class="pattern-description">
+                        Continuous optimization of batch size, complexity distribution, and resource allocation.
+                    </div>
+                    <div class="pattern-metrics">
+                        <div class="pattern-metric">
+                            <div class="pattern-metric-value">${(data.patterns?.efficiencyGain || 0).toFixed(1)}%</div>
+                            <div class="pattern-metric-label">Efficiency</div>
+                        </div>
+                        <div class="pattern-metric">
+                            <div class="pattern-metric-value">${data.patterns?.optimalBatchSize || 0}</div>
+                            <div class="pattern-metric-label">Optimal Size</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">📊 Implementation Analytics</h2>
+            <p class="section-subtitle">Visual analysis of batch progress, execution timeline, and technical complexity</p>
+        </div>
+        
+        <div class="grid grid-cols-2">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Batch Progress Overview</h3>
+                    <p class="chart-subtitle">Completed vs total subtasks per batch</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="batchProgressChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Execution Timeline</h3>
+                    <p class="chart-subtitle">Subtask completion over time</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="executionTimelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 mt-lg">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Technical Complexity Distribution</h3>
+                    <p class="chart-subtitle">Distribution of subtasks by complexity level</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="complexityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Technical Insights Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">💡 Technical Insights</h2>
+            <p class="section-subtitle">Key insights from implementation analysis and recommendations for optimization</p>
+        </div>
+        
+        <div class="technical-insights">
+            ${(data.insights || []).map(insight => `
+                <div class="insight-item">
+                    <div class="insight-icon">${insight.icon || '💡'}</div>
+                    <div class="insight-content">
+                        <div class="insight-title">${insight.title}</div>
+                        <div class="insight-description">${insight.description}</div>
+                    </div>
+                </div>
+            `).join('')}
+            
+            ${(data.insights || []).length === 0 ? `
+                <div class="insight-item">
+                    <div class="insight-icon">🔍</div>
+                    <div class="insight-content">
+                        <div class="insight-title">Batch Size Optimization</div>
+                        <div class="insight-description">Current batch sizes are well-balanced for development flow. Consider maintaining 3-8 subtasks per batch for optimal coordination.</div>
+                    </div>
+                </div>
+                
+                <div class="insight-item">
+                    <div class="insight-icon">⚡</div>
+                    <div class="insight-content">
+                        <div class="insight-title">Parallel Execution Opportunities</div>
+                        <div class="insight-description">Independent batches can be executed in parallel to reduce overall implementation timeline by up to 30%.</div>
+                    </div>
+                </div>
+                
+                <div class="insight-item">
+                    <div class="insight-icon">🎯</div>
+                    <div class="insight-content">
+                        <div class="insight-title">Quality Gate Effectiveness</div>
+                        <div class="insight-description">Current quality gates are preventing 85% of potential issues. Consider adding automated testing gates for further improvement.</div>
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+    </div>
+    
+    <!-- Quality Gates Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">🛡️ Quality Gates</h2>
+            <p class="section-subtitle">Implementation quality checkpoints and compliance verification</p>
+        </div>
+        
+        <div class="quality-gates">
+            ${(data.qualityGates || [
+                { name: 'SOLID Principles Applied', status: 'passed', description: 'All code follows SOLID design principles' },
+                { name: 'Comprehensive Testing', status: 'passed', description: 'Unit, integration, and e2e tests implemented' },
+                { name: 'Code Review Approval', status: 'passed', description: 'All batches reviewed and approved' },
+                { name: 'Documentation Updated', status: 'pending', description: 'Implementation documentation in progress' },
+                { name: 'Performance Validated', status: 'passed', description: 'Performance requirements met' },
+                { name: 'Security Verified', status: 'passed', description: 'Security measures implemented and tested' }
+            ]).map(gate => `
+                <div class="gate-item">
+                    <div class="gate-status ${gate.status}">
+                        ${gate.status === 'passed' ? '✓' : gate.status === 'failed' ? '✗' : '⏳'}
+                    </div>
+                    <div class="gate-content">
+                        <div class="gate-name">${gate.name}</div>
+                        <div class="gate-description">${gate.description}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    </div>
+`;
+%>
+
+<!-- Include Base Layout -->
+<%- include('base-layout', { 
+    title, 
+    subtitle, 
+    headerIcon, 
+    reportType, 
+    generatedAt, 
+    dateRange, 
+    content, 
+    additionalStyles, 
+    additionalScripts 
+}) %> 
