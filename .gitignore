@@ -10,12 +10,12 @@ yarn-error.log*
 /generated
 
 # Prisma
-prisma/*.db
-prisma/*.db-journal
 prisma/migrations/*/*.sql
 /logs
 /.env.docker.example
 prisma/workflow-manager.db
 /prisma/data/**
 /workflow-manager-mcp-reports
-prisma/data/workflow.db
+/prisma/data/*
+/prisma/data/workflow.db
+/prisma/data/workflow.db.backup
