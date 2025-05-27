@@ -1,0 +1,417 @@
+{{> layouts/base title="Performance Dashboard" subtitle="Real-time metrics with performance trending and benchmarks"}}
+
+{{#section "content"}}
+<!-- Performance Overview Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+    <div class="flex items-center justify-between mb-4">
+      <div class="text-3xl">⚡</div>
+      <div class="text-right">
+        <div class="text-2xl font-bold text-gray-900">{{defaultValue data.metrics.averageCompletionTime "0h"}}</div>
+        <div class="text-sm text-gray-500">Avg Completion Time</div>
+      </div>
+    </div>
+    <div class="flex items-center">
+      <span class="text-sm font-medium {{#if (gte data.metrics.completionTimeTrend 0)}}text-green-600{{else}}text-red-600{{/if}}">
+        {{#if (gte data.metrics.completionTimeTrend 0)}}↗{{else}}↘{{/if}} {{abs data.metrics.completionTimeTrend}}%
+      </span>
+    </div>
+  </div>
+  
+  <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+    <div class="flex items-center justify-between mb-4">
+      <div class="text-3xl">🎯</div>
+      <div class="text-right">
+        <div class="text-2xl font-bold text-gray-900">{{defaultValue data.metrics.throughputRate "0"}}/day</div>
+        <div class="text-sm text-gray-500">Task Throughput</div>
+      </div>
+    </div>
+    <div class="flex items-center">
+      <span class="text-sm font-medium {{#if (gte data.metrics.throughputTrend 0)}}text-green-600{{else}}text-red-600{{/if}}">
+        {{#if (gte data.metrics.throughputTrend 0)}}↗{{else}}↘{{/if}} {{abs data.metrics.throughputTrend}}%
+      </span>
+    </div>
+  </div>
+  
+  <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+    <div class="flex items-center justify-between mb-4">
+      <div class="text-3xl">🔄</div>
+      <div class="text-right">
+        <div class="text-2xl font-bold text-gray-900">{{defaultValue data.metrics.redelegationRate "0"}}%</div>
+        <div class="text-sm text-gray-500">Redelegation Rate</div>
+      </div>
+    </div>
+    <div class="flex items-center">
+      <span class="text-sm font-medium {{#if (lte data.metrics.redelegationTrend 0)}}text-green-600{{else}}text-red-600{{/if}}">
+        {{#if (lte data.metrics.redelegationTrend 0)}}↗{{else}}↘{{/if}} {{abs data.metrics.redelegationTrend}}%
+      </span>
+    </div>
+  </div>
+  
+  <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+    <div class="flex items-center justify-between mb-4">
+      <div class="text-3xl">✅</div>
+      <div class="text-right">
+        <div class="text-2xl font-bold text-gray-900">{{defaultValue data.metrics.qualityScore "0"}}%</div>
+        <div class="text-sm text-gray-500">Quality Score</div>
+      </div>
+    </div>
+    <div class="flex items-center">
+      <span class="text-sm font-medium {{#if (gte data.metrics.qualityTrend 0)}}text-green-600{{else}}text-red-600{{/if}}">
+        {{#if (gte data.metrics.qualityTrend 0)}}↗{{else}}↘{{/if}} {{abs data.metrics.qualityTrend}}%
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Performance Trends Chart -->
+<div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+  <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+    <span class="text-2xl mr-3">📈</span>
+    Performance Trends (Last 30 Days)
+  </h3>
+  <div class="relative">
+    <canvas id="performanceTrendsChart" class="w-full h-80"></canvas>
+  </div>
+  <div class="flex flex-wrap gap-4 mt-4 justify-center">
+    <div class="flex items-center">
+      <div class="w-4 h-4 bg-blue-500 rounded mr-2"></div>
+      <span class="text-sm text-gray-600">Completion Time</span>
+    </div>
+    <div class="flex items-center">
+      <div class="w-4 h-4 bg-green-500 rounded mr-2"></div>
+      <span class="text-sm text-gray-600">Throughput Rate</span>
+    </div>
+    <div class="flex items-center">
+      <div class="w-4 h-4 bg-yellow-500 rounded mr-2"></div>
+      <span class="text-sm text-gray-600">Quality Score</span>
+    </div>
+  </div>
+</div>
+
+<!-- Role Performance Matrix -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+  <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+      <span class="text-2xl mr-3">👥</span>
+      Role Performance Metrics
+    </h3>
+    <div class="space-y-6">
+      {{#each data.rolePerformance}}
+      <div class="border-b border-gray-100 pb-4 last:border-b-0">
+        <div class="font-semibold text-gray-900 mb-3">{{this.name}}</div>
+        <div class="space-y-3">
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Efficiency</span>
+              <span class="font-medium">{{defaultValue this.efficiency 0}}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-green-500 h-2 rounded-full transition-all duration-500" style="width: {{defaultValue this.efficiency 0}}%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Quality</span>
+              <span class="font-medium">{{defaultValue this.quality 0}}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-blue-500 h-2 rounded-full transition-all duration-500" style="width: {{defaultValue this.quality 0}}%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Speed</span>
+              <span class="font-medium">{{defaultValue this.speed 0}}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-yellow-500 h-2 rounded-full transition-all duration-500" style="width: {{defaultValue this.speed 0}}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+
+  <!-- Performance Benchmarks -->
+  <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+      <span class="text-2xl mr-3">🎯</span>
+      Performance Benchmarks
+    </h3>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="bg-gray-50 rounded-lg p-4">
+        <div class="text-sm text-gray-600 mb-1">Industry Standard</div>
+        <div class="text-lg font-bold text-gray-900">{{defaultValue data.benchmarks.industryStandard "N/A"}}</div>
+        <div class="text-sm font-medium {{#if (gte data.benchmarks.vsIndustry 0)}}text-green-600{{else}}text-red-600{{/if}}">
+          {{#if (gte data.benchmarks.vsIndustry 0)}}+{{/if}}{{defaultValue data.benchmarks.vsIndustry 0}}%
+        </div>
+      </div>
+      
+      <div class="bg-gray-50 rounded-lg p-4">
+        <div class="text-sm text-gray-600 mb-1">Team Average</div>
+        <div class="text-lg font-bold text-gray-900">{{defaultValue data.benchmarks.teamAverage "N/A"}}</div>
+        <div class="text-sm font-medium {{#if (gte data.benchmarks.vsTeam 0)}}text-green-600{{else}}text-red-600{{/if}}">
+          {{#if (gte data.benchmarks.vsTeam 0)}}+{{/if}}{{defaultValue data.benchmarks.vsTeam 0}}%
+        </div>
+      </div>
+      
+      <div class="bg-gray-50 rounded-lg p-4">
+        <div class="text-sm text-gray-600 mb-1">Previous Period</div>
+        <div class="text-lg font-bold text-gray-900">{{defaultValue data.benchmarks.previousPeriod "N/A"}}</div>
+        <div class="text-sm font-medium {{#if (gte data.benchmarks.vsPrevious 0)}}text-green-600{{else}}text-red-600{{/if}}">
+          {{#if (gte data.benchmarks.vsPrevious 0)}}+{{/if}}{{defaultValue data.benchmarks.vsPrevious 0}}%
+        </div>
+      </div>
+      
+      <div class="bg-gray-50 rounded-lg p-4">
+        <div class="text-sm text-gray-600 mb-1">Target Goal</div>
+        <div class="text-lg font-bold text-gray-900">{{defaultValue data.benchmarks.targetGoal "N/A"}}</div>
+        <div class="text-sm font-medium {{#if (gte data.benchmarks.vsTarget 0)}}text-green-600{{else}}text-red-600{{/if}}">
+          {{#if (gte data.benchmarks.vsTarget 0)}}+{{/if}}{{defaultValue data.benchmarks.vsTarget 0}}%
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Performance Bottlenecks Analysis -->
+<div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+  <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+    <span class="text-2xl mr-3">🚧</span>
+    Performance Bottlenecks & Optimization Opportunities
+  </h3>
+  <div class="space-y-6">
+    {{#each data.bottlenecks}}
+    <div class="border rounded-lg p-6 {{#eq this.severity 'high'}}border-red-200 bg-red-50{{else}}{{#eq this.severity 'medium'}}border-yellow-200 bg-yellow-50{{else}}border-blue-200 bg-blue-50{{/eq}}{{/eq}}">
+      <div class="flex justify-between items-start mb-4">
+        <h4 class="text-lg font-semibold text-gray-900">{{defaultValue this.area "Unknown Area"}}</h4>
+        <span class="px-3 py-1 rounded-full text-xs font-medium {{#eq this.severity 'high'}}bg-red-100 text-red-800{{else}}{{#eq this.severity 'medium'}}bg-yellow-100 text-yellow-800{{else}}bg-blue-100 text-blue-800{{/eq}}{{/eq}}">
+          Impact: {{defaultValue this.impact "Medium"}}
+        </span>
+      </div>
+      <p class="text-gray-700 mb-4">{{defaultValue this.description "No description available"}}</p>
+      <div class="flex flex-wrap gap-4 mb-4">
+        <div class="bg-white rounded-lg px-3 py-2 border">
+          <span class="text-sm text-gray-600">Delay:</span>
+          <span class="font-medium ml-1">{{defaultValue this.averageDelay "0h"}}</span>
+        </div>
+        <div class="bg-white rounded-lg px-3 py-2 border">
+          <span class="text-sm text-gray-600">Frequency:</span>
+          <span class="font-medium ml-1">{{defaultValue this.frequency "0"}}/week</span>
+        </div>
+        <div class="bg-white rounded-lg px-3 py-2 border">
+          <span class="text-sm text-gray-600">Cost:</span>
+          <span class="font-medium ml-1">{{defaultValue this.estimatedCost "$0"}}</span>
+        </div>
+      </div>
+      {{#if this.recommendations}}
+      <div>
+        <h5 class="font-semibold text-gray-900 mb-2">Recommendations:</h5>
+        <ul class="list-disc list-inside space-y-1">
+          {{#each this.recommendations}}
+          <li class="text-gray-700">{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+      {{/if}}
+    </div>
+    {{/each}}
+  </div>
+</div>
+
+<!-- Real-time Performance Indicators -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+    <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+      <span class="text-xl mr-2">🏥</span>
+      System Health
+    </h4>
+    <div class="text-center mb-4">
+      <div class="text-4xl mb-2">
+        {{#eq data.systemHealth.status 'healthy'}}🟢{{else}}{{#eq data.systemHealth.status 'warning'}}🟡{{else}}{{#eq data.systemHealth.status 'critical'}}🔴{{else}}⚪{{/eq}}{{/eq}}{{/eq}}
+      </div>
+      <div class="text-sm font-medium text-gray-700">{{defaultValue data.systemHealth.message "Status Unknown"}}</div>
+    </div>
+    <div class="space-y-3">
+      <div class="flex justify-between">
+        <span class="text-gray-600">CPU Usage:</span>
+        <span class="font-medium">{{defaultValue data.systemHealth.cpuUsage "0"}}%</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-600">Memory:</span>
+        <span class="font-medium">{{defaultValue data.systemHealth.memoryUsage "0"}}%</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-600">Response Time:</span>
+        <span class="font-medium">{{defaultValue data.systemHealth.responseTime "0"}}ms</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+    <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+      <span class="text-xl mr-2">⚡</span>
+      Workflow Velocity
+    </h4>
+    <div class="relative">
+      <canvas id="velocityChart" class="w-full h-32"></canvas>
+    </div>
+    <div class="mt-4 text-center">
+      <div class="text-2xl font-bold text-gray-900">{{defaultValue data.velocity.current "0"}}</div>
+      <div class="text-sm text-gray-600">tasks/day</div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+    <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+      <span class="text-xl mr-2">🎯</span>
+      Goal Progress
+    </h4>
+    <div class="relative">
+      <canvas id="goalProgressChart" class="w-full h-32"></canvas>
+    </div>
+    <div class="mt-4 text-center">
+      <div class="text-2xl font-bold text-gray-900">{{defaultValue data.goalProgress.percentage "0"}}%</div>
+      <div class="text-sm text-gray-600">of monthly goal</div>
+    </div>
+  </div>
+</div>
+
+<!-- Performance Insights & Recommendations -->
+<div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+  <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+    <span class="text-2xl mr-3">💡</span>
+    AI-Powered Performance Insights
+  </h3>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div>
+      <h4 class="font-semibold text-gray-900 mb-3">Key Insights</h4>
+      <ul class="space-y-2">
+        {{#each data.insights}}
+        <li class="flex items-start">
+          <span class="text-blue-500 mr-2 mt-1">•</span>
+          <span class="text-gray-700">{{this}}</span>
+        </li>
+        {{/each}}
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-semibold text-gray-900 mb-3">Recommended Actions</h4>
+      <ul class="space-y-2">
+        {{#each data.recommendations}}
+        <li class="flex items-start">
+          <span class="text-green-500 mr-2 mt-1">✓</span>
+          <span class="text-gray-700">{{this}}</span>
+        </li>
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+</div>
+{{/section}}
+
+{{#section "scripts"}}
+<script>
+// Performance Trends Chart
+const performanceTrendsCtx = document.getElementById('performanceTrendsChart').getContext('2d');
+new Chart(performanceTrendsCtx, {
+  type: 'line',
+  data: {
+    labels: {{{json data.trendLabels}}},
+    datasets: [
+      {
+        label: 'Completion Time (hours)',
+        data: {{{json data.completionTimeData}}},
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4
+      },
+      {
+        label: 'Throughput Rate',
+        data: {{{json data.throughputData}}},
+        borderColor: 'rgb(34, 197, 94)',
+        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+        tension: 0.4
+      },
+      {
+        label: 'Quality Score',
+        data: {{{json data.qualityData}}},
+        borderColor: 'rgb(234, 179, 8)',
+        backgroundColor: 'rgba(234, 179, 8, 0.1)',
+        tension: 0.4
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)'
+        }
+      },
+      x: {
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)'
+        }
+      }
+    }
+  }
+});
+
+// Velocity Chart
+const velocityCtx = document.getElementById('velocityChart').getContext('2d');
+new Chart(velocityCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Completed', 'Remaining'],
+    datasets: [{
+      data: [{{defaultValue data.velocity.completed 0}}, {{defaultValue data.velocity.remaining 0}}],
+      backgroundColor: ['rgb(34, 197, 94)', 'rgb(229, 231, 235)'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  }
+});
+
+// Goal Progress Chart
+const goalProgressCtx = document.getElementById('goalProgressChart').getContext('2d');
+new Chart(goalProgressCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Progress', 'Remaining'],
+    datasets: [{
+      data: [{{defaultValue data.goalProgress.completed 0}}, {{defaultValue data.goalProgress.remaining 0}}],
+      backgroundColor: ['rgb(59, 130, 246)', 'rgb(229, 231, 235)'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  }
+});
+</script>
+{{/section}} 
