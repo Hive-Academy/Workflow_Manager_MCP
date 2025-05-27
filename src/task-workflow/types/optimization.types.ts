@@ -10,6 +10,14 @@
  */
 export enum OptimizationLevel {
   /**
+   * NONE: No optimization, raw data from database
+   * - Best for: Debugging optimization issues, complete data access
+   * - Token savings: 0%
+   * - Use case: Fixing workflow breakdowns, complete context access
+   */
+  NONE = 'NONE',
+
+  /**
    * MINIMAL: Only essential identifiers and status
    * - Best for: Quick status checks, batch operations
    * - Token savings: ~95%

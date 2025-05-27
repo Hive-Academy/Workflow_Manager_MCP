@@ -13,6 +13,12 @@ export interface ReportData {
   charts: ChartData[];
   recommendations: string[];
   enhancedInsights?: EnhancedInsight[];
+  dynamicContent?: {
+    executiveSummary: string;
+    keyInsights: string[];
+    actionableRecommendations: string[];
+    detailedAnalysis: string;
+  };
 }
 
 export interface EnhancedInsight {
