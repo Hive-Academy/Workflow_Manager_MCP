@@ -270,6 +270,7 @@ export class UniversalOperationsService {
       comment: this.prisma.comment,
       delegation: this.prisma.delegationRecord, // Correct model name
       workflowTransition: this.prisma.workflowTransition,
+      codebaseAnalysis: this.prisma.codebaseAnalysis,
     };
 
     const model = modelMap[entity];

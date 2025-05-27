@@ -236,6 +236,22 @@ exports.Prisma.WorkflowTransitionScalarFieldEnum = {
   reason: 'reason'
 };
 
+exports.Prisma.CodebaseAnalysisScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  architectureFindings: 'architectureFindings',
+  problemsIdentified: 'problemsIdentified',
+  implementationContext: 'implementationContext',
+  integrationPoints: 'integrationPoints',
+  qualityAssessment: 'qualityAssessment',
+  filesCovered: 'filesCovered',
+  technologyStack: 'technologyStack',
+  analyzedAt: 'analyzedAt',
+  updatedAt: 'updatedAt',
+  analyzedBy: 'analyzedBy',
+  analysisVersion: 'analysisVersion'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -277,7 +293,8 @@ exports.Prisma.ModelName = {
   CodeReview: 'CodeReview',
   CompletionReport: 'CompletionReport',
   Comment: 'Comment',
-  WorkflowTransition: 'WorkflowTransition'
+  WorkflowTransition: 'WorkflowTransition',
+  CodebaseAnalysis: 'CodebaseAnalysis'
 };
 
 /**

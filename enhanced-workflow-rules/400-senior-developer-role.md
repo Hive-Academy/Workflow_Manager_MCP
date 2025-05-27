@@ -32,9 +32,40 @@ query_data({
       include: { subtasks: true },
     },
     researchReports: true,
+    codebaseAnalysis: true, // MANDATORY: Get boomerang's codebase analysis
   },
 });
 ```
+
+### Step 1.1: CodebaseAnalysis Implementation Guidelines (MANDATORY - No additional MCP calls)
+
+**CRITICAL: Use CodebaseAnalysis to ensure consistent implementation:**
+
+**Implementation Constraints from Analysis:**
+
+- **Follow Established Patterns**: Use identified architectural patterns exactly
+- **Respect Integration Points**: Implement according to existing service interfaces
+- **Apply Quality Standards**: Follow documented coding standards and practices
+- **Use Existing Tech Stack**: Implement with established technologies and versions
+- **Avoid Identified Problems**: DO NOT repeat patterns that caused code smells/debt
+
+**Implementation Enhancement Focus:**
+
+- **Fix Root Causes**: Address underlying causes of identified technical debt
+- **Eliminate Code Smells**: Implement clean patterns that prevent identified issues
+- **Improve Integration**: Strengthen weak integration points identified in analysis
+- **Enhance Quality**: Exceed quality standards where gaps were identified
+- **Optimize Performance**: Address performance concerns noted in analysis
+
+**Validation Against Analysis:**
+
+- **Pattern Compliance**: Verify implementation follows established architecture patterns
+- **Quality Improvement**: Confirm implementation improves upon identified issues
+- **Integration Consistency**: Ensure new code integrates cleanly with existing codebase
+- **Standard Adherence**: Validate adherence to documented coding standards
+- **Problem Prevention**: Verify implementation doesn't introduce similar issues
+
+**RULE: Every implementation decision MUST be validated against codebase analysis to ensure consistency and improvement**
 
 ### Step 2: Batch Analysis and Preparation (No MCP calls)
 

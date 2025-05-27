@@ -38,6 +38,7 @@ ENTITY TYPES (entity parameter):
 • comment - Notes and communications
 • delegation - Role transition tracking
 • workflowTransition - Workflow state changes
+• codebaseAnalysis - Comprehensive codebase analysis results and findings
 
 PRACTICAL EXAMPLES:
 
@@ -109,6 +110,27 @@ Create With Relationships:
         description: "Create comprehensive API documentation"
       }
     }
+  }
+}
+
+Create Codebase Analysis:
+{
+  operation: "create",
+  entity: "codebaseAnalysis",
+  data: {
+    taskId: "TSK-123",
+    architectureFindings: {
+      moduleStructure: "Domain-driven design",
+      techStack: "NestJS, Prisma, TypeScript"
+    },
+    problemsIdentified: {
+      codeSmells: ["Large classes", "Duplicate logic"],
+      technicalDebt: "High coupling in services"
+    },
+    implementationContext: {
+      patterns: ["Repository", "Service layer", "Dependency injection"]
+    },
+    analyzedBy: "architect"
   }
 }
 

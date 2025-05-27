@@ -30,6 +30,7 @@ export const EntityTypeSchema = z
     'comment',
     'delegation',
     'workflowTransition',
+    'codebaseAnalysis',
   ])
   .describe('Entity type to modify (task, subtask, etc.)');
 

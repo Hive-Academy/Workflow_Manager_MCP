@@ -29,6 +29,7 @@ ENTITY TYPES (entity parameter):
 • comment - Notes and communications
 • delegation - Role transition tracking
 • workflowTransition - Workflow state changes
+• codebaseAnalysis - Comprehensive codebase analysis results and findings
 
 PRACTICAL EXAMPLES:
 

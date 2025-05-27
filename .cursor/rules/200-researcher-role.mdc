@@ -35,9 +35,32 @@ query_data({
     taskDescription: true,
     implementationPlans: true,
     researchReports: true,
+    codebaseAnalysis: true, // MANDATORY: Get boomerang's codebase analysis
   },
 });
 ```
+
+### Step 1.1: CodebaseAnalysis Integration (MANDATORY - No additional MCP calls)
+
+**CRITICAL: Use boomerang's CodebaseAnalysis as research foundation:**
+
+**Extract from codebaseAnalysis:**
+
+- **Current architecture patterns** to research compatibility
+- **Identified technical debt** to research solutions
+- **Technology stack details** to research best practices
+- **Integration constraints** to research approaches
+- **Quality standards** to research compliance methods
+
+**Research Focus Areas Informed by Analysis:**
+
+- **Pattern Enhancement**: Research improvements to identified patterns
+- **Problem Solutions**: Research fixes for identified code smells and technical debt
+- **Integration Approaches**: Research how to integrate with existing architecture
+- **Quality Improvements**: Research testing, documentation, security enhancements
+- **Performance Optimization**: Research solutions for identified performance issues
+
+**Document how research findings complement existing codebase analysis**
 
 ### Step 2: Research Question Identification (No MCP calls)
 
