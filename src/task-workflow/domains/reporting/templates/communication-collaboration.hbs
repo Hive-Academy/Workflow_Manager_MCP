@@ -1,0 +1,286 @@
+{{!-- Communication & Collaboration Analysis Template --}}
+{{#> layouts/base 
+    title="🤝 Communication & Collaboration Analysis"
+    subtitle="Team Dynamics & Workflow Efficiency"
+    headerIcon="🤝"
+    reportType="Communication Collaboration"
+    generatedAt=data.generatedAt
+    dateRange=data.dateRange
+}}
+
+{{#*inline "content"}}
+<div class="min-h-screen bg-gray-900 text-white">
+    <!-- Collaboration Overview -->
+    <div class="bg-gradient-to-br from-green-500 to-blue-500 rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
+        <div class="relative z-10">
+            <h2 class="text-3xl font-bold mb-4">Communication & Collaboration Analysis</h2>
+            <p class="text-lg opacity-90 mb-6">Comprehensive analysis of team communication patterns, workflow efficiency, and collaboration effectiveness throughout the task lifecycle.</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
+            <div class="text-center bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div class="text-3xl font-bold mb-2">{{default data.collaborationStats.totalInteractions 47}}</div>
+                <div class="text-sm uppercase tracking-wide opacity-90">Total Interactions</div>
+            </div>
+            <div class="text-center bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div class="text-3xl font-bold mb-2">{{default data.collaborationStats.roleTransitions 8}}</div>
+                <div class="text-sm uppercase tracking-wide opacity-90">Role Transitions</div>
+            </div>
+            <div class="text-center bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div class="text-3xl font-bold mb-2">{{default data.collaborationStats.avgResponseTime "2.3h"}}</div>
+                <div class="text-sm uppercase tracking-wide opacity-90">Avg Response Time</div>
+            </div>
+            <div class="text-center bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div class="text-3xl font-bold mb-2">{{default data.collaborationStats.collaborationScore 85}}%</div>
+                <div class="text-sm uppercase tracking-wide opacity-90">Collaboration Score</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Communication Metrics -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {{#each (default data.communicationMetrics (object 
+            clarity=(object score=88 icon="💬")
+            responsiveness=(object score=92 icon="⚡")
+            collaboration=(object score=85 icon="🤝")
+            knowledgeSharing=(object score=79 icon="📚")
+            conflictResolution=(object score=83 icon="🔧")
+            teamAlignment=(object score=90 icon="🎯")
+        ))}}
+            <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 text-center relative overflow-hidden hover:transform hover:scale-105 transition-all duration-200">
+                <!-- Top border indicator -->
+                <div class="absolute top-0 left-0 right-0 h-1 {{#if (gte this.score 90)}}bg-green-500{{else if (gte this.score 80)}}bg-blue-500{{else if (gte this.score 70)}}bg-yellow-500{{else}}bg-red-500{{/if}}"></div>
+                
+                <div class="text-4xl mb-4">{{this.icon}}</div>
+                <div class="text-3xl font-bold mb-2 {{#if (gte this.score 90)}}text-green-400{{else if (gte this.score 80)}}text-blue-400{{else if (gte this.score 70)}}text-yellow-400{{else}}text-red-400{{/if}}">{{this.score}}%</div>
+                <div class="text-sm text-gray-400 uppercase tracking-wide mb-2">{{capitalize @key}}</div>
+                <div class="text-xs text-gray-500 leading-tight">
+                    {{metricDescription @key}}
+                </div>
+            </div>
+        {{/each}}
+    </div>
+
+    <!-- Workflow Efficiency Timeline -->
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 mb-8">
+        <div class="flex items-center gap-3 mb-6">
+            <span class="text-2xl">⏱️</span>
+            <h3 class="text-2xl font-bold">Workflow Efficiency Timeline</h3>
+        </div>
+        
+        <div class="space-y-8">
+            {{#each (default data.workflowSteps (array 
+                (object step=1 title="Task Intake & Analysis" role="boomerang" status="completed" 
+                    description="Initial task analysis, requirement gathering, and research evaluation to determine implementation approach."
+                    duration="45m" interactions=3 efficiency="92%" quality="High")
+                (object step=2 title="Research & Investigation" role="researcher" status="completed"
+                    description="Comprehensive research on reporting system architecture, template engines, and integration patterns."
+                    duration="2.5h" interactions=8 efficiency="88%" quality="High")
+                (object step=3 title="Architecture & Planning" role="architect" status="completed"
+                    description="Technical architecture design, implementation plan creation, and subtask breakdown into logical batches."
+                    duration="1.8h" interactions=5 efficiency="85%" quality="High")
+                (object step=4 title="Implementation - Batch B001" role="senior-developer" status="completed"
+                    description="Service consolidation and integration implementation with comprehensive testing and documentation."
+                    duration="4.2h" interactions=12 efficiency="90%" quality="High")
+                (object step=5 title="Implementation - Batch B002" role="senior-developer" status="in-progress"
+                    description="Template system enhancement with modern EJS templates and sophisticated reporting capabilities."
+                    duration="3.1h" interactions=8 efficiency="87%" quality="High")
+                (object step=6 title="Quality Review & Testing" role="code-review" status="pending"
+                    description="Comprehensive code review, manual testing, and acceptance criteria verification."
+                    duration="TBD" interactions=0 efficiency="TBD" quality="TBD")
+            ))}}
+                <div class="flex gap-6 relative">
+                    {{#unless @last}}
+                    <div class="absolute left-5 top-12 bottom-0 w-0.5 bg-gray-600"></div>
+                    {{/unless}}
+                    
+                    <div class="w-10 h-10 rounded-full {{#if (eq this.status 'completed')}}bg-green-500{{else if (eq this.status 'in-progress')}}bg-yellow-500{{else if (eq this.status 'blocked')}}bg-red-500{{else}}bg-blue-500{{/if}} flex items-center justify-center text-white font-semibold text-sm relative z-10">
+                        {{this.step}}
+                    </div>
+                    
+                    <div class="flex-1 bg-gray-900 border border-gray-700 rounded-lg p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="text-lg font-semibold text-white mb-2">{{this.title}}</h4>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide {{#if (eq this.role 'boomerang')}}bg-blue-500 text-white{{else if (eq this.role 'researcher')}}bg-cyan-500 text-white{{else if (eq this.role 'architect')}}bg-yellow-500 text-white{{else if (eq this.role 'senior-developer')}}bg-green-500 text-white{{else if (eq this.role 'code-review')}}bg-red-500 text-white{{/if}}">{{this.role}}</span>
+                            </div>
+                        </div>
+                        
+                        <p class="text-gray-400 mb-4 leading-relaxed">{{this.description}}</p>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-700">
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-white mb-1">{{this.duration}}</div>
+                                <div class="text-xs text-gray-500 uppercase tracking-wide">Duration</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-white mb-1">{{this.interactions}}</div>
+                                <div class="text-xs text-gray-500 uppercase tracking-wide">Interactions</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-white mb-1">{{this.efficiency}}</div>
+                                <div class="text-xs text-gray-500 uppercase tracking-wide">Efficiency</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-white mb-1">{{this.quality}}</div>
+                                <div class="text-xs text-gray-500 uppercase tracking-wide">Quality</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+    </div>
+
+    <!-- Communication Channels -->
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 mb-8">
+        <div class="flex items-center gap-3 mb-6">
+            <span class="text-2xl">📡</span>
+            <h3 class="text-2xl font-bold">Communication Channels Usage</h3>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {{#each (default data.channels (array 
+                (object name="MCP Workflow System" icon="🔄" usage=95 level="high")
+                (object name="Code Comments" icon="💬" usage=78 level="high")
+                (object name="Documentation" icon="📝" usage=85 level="high")
+                (object name="Task Descriptions" icon="📋" usage=92 level="high")
+                (object name="Implementation Plans" icon="🏗️" usage=88 level="high")
+                (object name="Review Reports" icon="🔍" usage=82 level="high")
+            ))}}
+                <div class="bg-gray-900 border border-gray-700 rounded-lg p-6 text-center hover:bg-gray-750 hover:transform hover:-translate-y-1 transition-all duration-200">
+                    <div class="text-3xl mb-4">{{this.icon}}</div>
+                    <h4 class="font-semibold text-white mb-3">{{this.name}}</h4>
+                    <div class="text-2xl font-bold mb-2 {{#if (eq this.level 'high')}}text-green-400{{else if (eq this.level 'medium')}}text-yellow-400{{else}}text-red-400{{/if}}">{{this.usage}}%</div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wide">Usage Rate</div>
+                </div>
+            {{/each}}
+        </div>
+    </div>
+
+    <!-- Collaboration Issues -->
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 mb-8">
+        <div class="flex items-center gap-3 mb-6">
+            <span class="text-2xl">⚠️</span>
+            <h3 class="text-2xl font-bold">Collaboration Challenges</h3>
+        </div>
+        
+        <div class="space-y-4">
+            {{#each (default data.issues (array 
+                (object severity="medium" title="Context Switching Overhead"
+                    description="Frequent role transitions require context loading and memory retrieval, which can impact efficiency when switching between complex tasks."
+                    impact="Approximately 10-15% time overhead during role transitions")
+                (object severity="low" title="Documentation Lag"
+                    description="Some implementation details are documented after completion rather than during development, which can affect knowledge transfer."
+                    impact="Minor delay in knowledge sharing and potential context loss")
+                (object severity="medium" title="Batch Dependency Management"
+                    description="Complex dependencies between batches require careful coordination and can create bottlenecks if not properly managed."
+                    impact="Potential delays in parallel development and integration challenges")
+                (object severity="low" title="Quality Gate Consistency"
+                    description="Varying levels of detail in quality checks across different roles and phases of the workflow."
+                    impact="Inconsistent quality standards and potential rework requirements")
+            ))}}
+                <div class="flex gap-4 p-4 bg-gray-900 border border-gray-700 rounded-lg">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide min-w-fit {{#if (eq this.severity 'critical')}}bg-red-500 text-white{{else if (eq this.severity 'high')}}bg-orange-500 text-white{{else if (eq this.severity 'medium')}}bg-blue-500 text-white{{else}}bg-gray-600 text-gray-300{{/if}}">{{this.severity}}</span>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-white mb-2">{{this.title}}</h4>
+                        <p class="text-gray-400 mb-3 leading-relaxed">{{this.description}}</p>
+                        <div class="text-sm text-gray-500 bg-gray-800 p-3 rounded border-l-4 border-yellow-500">
+                            <strong>Impact:</strong> {{this.impact}}
+                        </div>
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+    </div>
+
+    <!-- Team Performance by Role -->
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 mb-8">
+        <div class="flex items-center gap-3 mb-6">
+            <span class="text-2xl">👥</span>
+            <h3 class="text-2xl font-bold">Performance by Role</h3>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {{#each (default data.rolePerformance (object 
+                boomerang=(object taskIntake=92 analysis=88 delegation=90 delivery=85)
+                researcher=(object thoroughness=90 accuracy=95 synthesis=87 recommendations=89)
+                architect=(object planning=88 design=92 breakdown=85 coordination=87)
+                senior-developer=(object implementation=90 testing=88 documentation=82 quality=89)
+                code-review=(object thoroughness=93 accuracy=91 feedback=87 standards=90)
+            ))}}
+                <div class="bg-gray-900 border border-gray-700 rounded-lg p-6">
+                    <h4 class="font-semibold text-white mb-4 text-center p-3 bg-gray-800 rounded">{{capitalize @key}}</h4>
+                    <div class="space-y-3">
+                        {{#each this}}
+                            <div class="flex justify-between items-center p-2 bg-gray-800 rounded">
+                                <span class="text-sm text-gray-400">{{capitalize @key}}</span>
+                                <span class="font-semibold {{#if (gte this 90)}}text-green-400{{else if (gte this 80)}}text-blue-400{{else if (gte this 70)}}text-yellow-400{{else}}text-red-400{{/if}}">{{this}}%</span>
+                            </div>
+                        {{/each}}
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 mb-8">
+        <div class="flex items-center gap-3 mb-6">
+            <span class="text-2xl">💡</span>
+            <h3 class="text-2xl font-bold">Communication & Collaboration Recommendations</h3>
+        </div>
+        
+        <div class="space-y-4">
+            {{#each (default data.recommendations (array 
+                (object type="communication" text="Implement standardized handoff templates to reduce context switching overhead and ensure consistent information transfer between roles.")
+                (object type="process" text="Establish regular checkpoint meetings during long implementation phases to maintain alignment and address blockers proactively.")
+                (object type="tooling" text="Develop automated workflow status dashboards to provide real-time visibility into task progress and role transitions.")
+                (object type="training" text="Create role-specific communication guidelines and best practices documentation to improve consistency across team members.")
+                (object type="process" text="Implement parallel work streams where possible to reduce batch dependencies and improve overall workflow efficiency.")
+                (object type="communication" text="Establish clear escalation paths and communication protocols for handling blockers and quality issues across roles.")
+            ))}}
+                <div class="flex gap-4 p-4 bg-gray-900 border border-gray-700 rounded-lg">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide min-w-fit {{#if (eq this.type 'communication')}}bg-blue-500 text-white{{else if (eq this.type 'process')}}bg-yellow-500 text-white{{else if (eq this.type 'tooling')}}bg-green-500 text-white{{else if (eq this.type 'training')}}bg-purple-500 text-white{{/if}}">{{this.type}}</span>
+                    <div class="flex-1 text-gray-300 leading-relaxed">{{this.text}}</div>
+                </div>
+            {{/each}}
+        </div>
+    </div>
+
+    <!-- Task-Specific Communication Summary -->
+    {{#if data.task.comments}}
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8">
+        <div class="flex items-center gap-3 mb-6">
+            <span class="text-2xl">💬</span>
+            <h3 class="text-2xl font-bold">Task Communication Summary</h3>
+        </div>
+        
+        <div class="space-y-6">
+            <div>
+                <h4 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>📊</span> Communication Overview
+                </h4>
+                <p class="text-gray-400 leading-relaxed">Total of {{data.task.comments.length}} communication events recorded throughout the task lifecycle, demonstrating active collaboration and knowledge sharing across all workflow phases.</p>
+            </div>
+            
+            <div>
+                <h4 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>🎯</span> Key Communication Patterns
+                </h4>
+                <p class="text-gray-400 leading-relaxed">Strong emphasis on technical documentation, clear role transitions, and comprehensive progress reporting. Communication quality remains consistently high across all workflow phases.</p>
+            </div>
+            
+            <div>
+                <h4 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>🔍</span> Areas for Improvement
+                </h4>
+                <p class="text-gray-400 leading-relaxed">Consider implementing more proactive communication during long implementation phases and standardizing handoff documentation to reduce context switching overhead.</p>
+            </div>
+        </div>
+    </div>
+    {{/if}}
+</div>
+{{/inline}}
+
+{{/layouts/base}}

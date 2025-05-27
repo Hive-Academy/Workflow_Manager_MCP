@@ -4,7 +4,7 @@ import { z } from 'zod';
  * Universal Mutation Schema - Leverages Prisma's full mutation capabilities
  * Replaces 20+ individual create/update/delete tools with one powerful tool
  *
- * 🎯 COMPLETE MUTATION REFERENCE:
+ *  COMPLETE MUTATION REFERENCE:
  * This schema provides comprehensive CRUD operations with batch support,
  * transaction management, and relationship handling for all entities.
  *
@@ -13,9 +13,9 @@ import { z } from 'zod';
  * - updateMany: Critical for batch status updates and bulk modifications
  * - Batch transactions: Ensure data consistency across multiple operations
  *
- * 📊 COMPLETE ENTITY FIELD SPECIFICATIONS:
+ *  COMPLETE ENTITY FIELD SPECIFICATIONS:
  *
- * 🔹 TASK ENTITY - Main workflow tasks
+ *  TASK ENTITY - Main workflow tasks
  *   Required: taskId (string), name (string), status (enum), creationDate (DateTime)
  *   Optional: completionDate (DateTime), owner (string), currentMode (enum), priority (enum),
  *            dependencies (string[]), redelegationCount (int), gitBranch (string)
@@ -23,55 +23,55 @@ import { z } from 'zod';
  *                 delegationRecords (1:many), researchReports (1:many), codeReviews (1:many),
  *                 completionReports (1:many), comments (1:many), workflowTransitions (1:many)
  *
- * 🔹 TASK DESCRIPTION ENTITY - Detailed specifications
+ *  TASK DESCRIPTION ENTITY - Detailed specifications
  *   Required: taskId (string), description (string), createdAt (DateTime), updatedAt (DateTime)
  *   Optional: businessRequirements (string), technicalRequirements (string), acceptanceCriteria (string[])
  *   Relationships: task (1:1 required)
  *
- * 🔹 IMPLEMENTATION PLAN ENTITY - Technical implementation plans
+ *  IMPLEMENTATION PLAN ENTITY - Technical implementation plans
  *   Required: taskId (string), overview (string), createdAt (DateTime), updatedAt (DateTime)
  *   Optional: approach (string), technicalDecisions (string), filesToModify (string[]), createdBy (string)
  *   Relationships: task (1:1 required), subtasks (1:many)
  *
- * 🔹 SUBTASK ENTITY - Granular work items (CRITICAL for batch operations)
+ *  SUBTASK ENTITY - Granular work items (CRITICAL for batch operations)
  *   Required: taskId (string), planId (int), name (string), sequenceNumber (int), status (enum)
  *   Optional: description (string), assignedTo (string), estimatedDuration (string),
  *            startedAt (DateTime), completedAt (DateTime), batchId (string), batchTitle (string)
  *   Relationships: task (1:1 required), plan (1:1 required), delegationRecords (1:many), comments (1:many)
  *
- * 🔹 RESEARCH REPORT ENTITY - Research findings
+ *  RESEARCH REPORT ENTITY - Research findings
  *   Required: taskId (string), title (string), createdAt (DateTime), updatedAt (DateTime)
  *   Optional: summary (string), findings (string), recommendations (string), references (string[])
  *   Relationships: task (1:1 required)
  *
- * 🔹 CODE REVIEW REPORT ENTITY - Quality assessments (maps to CodeReview model)
+ *  CODE REVIEW REPORT ENTITY - Quality assessments (maps to CodeReview model)
  *   Required: taskId (string), status (enum), createdAt (DateTime), updatedAt (DateTime)
  *   Optional: summary (string), strengths (string), issues (string), acceptanceCriteriaVerification (JSON),
  *            manualTestingResults (string), requiredChanges (string)
  *   Relationships: task (1:1 required)
  *
- * 🔹 COMPLETION REPORT ENTITY - Task completion summaries
+ *  COMPLETION REPORT ENTITY - Task completion summaries
  *   Required: taskId (string), summary (string), createdAt (DateTime)
  *   Optional: filesModified (string[]), delegationSummary (string), acceptanceCriteriaVerification (JSON)
  *   Relationships: task (1:1 required)
  *
- * 🔹 COMMENT ENTITY - Notes and communications
+ *  COMMENT ENTITY - Notes and communications
  *   Required: taskId (string), mode (enum), content (string), createdAt (DateTime)
  *   Optional: subtaskId (int)
  *   Relationships: task (1:1 required), subtask (1:1 optional)
  *
- * 🔹 DELEGATION RECORD ENTITY - Role transition tracking (maps to DelegationRecord model)
+ *  DELEGATION RECORD ENTITY - Role transition tracking (maps to DelegationRecord model)
  *   Required: taskId (string), fromMode (enum), toMode (enum), delegationTimestamp (DateTime)
  *   Optional: subtaskId (int), completionTimestamp (DateTime), success (boolean),
  *            rejectionReason (string), redelegationCount (int)
  *   Relationships: task (1:1 required), subtask (1:1 optional)
  *
- * 🔹 WORKFLOW TRANSITION ENTITY - State change tracking
+ *  WORKFLOW TRANSITION ENTITY - State change tracking
  *   Required: taskId (string), fromMode (enum), toMode (enum), transitionTimestamp (DateTime)
  *   Optional: reason (string)
  *   Relationships: task (1:1 required)
  *
- * 📋 ENUM VALUE SPECIFICATIONS:
+ *  ENUM VALUE SPECIFICATIONS:
  *
  * 🔸 TASK STATUS: "not-started" | "in-progress" | "needs-review" | "completed" | "needs-changes" | "paused" | "cancelled"
  * 🔸 TASK PRIORITY: "Low" | "Medium" | "High" | "Critical"
@@ -83,15 +83,15 @@ import { z } from 'zod';
 // ===== OPERATION TYPE DEFINITIONS =====
 
 /**
- * 📋 MUTATION OPERATION TYPES:
+ *  MUTATION OPERATION TYPES:
  *
- * 🔹 SINGLE RECORD OPERATIONS:
+ *  SINGLE RECORD OPERATIONS:
  * - 'create': Create a single new record with relationships
  * - 'update': Update a single existing record by ID/conditions
  * - 'upsert': Create if not exists, update if exists (atomic operation)
  * - 'delete': Delete a single record by ID/conditions
  *
- * 🔹 BATCH OPERATIONS (CRITICAL FOR PERFORMANCE):
+ *  BATCH OPERATIONS (CRITICAL FOR PERFORMANCE):
  * - 'createMany': Create multiple records in a single operation (ESSENTIAL for subtasks)
  * - 'updateMany': Update multiple records matching conditions (CRITICAL for status updates)
  * - 'deleteMany': Delete multiple records matching conditions
@@ -107,8 +107,8 @@ export const MutationOperationSchema = z.enum([
   'update',
   'upsert',
   'delete',
-  'createMany', // 🚀 CRITICAL: Batch creation for subtasks
-  'updateMany', // 🚀 CRITICAL: Batch status updates
+  'createMany',
+  'updateMany',
   'deleteMany',
 ]);
 
@@ -117,7 +117,7 @@ export const EntityTypeSchema = z.enum([
   'task',
   'taskDescription',
   'implementationPlan',
-  'subtask', // 🎯 PRIMARY TARGET for batch operations
+  'subtask', //  PRIMARY TARGET for batch operations
   'researchReport',
   'codeReviewReport', // Maps to CodeReview model
   'completionReport',
@@ -129,9 +129,9 @@ export const EntityTypeSchema = z.enum([
 // ===== DATA PAYLOAD SPECIFICATIONS =====
 
 /**
- * 📊 COMPREHENSIVE DATA PAYLOAD EXAMPLES BY OPERATION TYPE:
+ *  COMPREHENSIVE DATA PAYLOAD EXAMPLES BY OPERATION TYPE:
  *
- * 🔹 CREATE SINGLE RECORD EXAMPLES:
+ *  CREATE SINGLE RECORD EXAMPLES:
  *
  * • Task Creation:
  *   {
@@ -258,7 +258,7 @@ export const EntityTypeSchema = z.enum([
  *     reason: "Implementation plan complete, delegating for development"
  *   }
  *
- * 🔹 CREATE MANY RECORDS (CRITICAL FOR SUBTASKS - Implementation Plan Batch Creation):
+ *  CREATE MANY RECORDS (CRITICAL FOR SUBTASKS - Implementation Plan Batch Creation):
  *
  * • Subtasks Batch Creation:
  *   [
@@ -300,7 +300,7 @@ export const EntityTypeSchema = z.enum([
  *     }
  *   ]
  *
- * 🔹 UPDATE SINGLE RECORD EXAMPLES:
+ *  UPDATE SINGLE RECORD EXAMPLES:
  *
  * • Task Status Update:
  *   { status: "completed", completionDate: "2024-01-15T16:00:00Z" }
@@ -320,7 +320,7 @@ export const EntityTypeSchema = z.enum([
  *     technicalDecisions: "Revised to use different JWT library"
  *   }
  *
- * 🔹 UPDATE MANY RECORDS (CRITICAL FOR BATCH STATUS UPDATES):
+ *  UPDATE MANY RECORDS (CRITICAL FOR BATCH STATUS UPDATES):
  *
  * • Batch Status Update (Applied to all records matching where conditions):
  *   { status: "completed", completedAt: "2024-01-15T14:00:00Z" }
@@ -334,7 +334,7 @@ export const EntityTypeSchema = z.enum([
  *   { status: "cancelled" }
  *   WHERE: { taskId: "TSK-006", status: "not-started" }
  *
- * 🔹 RELATIONSHIP OPERATIONS:
+ *  RELATIONSHIP OPERATIONS:
  *
  * • Connect to Existing Records:
  *   { task: { connect: { taskId: "TSK-001" } } }
@@ -360,7 +360,7 @@ export const EntityTypeSchema = z.enum([
  *     }
  *   }
  *
- * 🔹 UPSERT OPERATIONS (Create if not exists, update if exists):
+ *  UPSERT OPERATIONS (Create if not exists, update if exists):
  *
  * • Task Upsert:
  *   WHERE: { taskId: "TSK-006" }
@@ -372,7 +372,7 @@ export const EntityTypeSchema = z.enum([
  *   CREATE: { taskId: "TSK-006", mode: "architect", content: "Initial comment" }
  *   UPDATE: { content: "Updated comment" }
  *
- * 🔹 DELETE OPERATIONS:
+ *  DELETE OPERATIONS:
  *
  * • Single Record Delete:
  *   WHERE: { id: 25 } (Delete comment with ID 25)
@@ -385,21 +385,21 @@ export const EntityTypeSchema = z.enum([
 export const DataPayloadSchema = z
   .record(z.any())
   .describe(
-    '📊 DATA PAYLOAD - Complete mutation data structure:\n\n' +
-      '🔹 SINGLE RECORD CREATION:\n' +
+    ' DATA PAYLOAD - Complete mutation data structure:\n\n' +
+      ' SINGLE RECORD CREATION:\n' +
       '- { taskId: "TSK-001", name: "New Task", status: "not-started", priority: "High" }\n' +
       '- { taskId: "TSK-001", planId: 3, name: "Implement API", sequenceNumber: 1, batchId: "B001" }\n\n' +
-      '🔹 BATCH CREATION (createMany - CRITICAL for subtasks):\n' +
+      ' BATCH CREATION (createMany - CRITICAL for subtasks):\n' +
       '- [{ name: "Setup DB", sequenceNumber: 1 }, { name: "Create API", sequenceNumber: 2 }]\n' +
       '- All records in array must have same structure and required fields\n\n' +
-      '🔹 UPDATE OPERATIONS:\n' +
+      ' UPDATE OPERATIONS:\n' +
       '- { status: "completed", completionDate: "2024-01-15T10:00:00Z" }\n' +
       '- { status: "in-progress", startedAt: "2024-01-15T09:00:00Z" }\n\n' +
-      '🔹 RELATIONSHIP MANAGEMENT:\n' +
+      ' RELATIONSHIP MANAGEMENT:\n' +
       '- { task: { connect: { taskId: "TSK-001" } } } - Connect to existing\n' +
       '- { taskDescription: { create: { description: "..." } } } - Create and connect\n' +
       '- { subtasks: { updateMany: { where: { batchId: "B001" }, data: { status: "completed" } } } }\n\n' +
-      '🔹 UPSERT OPERATIONS:\n' +
+      ' UPSERT OPERATIONS:\n' +
       '- create: { taskId: "TSK-001", name: "New Task" } - Data if creating\n' +
       '- update: { status: "updated" } - Data if updating\n' +
       '- where: { taskId: "TSK-001" } - Condition to check existence',
@@ -409,21 +409,21 @@ export const DataPayloadSchema = z
 export const WhereConditionSchema = z
   .record(z.any())
   .describe(
-    '🔍 WHERE CONDITIONS - Precise record targeting:\n\n' +
-      '🔹 SINGLE RECORD TARGETING:\n' +
+    ' WHERE CONDITIONS - Precise record targeting:\n\n' +
+      ' SINGLE RECORD TARGETING:\n' +
       '- { id: 123 } - By primary key (auto-increment IDs)\n' +
       '- { taskId: "TSK-001" } - By unique identifier\n' +
       '- { taskId: "TSK-001", planId: 3 } - By composite conditions\n\n' +
-      '🔹 BATCH TARGETING (updateMany/deleteMany):\n' +
+      ' BATCH TARGETING (updateMany/deleteMany):\n' +
       '- { batchId: "B001" } - All subtasks in batch B001\n' +
       '- { status: "not-started" } - All records with specific status\n' +
       '- { taskId: "TSK-001", status: { in: ["not-started", "in-progress"] } } - Multiple conditions\n\n' +
-      '🔹 ADVANCED FILTERING:\n' +
+      ' ADVANCED FILTERING:\n' +
       '- { AND: [{ taskId: "TSK-001" }, { status: "not-started" }] } - Multiple conditions\n' +
       '- { OR: [{ status: "completed" }, { status: "cancelled" }] } - Alternative conditions\n' +
       '- { createdAt: { lt: "2024-01-01T00:00:00Z" } } - Date-based filtering\n' +
       '- { sequenceNumber: { gte: 5 } } - Numeric comparisons\n\n' +
-      '🔹 RELATIONSHIP-BASED CONDITIONS:\n' +
+      ' RELATIONSHIP-BASED CONDITIONS:\n' +
       '- { task: { status: "in-progress" } } - Filter by related record properties\n' +
       '- { plan: { createdBy: "architect" } } - Filter by implementation plan creator',
   );
@@ -431,14 +431,14 @@ export const WhereConditionSchema = z
 // ===== ADVANCED OPERATION SCHEMAS =====
 
 /**
- * 🔄 BATCH OPERATION CONFIGURATION:
+ *  BATCH OPERATION CONFIGURATION:
  *
- * 🚀 CRITICAL FOR IMPLEMENTATION PLANS:
+ *  CRITICAL FOR IMPLEMENTATION PLANS:
  * - Create implementation plan + all subtasks in single transaction
  * - Update multiple subtask statuses atomically
  * - Ensure consistency across related operations
  *
- * 🔹 EXAMPLE BATCH OPERATIONS:
+ *  EXAMPLE BATCH OPERATIONS:
  * [
  *   {
  *     "operation": "create",
@@ -479,14 +479,14 @@ export const BatchOperationSchema = z.object({
 });
 
 /**
- * 🔒 TRANSACTION CONTROL - Ensure data consistency:
+ *  TRANSACTION CONTROL - Ensure data consistency:
  *
- * 🔹 BATCH OPERATION TRANSACTIONS:
+ *  BATCH OPERATION TRANSACTIONS:
  * - Essential for createMany/updateMany operations
  * - Ensures all subtasks created/updated together or none
  * - Prevents partial batch completion on errors
  *
- * 🔹 MULTI-ENTITY TRANSACTIONS:
+ *  MULTI-ENTITY TRANSACTIONS:
  * - Group related operations (task + implementation plan + subtasks)
  * - Maintain referential integrity across entities
  * - Rollback all changes if any operation fails
@@ -578,9 +578,9 @@ export const UniversalMutationSchema = z.object({
   entity: EntityTypeSchema.describe('The entity type to mutate'),
 
   data: DataPayloadSchema.optional().describe(
-    '📊 DATA FOR CREATE/UPDATE OPERATIONS:\n\n' +
+    ' DATA FOR CREATE/UPDATE OPERATIONS:\n\n' +
       '🚀 CRITICAL BATCH EXAMPLES:\n\n' +
-      '🔹 CREATE MANY SUBTASKS (Implementation Plan Batch Creation):\n' +
+      ' CREATE MANY SUBTASKS (Implementation Plan Batch Creation):\n' +
       '[\n' +
       '  {\n' +
       '    "taskId": "TSK-005",\n' +
@@ -607,31 +607,31 @@ export const UniversalMutationSchema = z.object({
       '    "batchTitle": "Schema File Enhancement"\n' +
       '  }\n' +
       ']\n\n' +
-      '🔹 UPDATE MANY (Batch Status Updates):\n' +
+      ' UPDATE MANY (Batch Status Updates):\n' +
       '- Data: { "status": "completed", "completedAt": "2024-01-15T10:00:00Z" }\n' +
       '- Where: { "batchId": "B001" } - Updates all subtasks in batch\n\n' +
-      '🔹 SINGLE RECORD OPERATIONS:\n' +
+      ' SINGLE RECORD OPERATIONS:\n' +
       '- Create Task: { "taskId": "TSK-006", "name": "New Feature", "status": "not-started" }\n' +
       '- Update Status: { "status": "in-progress", "startedAt": "2024-01-15T09:00:00Z" }\n' +
       '- Create with Relations: { "taskId": "TSK-006", "taskDescription": { "create": { "description": "..." } } }',
   ),
 
   where: WhereConditionSchema.optional().describe(
-    '🔍 WHERE CONDITIONS FOR UPDATE/DELETE OPERATIONS:\n\n' +
-      '🚀 CRITICAL BATCH TARGETING:\n\n' +
-      '🔹 BATCH OPERATIONS (updateMany/deleteMany):\n' +
+    ' WHERE CONDITIONS FOR UPDATE/DELETE OPERATIONS:\n\n' +
+      ' CRITICAL BATCH TARGETING:\n\n' +
+      ' BATCH OPERATIONS (updateMany/deleteMany):\n' +
       '- { "batchId": "B001" } - Target all subtasks in batch B001\n' +
       '- { "taskId": "TSK-005", "status": "not-started" } - All not-started subtasks for task\n' +
       '- { "assignedTo": "senior-developer", "status": { "in": ["not-started", "in-progress"] } }\n\n' +
-      '🔹 SINGLE RECORD TARGETING:\n' +
+      ' SINGLE RECORD TARGETING:\n' +
       '- { "id": 123 } - By auto-increment primary key\n' +
       '- { "taskId": "TSK-005" } - By unique task identifier\n' +
       '- { "taskId": "TSK-005", "planId": 3 } - By composite foreign keys\n\n' +
-      '🔹 ADVANCED CONDITIONS:\n' +
+      ' ADVANCED CONDITIONS:\n' +
       '- { "AND": [{ "taskId": "TSK-005" }, { "sequenceNumber": { "gte": 3 } }] }\n' +
       '- { "OR": [{ "status": "completed" }, { "status": "cancelled" }] }\n' +
       '- { "createdAt": { "lt": "2024-01-01T00:00:00Z" } } - Date-based cleanup\n\n' +
-      '🔹 RELATIONSHIP-BASED:\n' +
+      ' RELATIONSHIP-BASED:\n' +
       '- { "task": { "status": "cancelled" } } - Target by related task status\n' +
       '- { "plan": { "createdBy": "architect" } } - Target by plan creator',
   ),
@@ -640,15 +640,15 @@ export const UniversalMutationSchema = z.object({
     .record(z.any())
     .optional()
     .describe(
-      '🔗 INCLUDE RELATED DATA IN RESPONSE:\n\n' +
-        '🔹 ESSENTIAL INCLUDES:\n' +
+      ' INCLUDE RELATED DATA IN RESPONSE:\n\n' +
+        ' ESSENTIAL INCLUDES:\n' +
         '- { "task": true } - Include parent task information\n' +
         '- { "plan": true } - Include implementation plan details\n' +
         '- { "comments": true } - Include related comments\n\n' +
-        '🔹 NESTED INCLUDES:\n' +
+        ' NESTED INCLUDES:\n' +
         '- { "task": { "include": { "taskDescription": true } } }\n' +
         '- { "plan": { "include": { "subtasks": true } } }\n\n' +
-        '🔹 FILTERED INCLUDES:\n' +
+        ' FILTERED INCLUDES:\n' +
         '- { "comments": { "where": { "mode": "architect" }, "orderBy": { "createdAt": "desc" } } }',
     ),
 
@@ -656,11 +656,11 @@ export const UniversalMutationSchema = z.object({
     .record(z.any())
     .optional()
     .describe(
-      '🎯 SELECT SPECIFIC FIELDS TO RETURN:\n\n' +
-        '🔹 PERFORMANCE OPTIMIZATION:\n' +
+      ' SELECT SPECIFIC FIELDS TO RETURN:\n\n' +
+        ' PERFORMANCE OPTIMIZATION:\n' +
         '- { "id": true, "status": true, "completedAt": true } - Essential fields only\n' +
         '- { "taskId": true, "name": true, "batchId": true } - Batch operation results\n\n' +
-        '🔹 RELATIONSHIP SELECTION:\n' +
+        ' RELATIONSHIP SELECTION:\n' +
         '- { "task": { "select": { "taskId": true, "name": true } } }\n' +
         '- { "plan": { "select": { "overview": true, "createdBy": true } } }',
     ),

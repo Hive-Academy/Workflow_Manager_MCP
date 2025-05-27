@@ -4,19 +4,19 @@ import { z } from 'zod';
  * Workflow Operations Schema - Specialized workflow state management and transitions
  * Handles complex workflow transitions, delegations, and role-based operations
  *
- * 🎯 COMPLETE WORKFLOW REFERENCE:
+ *  COMPLETE WORKFLOW REFERENCE:
  * This schema provides comprehensive workflow state management with role-based delegation,
  * completion tracking, escalation handling, and batch workflow operations.
  *
- * 🚀 CRITICAL WORKFLOW OPERATIONS:
+ *  CRITICAL WORKFLOW OPERATIONS:
  * - delegate: Essential for role-based task handoffs with validation
  * - complete: Critical for task completion with evidence tracking
  * - transition: Important for status changes with workflow validation
  * - escalate: Necessary for handling blockers and quality issues
  *
- * 📊 COMPLETE WORKFLOW FIELD SPECIFICATIONS:
+ *  COMPLETE WORKFLOW FIELD SPECIFICATIONS:
  *
- * 🔹 WORKFLOW OPERATION TYPES (operation):
+ *  WORKFLOW OPERATION TYPES (operation):
  * - delegate: Hand off task/subtask between roles (ESSENTIAL)
  * - complete: Mark work completed with evidence (CRITICAL)
  * - transition: Change status with validation (IMPORTANT)
@@ -26,14 +26,14 @@ import { z } from 'zod';
  * - resume: Resume paused work (restores context)
  * - cancel: Terminate task entirely (requires cleanup)
  *
- * 🔹 WORKFLOW ROLES (fromRole/toRole):
+ *  WORKFLOW ROLES (fromRole/toRole):
  * - boomerang: Task coordination, intake, final delivery (ENTRY/EXIT)
  * - researcher: Knowledge gathering, analysis (KNOWLEDGE specialist)
  * - architect: Technical planning, design (DESIGN specialist)
  * - senior-developer: Implementation, coding (IMPLEMENTATION specialist)
  * - code-review: Quality assurance, testing (QUALITY specialist)
  *
- * 🔹 TASK STATUS VALUES (newStatus):
+ *  TASK STATUS VALUES (newStatus):
  * - not-started: Initial state, awaiting assignment
  * - in-progress: Active work by assigned role
  * - needs-review: Work complete, awaiting quality review
@@ -42,41 +42,41 @@ import { z } from 'zod';
  * - paused: Work temporarily suspended
  * - cancelled: Task terminated with cleanup
  *
- * 🔹 COMPLETION DATA FIELDS (completionData):
+ *  COMPLETION DATA FIELDS (completionData):
  * - summary: Work accomplishment summary (REQUIRED)
  * - evidence: Supporting documentation and proof
  * - filesModified: Array of changed files
  * - acceptanceCriteriaVerification: JSON verification results
  *
- * 🔹 REJECTION DATA FIELDS (rejectionData):
+ *  REJECTION DATA FIELDS (rejectionData):
  * - reason: Rejection explanation (REQUIRED)
  * - severity: Issue severity (low/medium/high/critical)
  * - requiredChanges: Specific change requirements
  * - blockers: Array of blocking issues
  *
- * 🔹 SCHEDULING FIELDS (scheduling):
+ *  SCHEDULING FIELDS (scheduling):
  * - deadline: ISO date deadline for operation
  * - estimatedDuration: Time estimate for operation
  * - priority: Operation priority (low/medium/high/urgent)
  * - scheduleFor: ISO date to schedule operation
  *
- * 🔹 CONSTRAINT FIELDS (constraints):
+ *  CONSTRAINT FIELDS (constraints):
  * - forceTransition: Force invalid transitions (default: false)
  * - allowSkipValidation: Skip validation checks (default: false)
  * - createAuditTrail: Create audit entry (default: true)
  * - notifyStakeholders: Send notifications (default: true)
  *
- * 🔹 BATCH OPERATION FIELDS (batch):
+ *  BATCH OPERATION FIELDS (batch):
  * - taskIds: Array of task IDs for batch operations
  * - parallelExecution: Execute in parallel (default: false)
  * - continueOnError: Continue if individual ops fail (default: false)
  *
- * 🔹 CONDITION FIELDS (conditions):
+ *  CONDITION FIELDS (conditions):
  * - requiredRole: Required current role for operation
  * - requiredStatus: Required current status for operation
  * - customConditions: Array of custom condition checks
  *
- * 🔹 METADATA FIELDS (metadata):
+ *  METADATA FIELDS (metadata):
  * - Additional operation-specific data as key-value pairs
  * - Used for custom workflow extensions and integrations
  */
@@ -84,68 +84,68 @@ import { z } from 'zod';
 // ===== WORKFLOW OPERATION DEFINITIONS =====
 
 /**
- * 📋 WORKFLOW OPERATION TYPES:
+ *  WORKFLOW OPERATION TYPES:
  *
- * 🔹 CORE WORKFLOW OPERATIONS:
+ *  CORE WORKFLOW OPERATIONS:
  * - 'delegate': Hand off task/subtask from one role to another (ESSENTIAL for workflow)
  * - 'complete': Mark task/operation as completed with evidence (CRITICAL for closure)
  * - 'transition': Change task status with workflow validation (IMPORTANT for state management)
  *
- * 🔹 ESCALATION & MANAGEMENT:
+ *  ESCALATION & MANAGEMENT:
  * - 'escalate': Escalate issues, blockers, or quality concerns (NECESSARY for problem resolution)
  * - 'reassign': Change task assignment within same role or to different role
  * - 'pause': Temporarily halt work on task (preserves context for resumption)
  * - 'resume': Resume paused work (restores previous context and state)
  * - 'cancel': Cancel task entirely (requires proper cleanup and notification)
  *
- * 💡 WORKFLOW OPERATION BENEFITS:
+ *  WORKFLOW OPERATION BENEFITS:
  * - Role Validation: Ensures proper role transitions and permissions
  * - State Consistency: Maintains workflow state integrity across operations
  * - Audit Trail: Complete tracking of all workflow changes and decisions
  * - Evidence Tracking: Documents completion criteria and verification results
  */
 export const WorkflowOperationSchema = z.enum([
-  'delegate', // 🚀 CRITICAL: Role-based task handoffs
-  'complete', // 🚀 CRITICAL: Task completion with evidence
-  'transition', // 🔄 IMPORTANT: Status changes with validation
-  'escalate', // ⚠️ NECESSARY: Issue escalation and problem resolution
-  'reassign', // 🔄 Role reassignment within workflow
-  'pause', // ⏸️ Temporary work suspension
-  'resume', // ▶️ Resume paused work
-  'cancel', // ❌ Task cancellation with cleanup
+  'delegate', //  CRITICAL: Role-based task handoffs
+  'complete', //  CRITICAL: Task completion with evidence
+  'transition', //  IMPORTANT: Status changes with validation
+  'escalate', //  NECESSARY: Issue escalation and problem resolution
+  'reassign', //  Role reassignment within workflow
+  'pause', //  Temporary work suspension
+  'resume', //  Resume paused work
+  'cancel', // Task cancellation with cleanup
 ]);
 
 /**
- * 📋 WORKFLOW ROLE DEFINITIONS:
+ *  WORKFLOW ROLE DEFINITIONS:
  *
- * 🔹 ROLE HIERARCHY & RESPONSIBILITIES:
+ *  ROLE HIERARCHY & RESPONSIBILITIES:
  * - 'boomerang': Task intake, analysis, research evaluation, final delivery (ENTRY/EXIT point)
  * - 'researcher': In-depth research, knowledge gathering, option evaluation (KNOWLEDGE specialist)
  * - 'architect': Technical planning, implementation design, subtask creation (DESIGN specialist)
  * - 'senior-developer': Code implementation, testing, technical execution (IMPLEMENTATION specialist)
  * - 'code-review': Quality assurance, manual testing, approval/rejection (QUALITY specialist)
  *
- * 🔹 TYPICAL DELEGATION FLOW:
+ *  TYPICAL DELEGATION FLOW:
  * boomerang → researcher → boomerang → architect → senior-developer → architect → code-review → boomerang
  *
- * 🔹 ROLE TRANSITION RULES:
+ *  ROLE TRANSITION RULES:
  * - Each role has specific entry/exit criteria
  * - Delegation requires proper handoff documentation
  * - Role validation ensures appropriate skill matching
  * - Escalation paths defined for each role transition
  */
 export const WorkflowRoleSchema = z.enum([
-  'boomerang', // 🪃 ENTRY/EXIT: Task coordination and delivery
-  'researcher', // 🔬 KNOWLEDGE: Research and analysis
-  'architect', // 🏛️ DESIGN: Technical planning and architecture
-  'senior-developer', // 👨‍💻 IMPLEMENTATION: Code development and testing
-  'code-review', // 🔍 QUALITY: Review and validation
+  'boomerang',
+  'researcher',
+  'architect',
+  'senior-developer',
+  'code-review',
 ]);
 
 /**
- * 📋 TASK STATUS DEFINITIONS:
+ *  TASK STATUS DEFINITIONS:
  *
- * 🔹 WORKFLOW STATUS PROGRESSION:
+ *  WORKFLOW STATUS PROGRESSION:
  * - 'not-started': Initial state, awaiting role assignment
  * - 'in-progress': Active work in progress by assigned role
  * - 'needs-review': Work completed, awaiting quality review
@@ -154,7 +154,7 @@ export const WorkflowRoleSchema = z.enum([
  * - 'paused': Work temporarily suspended (preserves context)
  * - 'cancelled': Task terminated (requires cleanup)
  *
- * 🔹 STATUS TRANSITION RULES:
+ *  STATUS TRANSITION RULES:
  * - not-started → in-progress (via delegation)
  * - in-progress → needs-review (via completion)
  * - needs-review → completed (via approval)
@@ -163,30 +163,30 @@ export const WorkflowRoleSchema = z.enum([
  * - Any status → paused/cancelled (via management operations)
  */
 export const TaskStatusSchema = z.enum([
-  'not-started', // 🆕 Initial state
-  'in-progress', // 🔄 Active work
-  'needs-review', // 👀 Awaiting review
-  'completed', // ✅ Finished and approved
-  'needs-changes', // 🔧 Requires modifications
-  'paused', // ⏸️ Temporarily suspended
-  'cancelled', // ❌ Terminated
+  'not-started',
+  'in-progress',
+  'needs-review',
+  'completed',
+  'needs-changes',
+  'paused',
+  'cancelled',
 ]);
 
 /**
- * 📋 COMPLETION DATA SCHEMA:
+ *  COMPLETION DATA SCHEMA:
  * Comprehensive data structure for task/operation completion
  */
 export const CompletionDataSchema = z.object({
   summary: z
     .string()
     .describe(
-      '📝 COMPLETION SUMMARY - Concise description of work accomplished (REQUIRED):\n\n' +
-        '🔹 EFFECTIVE SUMMARY PATTERNS:\n' +
+      ' COMPLETION SUMMARY - Concise description of work accomplished (REQUIRED):\n\n' +
+        ' EFFECTIVE SUMMARY PATTERNS:\n' +
         '- "Research complete: Evaluated 5 options, recommended React Query for state management"\n' +
         '- "Implementation complete: All 8 subtasks finished, manual testing passed"\n' +
         '- "Code review complete: APPROVED - All acceptance criteria verified"\n' +
         '- "Architecture complete: Implementation plan created with 3 batches, 12 subtasks"\n\n' +
-        '🔹 SUMMARY REQUIREMENTS:\n' +
+        ' SUMMARY REQUIREMENTS:\n' +
         '- Specific accomplishments with quantifiable results\n' +
         '- Key decisions made and rationale\n' +
         '- Quality verification status\n' +
@@ -197,13 +197,13 @@ export const CompletionDataSchema = z.object({
     .record(z.any())
     .optional()
     .describe(
-      '📊 COMPLETION EVIDENCE - Supporting documentation and proof of completion:\n\n' +
-        '🔹 EVIDENCE TYPES:\n' +
+      ' COMPLETION EVIDENCE - Supporting documentation and proof of completion:\n\n' +
+        ' EVIDENCE TYPES:\n' +
         '- testResults: { "manual": "passed", "unit": "98% coverage", "integration": "all passed" }\n' +
         '- codeMetrics: { "linesAdded": 245, "filesModified": 8, "complexity": "low" }\n' +
         '- qualityChecks: { "linting": "passed", "security": "no issues", "performance": "optimized" }\n' +
         '- acceptanceCriteria: { "criterion1": "verified", "criterion2": "verified" }\n\n' +
-        '🔹 EVIDENCE STRUCTURE:\n' +
+        ' EVIDENCE STRUCTURE:\n' +
         '- Key-value pairs with descriptive keys\n' +
         '- Quantifiable metrics where possible\n' +
         '- Status indicators (passed/failed/verified)\n' +
@@ -214,12 +214,12 @@ export const CompletionDataSchema = z.object({
     .array(z.string())
     .optional()
     .describe(
-      '📁 FILES MODIFIED - Array of files changed during the operation:\n\n' +
-        '🔹 FILE PATH EXAMPLES:\n' +
+      ' FILES MODIFIED - Array of files changed during the operation:\n\n' +
+        ' FILE PATH EXAMPLES:\n' +
         '- ["src/components/UserDashboard.tsx", "src/services/api.service.ts"]\n' +
         '- ["docs/implementation-plan.md", "tests/integration/api.test.ts"]\n' +
         '- ["schema/universal-query.schema.ts", "descriptions/query.description.ts"]\n\n' +
-        '🔹 PATH REQUIREMENTS:\n' +
+        ' PATH REQUIREMENTS:\n' +
         '- Relative paths from project root\n' +
         '- Include all significant file changes\n' +
         '- Group related changes logically\n' +
@@ -230,12 +230,12 @@ export const CompletionDataSchema = z.object({
     .record(z.any())
     .optional()
     .describe(
-      '✅ ACCEPTANCE CRITERIA VERIFICATION - JSON verification results:\n\n' +
-        '🔹 VERIFICATION STRUCTURE:\n' +
+      ' ACCEPTANCE CRITERIA VERIFICATION - JSON verification results:\n\n' +
+        ' VERIFICATION STRUCTURE:\n' +
         '- { "criterion1": { "status": "verified", "evidence": "Manual testing passed" } }\n' +
         '- { "criterion2": { "status": "verified", "evidence": "Code review approved" } }\n' +
         '- { "criterion3": { "status": "pending", "reason": "Awaiting deployment" } }\n\n' +
-        '🔹 VERIFICATION STATUSES:\n' +
+        ' VERIFICATION STATUSES:\n' +
         '- "verified": Criterion fully satisfied with evidence\n' +
         '- "partial": Partially satisfied, needs completion\n' +
         '- "pending": Awaiting verification or dependencies\n' +
@@ -244,20 +244,20 @@ export const CompletionDataSchema = z.object({
 });
 
 /**
- * 📋 REJECTION DATA SCHEMA:
+ *  REJECTION DATA SCHEMA:
  * Comprehensive data structure for escalation and rejection handling
  */
 export const RejectionDataSchema = z.object({
   reason: z
     .string()
     .describe(
-      '❌ REJECTION REASON - Clear explanation for rejection or escalation (REQUIRED):\n\n' +
-        '🔹 EFFECTIVE REJECTION REASONS:\n' +
+      'REJECTION REASON - Clear explanation for rejection or escalation (REQUIRED):\n\n' +
+        ' EFFECTIVE REJECTION REASONS:\n' +
         '- "Security vulnerability: SQL injection risk in user input validation"\n' +
         '- "Performance issue: API response time exceeds 2s requirement"\n' +
         '- "Missing functionality: User authentication not implemented"\n' +
         '- "Code quality: Violates SOLID principles, needs refactoring"\n\n' +
-        '🔹 REASON REQUIREMENTS:\n' +
+        ' REASON REQUIREMENTS:\n' +
         '- Specific issue identification\n' +
         '- Impact assessment\n' +
         '- Reference to standards or requirements\n' +
@@ -268,13 +268,13 @@ export const RejectionDataSchema = z.object({
     .enum(['low', 'medium', 'high', 'critical'])
     .optional()
     .describe(
-      '⚠️ ISSUE SEVERITY - Impact level of the rejection or escalation:\n\n' +
-        '🔹 SEVERITY LEVELS:\n' +
+      ' ISSUE SEVERITY - Impact level of the rejection or escalation:\n\n' +
+        ' SEVERITY LEVELS:\n' +
         '- "low": Minor issues, cosmetic problems, non-blocking\n' +
         '- "medium": Functional issues, performance concerns, moderate impact\n' +
         '- "high": Security issues, major functionality gaps, significant impact\n' +
         '- "critical": System-breaking issues, security vulnerabilities, blocking\n\n' +
-        '🔹 SEVERITY GUIDELINES:\n' +
+        ' SEVERITY GUIDELINES:\n' +
         '- Consider user impact and business risk\n' +
         '- Evaluate technical debt implications\n' +
         '- Assess security and compliance requirements\n' +
@@ -286,12 +286,12 @@ export const RejectionDataSchema = z.object({
     .optional()
     .describe(
       '🔧 REQUIRED CHANGES - Specific modifications needed to address issues:\n\n' +
-        '🔹 CHANGE SPECIFICATION EXAMPLES:\n' +
+        ' CHANGE SPECIFICATION EXAMPLES:\n' +
         '- "Add input sanitization to all user-facing forms using validator.js"\n' +
         '- "Implement caching layer to reduce API response time below 1s"\n' +
         '- "Add comprehensive error handling with user-friendly messages"\n' +
         '- "Refactor UserService to follow single responsibility principle"\n\n' +
-        '🔹 CHANGE REQUIREMENTS:\n' +
+        ' CHANGE REQUIREMENTS:\n' +
         '- Specific, actionable instructions\n' +
         '- Technical implementation guidance\n' +
         '- Quality standards and acceptance criteria\n' +
@@ -303,11 +303,11 @@ export const RejectionDataSchema = z.object({
     .optional()
     .describe(
       '🚧 BLOCKING ISSUES - Array of issues preventing progress:\n\n' +
-        '🔹 BLOCKER EXAMPLES:\n' +
+        ' BLOCKER EXAMPLES:\n' +
         '- ["External API dependency not available", "Database schema changes required"]\n' +
         '- ["Missing design specifications", "Unclear business requirements"]\n' +
         '- ["Technical expertise gap", "Resource allocation conflicts"]\n\n' +
-        '🔹 BLOCKER DOCUMENTATION:\n' +
+        ' BLOCKER DOCUMENTATION:\n' +
         '- Clear issue identification\n' +
         '- Impact on workflow progression\n' +
         '- Potential resolution approaches\n' +
@@ -316,7 +316,7 @@ export const RejectionDataSchema = z.object({
 });
 
 /**
- * 📋 SCHEDULING SCHEMA:
+ *  SCHEDULING SCHEMA:
  * Comprehensive scheduling and timing information for workflow operations
  */
 export const SchedulingSchema = z.object({
@@ -324,12 +324,12 @@ export const SchedulingSchema = z.object({
     .string()
     .optional()
     .describe(
-      '⏰ OPERATION DEADLINE - ISO date deadline for the workflow operation:\n\n' +
-        '🔹 DEADLINE EXAMPLES:\n' +
+      ' OPERATION DEADLINE - ISO date deadline for the workflow operation:\n\n' +
+        ' DEADLINE EXAMPLES:\n' +
         '- "2024-01-20T17:00:00Z": End of business day deadline\n' +
         '- "2024-01-22T09:00:00Z": Start of next business day\n' +
         '- "2024-01-25T23:59:59Z": End of sprint deadline\n\n' +
-        '🔹 DEADLINE CONSIDERATIONS:\n' +
+        ' DEADLINE CONSIDERATIONS:\n' +
         '- Business hours and timezone alignment\n' +
         '- Sprint and milestone boundaries\n' +
         '- Dependency and integration requirements\n' +
@@ -340,13 +340,13 @@ export const SchedulingSchema = z.object({
     .string()
     .optional()
     .describe(
-      '⏱️ ESTIMATED DURATION - Time estimate for completing the operation:\n\n' +
-        '🔹 DURATION EXAMPLES:\n' +
+      ' ESTIMATED DURATION - Time estimate for completing the operation:\n\n' +
+        ' DURATION EXAMPLES:\n' +
         '- "30 minutes": Quick fixes and minor updates\n' +
         '- "2 hours": Feature implementation or complex debugging\n' +
         '- "1 day": Major feature development or comprehensive testing\n' +
         '- "3 days": Complex integration or architectural changes\n\n' +
-        '🔹 ESTIMATION GUIDELINES:\n' +
+        ' ESTIMATION GUIDELINES:\n' +
         '- Include development, testing, and review time\n' +
         '- Factor in complexity and unknowns\n' +
         '- Consider team experience and expertise\n' +
@@ -357,13 +357,13 @@ export const SchedulingSchema = z.object({
     .enum(['low', 'medium', 'high', 'urgent'])
     .optional()
     .describe(
-      '🎯 OPERATION PRIORITY - Urgency level for the workflow operation:\n\n' +
-        '🔹 PRIORITY LEVELS:\n' +
+      ' OPERATION PRIORITY - Urgency level for the workflow operation:\n\n' +
+        ' PRIORITY LEVELS:\n' +
         '- "low": Nice-to-have improvements, non-critical enhancements\n' +
         '- "medium": Standard feature development, planned improvements\n' +
         '- "high": Important features, significant business value\n' +
         '- "urgent": Critical fixes, blocking issues, security vulnerabilities\n\n' +
-        '🔹 PRIORITY FACTORS:\n' +
+        ' PRIORITY FACTORS:\n' +
         '- Business impact and user value\n' +
         '- Technical risk and dependencies\n' +
         '- Timeline constraints and deadlines\n' +
@@ -374,12 +374,12 @@ export const SchedulingSchema = z.object({
     .string()
     .optional()
     .describe(
-      '📅 SCHEDULE FOR - ISO date to schedule the operation for execution:\n\n' +
-        '🔹 SCHEDULING EXAMPLES:\n' +
+      ' SCHEDULE FOR - ISO date to schedule the operation for execution:\n\n' +
+        ' SCHEDULING EXAMPLES:\n' +
         '- "2024-01-16T09:00:00Z": Next business day morning\n' +
         '- "2024-01-19T14:00:00Z": Specific afternoon slot\n' +
         '- "2024-01-22T08:00:00Z": Start of next sprint\n\n' +
-        '🔹 SCHEDULING CONSIDERATIONS:\n' +
+        ' SCHEDULING CONSIDERATIONS:\n' +
         '- Team availability and capacity\n' +
         '- Dependency completion requirements\n' +
         '- Integration and deployment windows\n' +
@@ -388,7 +388,7 @@ export const SchedulingSchema = z.object({
 });
 
 /**
- * 📋 CONSTRAINTS SCHEMA:
+ *  CONSTRAINTS SCHEMA:
  * Workflow operation constraints and validation controls
  */
 export const ConstraintsSchema = z.object({
@@ -396,69 +396,69 @@ export const ConstraintsSchema = z.object({
     .boolean()
     .default(false)
     .describe(
-      '🔧 FORCE TRANSITION - Force workflow transition even if validation fails:\n\n' +
-        '🔹 FORCE TRANSITION USAGE:\n' +
+      ' FORCE TRANSITION - Force workflow transition even if validation fails:\n\n' +
+        ' FORCE TRANSITION USAGE:\n' +
         '- Emergency situations requiring immediate action\n' +
         '- Administrative overrides for exceptional cases\n' +
         '- Recovery from workflow state corruption\n' +
         '- Testing and development scenarios\n\n' +
-        '⚠️ CAUTION: Use sparingly as it bypasses safety checks',
+        ' CAUTION: Use sparingly as it bypasses safety checks',
     ),
 
   allowSkipValidation: z
     .boolean()
     .default(false)
     .describe(
-      '⚡ SKIP VALIDATION - Allow skipping standard validation checks:\n\n' +
-        '🔹 SKIP VALIDATION SCENARIOS:\n' +
+      ' SKIP VALIDATION - Allow skipping standard validation checks:\n\n' +
+        ' SKIP VALIDATION SCENARIOS:\n' +
         '- Performance-critical operations\n' +
         '- Bulk operations with pre-validated data\n' +
         '- Administrative maintenance tasks\n' +
         '- Development and testing environments\n\n' +
-        '⚠️ CAUTION: May compromise data integrity and workflow consistency',
+        ' CAUTION: May compromise data integrity and workflow consistency',
     ),
 
   createAuditTrail: z
     .boolean()
     .default(true)
     .describe(
-      '📋 CREATE AUDIT TRAIL - Generate audit trail entry for the operation:\n\n' +
-        '🔹 AUDIT TRAIL BENEFITS:\n' +
+      ' CREATE AUDIT TRAIL - Generate audit trail entry for the operation:\n\n' +
+        ' AUDIT TRAIL BENEFITS:\n' +
         '- Complete operation history tracking\n' +
         '- Compliance and governance requirements\n' +
         '- Debugging and troubleshooting support\n' +
         '- Performance and workflow analysis\n\n' +
-        '✅ RECOMMENDED: Keep enabled for production environments',
+        ' RECOMMENDED: Keep enabled for production environments',
     ),
 
   notifyStakeholders: z
     .boolean()
     .default(true)
     .describe(
-      '📢 NOTIFY STAKEHOLDERS - Send notifications to relevant stakeholders:\n\n' +
-        '🔹 NOTIFICATION RECIPIENTS:\n' +
+      ' NOTIFY STAKEHOLDERS - Send notifications to relevant stakeholders:\n\n' +
+        ' NOTIFICATION RECIPIENTS:\n' +
         '- Role assignees and team members\n' +
         '- Project managers and stakeholders\n' +
         '- Quality assurance and review teams\n' +
         '- Integration and deployment teams\n\n' +
-        '✅ RECOMMENDED: Keep enabled for team coordination',
+        ' RECOMMENDED: Keep enabled for team coordination',
     ),
 });
 
 /**
- * 📋 BATCH OPERATIONS SCHEMA:
+ *  BATCH OPERATIONS SCHEMA:
  * Configuration for batch workflow operations across multiple tasks
  */
 export const BatchOperationsSchema = z.object({
   taskIds: z
     .array(z.string())
     .describe(
-      '📦 TASK IDS - Array of task IDs for batch workflow operations:\n\n' +
-        '🔹 BATCH OPERATION EXAMPLES:\n' +
+      ' TASK IDS - Array of task IDs for batch workflow operations:\n\n' +
+        ' BATCH OPERATION EXAMPLES:\n' +
         '- ["TSK-001", "TSK-002", "TSK-003"]: Related feature tasks\n' +
         '- ["TSK-BUG-001", "TSK-BUG-002"]: Bug fix batch\n' +
         '- ["TSK-REFACTOR-001", "TSK-REFACTOR-002"]: Refactoring batch\n\n' +
-        '🔹 BATCH CONSIDERATIONS:\n' +
+        ' BATCH CONSIDERATIONS:\n' +
         '- Logical grouping of related tasks\n' +
         '- Dependency management across tasks\n' +
         '- Resource allocation and capacity\n' +
@@ -469,12 +469,12 @@ export const BatchOperationsSchema = z.object({
     .boolean()
     .default(false)
     .describe(
-      '⚡ PARALLEL EXECUTION - Execute batch operations in parallel:\n\n' +
-        '🔹 PARALLEL EXECUTION BENEFITS:\n' +
+      ' PARALLEL EXECUTION - Execute batch operations in parallel:\n\n' +
+        ' PARALLEL EXECUTION BENEFITS:\n' +
         '- Faster completion for independent tasks\n' +
         '- Better resource utilization\n' +
         '- Reduced overall timeline\n\n' +
-        '🔹 PARALLEL EXECUTION RISKS:\n' +
+        ' PARALLEL EXECUTION RISKS:\n' +
         '- Dependency conflicts and race conditions\n' +
         '- Resource contention and bottlenecks\n' +
         '- Coordination and synchronization complexity',
@@ -484,12 +484,12 @@ export const BatchOperationsSchema = z.object({
     .boolean()
     .default(false)
     .describe(
-      '🔄 CONTINUE ON ERROR - Continue batch processing if individual operations fail:\n\n' +
-        '🔹 CONTINUE ON ERROR SCENARIOS:\n' +
+      ' CONTINUE ON ERROR - Continue batch processing if individual operations fail:\n\n' +
+        ' CONTINUE ON ERROR SCENARIOS:\n' +
         '- Non-critical operations with acceptable failures\n' +
         '- Data migration and cleanup operations\n' +
         '- Bulk updates with partial success tolerance\n\n' +
-        '🔹 ERROR HANDLING CONSIDERATIONS:\n' +
+        ' ERROR HANDLING CONSIDERATIONS:\n' +
         '- Error collection and reporting\n' +
         '- Rollback and recovery strategies\n' +
         '- Partial success communication',
@@ -497,17 +497,17 @@ export const BatchOperationsSchema = z.object({
 });
 
 /**
- * 📋 CONDITIONS SCHEMA:
+ *  CONDITIONS SCHEMA:
  * Conditions that must be met for workflow operations to proceed
  */
 export const ConditionsSchema = z.object({
   requiredRole: WorkflowRoleSchema.optional().describe(
-    '👤 REQUIRED ROLE - Role that must be current for the operation to proceed:\n\n' +
-      '🔹 ROLE VALIDATION EXAMPLES:\n' +
+    ' REQUIRED ROLE - Role that must be current for the operation to proceed:\n\n' +
+      ' ROLE VALIDATION EXAMPLES:\n' +
       '- "architect": Only architect can delegate to senior-developer\n' +
       '- "code-review": Only code-review can approve or reject\n' +
       '- "boomerang": Only boomerang can perform final delivery\n\n' +
-      '🔹 ROLE VALIDATION BENEFITS:\n' +
+      ' ROLE VALIDATION BENEFITS:\n' +
       '- Workflow integrity and consistency\n' +
       '- Permission and authorization control\n' +
       '- Audit trail and accountability\n' +
@@ -515,12 +515,12 @@ export const ConditionsSchema = z.object({
   ),
 
   requiredStatus: TaskStatusSchema.optional().describe(
-    '📊 REQUIRED STATUS - Status that must be current for the operation to proceed:\n\n' +
-      '🔹 STATUS VALIDATION EXAMPLES:\n' +
+    ' REQUIRED STATUS - Status that must be current for the operation to proceed:\n\n' +
+      ' STATUS VALIDATION EXAMPLES:\n' +
       '- "in-progress": Task must be active for completion\n' +
       '- "needs-review": Task must be ready for review operations\n' +
       '- "needs-changes": Task must need changes for reassignment\n\n' +
-      '🔹 STATUS VALIDATION BENEFITS:\n' +
+      ' STATUS VALIDATION BENEFITS:\n' +
       '- Workflow state consistency\n' +
       '- Operation sequence validation\n' +
       '- Data integrity protection\n' +
@@ -531,12 +531,12 @@ export const ConditionsSchema = z.object({
     .array(z.string())
     .optional()
     .describe(
-      '🔧 CUSTOM CONDITIONS - Array of custom condition checks to perform:\n\n' +
-        '🔹 CUSTOM CONDITION EXAMPLES:\n' +
+      ' CUSTOM CONDITIONS - Array of custom condition checks to perform:\n\n' +
+        ' CUSTOM CONDITION EXAMPLES:\n' +
         '- ["all_subtasks_completed", "acceptance_criteria_verified"]\n' +
         '- ["security_scan_passed", "performance_tests_passed"]\n' +
         '- ["dependencies_resolved", "integration_tests_passed"]\n\n' +
-        '🔹 CUSTOM CONDITION BENEFITS:\n' +
+        ' CUSTOM CONDITION BENEFITS:\n' +
         '- Business rule enforcement\n' +
         '- Quality gate validation\n' +
         '- Integration requirement checks\n' +
@@ -545,17 +545,17 @@ export const ConditionsSchema = z.object({
 });
 
 /**
- * 📋 MAIN WORKFLOW OPERATIONS SCHEMA:
+ *  MAIN WORKFLOW OPERATIONS SCHEMA:
  * Complete schema for all workflow operations with comprehensive field documentation
  */
 export const WorkflowOperationsSchema = z.object({
   operation: WorkflowOperationSchema.describe(
-    '🔄 WORKFLOW OPERATION TYPE - The specific workflow action to perform:\n\n' +
-      '🚀 CRITICAL OPERATIONS:\n' +
+    ' WORKFLOW OPERATION TYPE - The specific workflow action to perform:\n\n' +
+      ' CRITICAL OPERATIONS:\n' +
       '- "delegate": Hand off task from current role to target role (ESSENTIAL)\n' +
       '- "complete": Mark work as completed with evidence and verification (CRITICAL)\n' +
       '- "transition": Change task status with proper workflow validation\n\n' +
-      '⚠️ MANAGEMENT OPERATIONS:\n' +
+      ' MANAGEMENT OPERATIONS:\n' +
       '- "escalate": Escalate issues, blockers, or quality concerns\n' +
       '- "reassign": Change task assignment (same or different role)\n' +
       '- "pause": Temporarily suspend work (preserves context)\n' +
@@ -566,41 +566,41 @@ export const WorkflowOperationsSchema = z.object({
   taskId: z
     .string()
     .describe(
-      '🎯 TASK IDENTIFIER - The unique task ID to operate on:\n\n' +
-        '📋 TASK ID FORMAT:\n' +
+      ' TASK IDENTIFIER - The unique task ID to operate on:\n\n' +
+        ' TASK ID FORMAT:\n' +
         '- Standard format: "TSK-001", "TSK-002", etc.\n' +
         '- Must exist in the system before workflow operations\n' +
         '- Used for tracking across all workflow transitions\n\n' +
-        '📋 EXAMPLES:\n' +
+        ' EXAMPLES:\n' +
         '- "TSK-005": Current documentation enhancement task\n' +
         '- "TSK-003": Integration testing implementation task',
     ),
 
   // Role and delegation management with comprehensive examples
   fromRole: WorkflowRoleSchema.optional().describe(
-    '👤 SOURCE ROLE - Role performing the workflow operation:\n\n' +
-      '🔹 DELEGATION PATTERNS:\n' +
+    ' SOURCE ROLE - Role performing the workflow operation:\n\n' +
+      ' DELEGATION PATTERNS:\n' +
       '- "boomerang": Initial task assignment or final completion\n' +
       '- "researcher": Research completion, returning findings\n' +
       '- "architect": Implementation plan completion, delegating to developer\n' +
       '- "senior-developer": Code completion, delegating to review\n' +
       '- "code-review": Review completion, returning to architect or boomerang\n\n' +
-      '🔹 VALIDATION RULES:\n' +
+      ' VALIDATION RULES:\n' +
       '- Must match current task assignment role\n' +
       '- Required for delegation and completion operations\n' +
       '- Used for permission validation and audit trail',
   ),
 
   toRole: WorkflowRoleSchema.optional().describe(
-    '🎯 TARGET ROLE - Destination role for delegation/transition:\n\n' +
-      '🔹 COMMON DELEGATION FLOWS:\n' +
+    ' TARGET ROLE - Destination role for delegation/transition:\n\n' +
+      ' COMMON DELEGATION FLOWS:\n' +
       '- boomerang → researcher: "Need research on technology options"\n' +
       '- boomerang → architect: "Ready for technical planning"\n' +
       '- architect → senior-developer: "Implementation plan ready"\n' +
       '- senior-developer → architect: "Code complete, ready for review delegation"\n' +
       '- architect → code-review: "Implementation complete, needs quality review"\n' +
       '- code-review → boomerang: "Review complete, task ready for delivery"\n\n' +
-      '🔹 ESCALATION FLOWS:\n' +
+      ' ESCALATION FLOWS:\n' +
       '- Any role → boomerang: "Escalating blocker or major issue"\n' +
       '- code-review → architect: "Needs significant changes"\n' +
       '- senior-developer → architect: "Technical blocker or design issue"',
@@ -608,14 +608,14 @@ export const WorkflowOperationsSchema = z.object({
 
   // Status management with workflow validation
   newStatus: TaskStatusSchema.optional().describe(
-    '📊 NEW STATUS - Target status for transition operations:\n\n' +
-      '🔹 STATUS TRANSITION PATTERNS:\n' +
+    ' NEW STATUS - Target status for transition operations:\n\n' +
+      ' STATUS TRANSITION PATTERNS:\n' +
       '- "not-started" → "in-progress": Via delegation to active role\n' +
       '- "in-progress" → "needs-review": Via completion operation\n' +
       '- "needs-review" → "completed": Via approval from code-review\n' +
       '- "needs-review" → "needs-changes": Via rejection from code-review\n' +
       '- "needs-changes" → "in-progress": Via reassignment for fixes\n\n' +
-      '🔹 MANAGEMENT TRANSITIONS:\n' +
+      ' MANAGEMENT TRANSITIONS:\n' +
       '- Any status → "paused": Via pause operation\n' +
       '- "paused" → previous status: Via resume operation\n' +
       '- Any status → "cancelled": Via cancel operation',
@@ -626,17 +626,17 @@ export const WorkflowOperationsSchema = z.object({
     .string()
     .optional()
     .describe(
-      '💬 OPERATION MESSAGE - Context and reason for the workflow operation:\n\n' +
-        '🔹 DELEGATION MESSAGES:\n' +
+      ' OPERATION MESSAGE - Context and reason for the workflow operation:\n\n' +
+        ' DELEGATION MESSAGES:\n' +
         '- "Research complete. Key findings: [summary]. Ready for architecture."\n' +
         '- "Implementation plan ready. Please implement batch B001."\n' +
         '- "Code complete. All subtasks finished. Ready for review."\n' +
         '- "Review complete. Status: APPROVED. Ready for delivery."\n\n' +
-        '🔹 COMPLETION MESSAGES:\n' +
+        ' COMPLETION MESSAGES:\n' +
         '- "Task completed successfully. All acceptance criteria met."\n' +
         '- "Research findings documented. Recommendations provided."\n' +
         '- "Implementation complete. Manual testing passed."\n\n' +
-        '🔹 ESCALATION MESSAGES:\n' +
+        ' ESCALATION MESSAGES:\n' +
         '- "Blocking issue: API dependency not available."\n' +
         '- "Quality concern: Security vulnerability identified."\n' +
         '- "Resource constraint: Requires additional expertise."',
@@ -644,16 +644,16 @@ export const WorkflowOperationsSchema = z.object({
 
   // Completion data for successful task completion
   completionData: CompletionDataSchema.optional().describe(
-    '✅ COMPLETION DATA - Comprehensive completion information for successful operations:\n\n' +
-      '🔹 REQUIRED FOR OPERATIONS:\n' +
+    ' COMPLETION DATA - Comprehensive completion information for successful operations:\n\n' +
+      ' REQUIRED FOR OPERATIONS:\n' +
       '- "complete": Must provide summary and evidence\n' +
       '- "delegate" (when completing): Include completion summary\n\n' +
-      '🔹 COMPLETION DATA STRUCTURE:\n' +
+      ' COMPLETION DATA STRUCTURE:\n' +
       '- summary: Work accomplishment description (REQUIRED)\n' +
       '- evidence: Supporting documentation and metrics\n' +
       '- filesModified: Array of changed files\n' +
       '- acceptanceCriteriaVerification: JSON verification results\n\n' +
-      '🔹 COMPLETION EXAMPLES:\n' +
+      ' COMPLETION EXAMPLES:\n' +
       '- Research: { summary: "Technology evaluation complete", evidence: { optionsEvaluated: 5 } }\n' +
       '- Development: { summary: "Feature implementation complete", filesModified: ["src/api.ts"] }\n' +
       '- Review: { summary: "Code review complete: APPROVED", acceptanceCriteriaVerification: {...} }',
@@ -661,16 +661,16 @@ export const WorkflowOperationsSchema = z.object({
 
   // Rejection data for escalation and quality issues
   rejectionData: RejectionDataSchema.optional().describe(
-    '❌ REJECTION DATA - Comprehensive rejection and escalation information:\n\n' +
-      '🔹 REQUIRED FOR OPERATIONS:\n' +
+    'REJECTION DATA - Comprehensive rejection and escalation information:\n\n' +
+      ' REQUIRED FOR OPERATIONS:\n' +
       '- "escalate": Must provide reason and severity\n' +
       '- "transition" (to needs-changes): Include rejection details\n\n' +
-      '🔹 REJECTION DATA STRUCTURE:\n' +
+      ' REJECTION DATA STRUCTURE:\n' +
       '- reason: Clear explanation for rejection (REQUIRED)\n' +
       '- severity: Issue impact level (low/medium/high/critical)\n' +
       '- requiredChanges: Specific modification requirements\n' +
       '- blockers: Array of blocking issues\n\n' +
-      '🔹 REJECTION EXAMPLES:\n' +
+      ' REJECTION EXAMPLES:\n' +
       '- Quality: { reason: "Security vulnerability found", severity: "high" }\n' +
       '- Blocker: { reason: "API dependency unavailable", blockers: ["External service down"] }\n' +
       '- Changes: { reason: "Missing functionality", requiredChanges: "Add user authentication" }',
@@ -678,13 +678,13 @@ export const WorkflowOperationsSchema = z.object({
 
   // Scheduling and timing information
   scheduling: SchedulingSchema.optional().describe(
-    '📅 SCHEDULING - Timing and deadline information for the workflow operation:\n\n' +
-      '🔹 SCHEDULING COMPONENTS:\n' +
+    ' SCHEDULING - Timing and deadline information for the workflow operation:\n\n' +
+      ' SCHEDULING COMPONENTS:\n' +
       '- deadline: ISO date deadline for operation completion\n' +
       '- estimatedDuration: Time estimate for the operation\n' +
       '- priority: Operation urgency level\n' +
       '- scheduleFor: ISO date to schedule operation execution\n\n' +
-      '🔹 SCHEDULING EXAMPLES:\n' +
+      ' SCHEDULING EXAMPLES:\n' +
       '- Urgent: { deadline: "2024-01-16T17:00:00Z", priority: "urgent" }\n' +
       '- Planned: { scheduleFor: "2024-01-20T09:00:00Z", estimatedDuration: "2 hours" }\n' +
       '- Sprint: { deadline: "2024-01-25T23:59:59Z", priority: "high" }',
@@ -692,13 +692,13 @@ export const WorkflowOperationsSchema = z.object({
 
   // Workflow operation constraints
   constraints: ConstraintsSchema.optional().describe(
-    '🔧 CONSTRAINTS - Workflow operation constraints and validation controls:\n\n' +
-      '🔹 CONSTRAINT OPTIONS:\n' +
+    ' CONSTRAINTS - Workflow operation constraints and validation controls:\n\n' +
+      ' CONSTRAINT OPTIONS:\n' +
       '- forceTransition: Force invalid transitions (emergency use)\n' +
       '- allowSkipValidation: Skip standard validation checks\n' +
       '- createAuditTrail: Generate audit trail entry (default: true)\n' +
       '- notifyStakeholders: Send notifications (default: true)\n\n' +
-      '🔹 CONSTRAINT EXAMPLES:\n' +
+      ' CONSTRAINT EXAMPLES:\n' +
       '- Emergency: { forceTransition: true, createAuditTrail: true }\n' +
       '- Bulk: { allowSkipValidation: true, notifyStakeholders: false }\n' +
       '- Standard: { createAuditTrail: true, notifyStakeholders: true }',
@@ -706,12 +706,12 @@ export const WorkflowOperationsSchema = z.object({
 
   // Batch operation configuration
   batch: BatchOperationsSchema.optional().describe(
-    '📦 BATCH OPERATIONS - Configuration for batch workflow operations:\n\n' +
-      '🔹 BATCH COMPONENTS:\n' +
+    ' BATCH OPERATIONS - Configuration for batch workflow operations:\n\n' +
+      ' BATCH COMPONENTS:\n' +
       '- taskIds: Array of task IDs for batch processing\n' +
       '- parallelExecution: Execute operations in parallel\n' +
       '- continueOnError: Continue if individual operations fail\n\n' +
-      '🔹 BATCH EXAMPLES:\n' +
+      ' BATCH EXAMPLES:\n' +
       '- Sequential: { taskIds: ["TSK-001", "TSK-002"], parallelExecution: false }\n' +
       '- Parallel: { taskIds: ["TSK-003", "TSK-004"], parallelExecution: true }\n' +
       '- Resilient: { taskIds: ["TSK-005", "TSK-006"], continueOnError: true }',
@@ -719,12 +719,12 @@ export const WorkflowOperationsSchema = z.object({
 
   // Conditional operation requirements
   conditions: ConditionsSchema.optional().describe(
-    '🔍 CONDITIONS - Conditions that must be met for operation to proceed:\n\n' +
-      '🔹 CONDITION TYPES:\n' +
+    ' CONDITIONS - Conditions that must be met for operation to proceed:\n\n' +
+      ' CONDITION TYPES:\n' +
       '- requiredRole: Role that must be current for operation\n' +
       '- requiredStatus: Status that must be current for operation\n' +
       '- customConditions: Array of custom condition checks\n\n' +
-      '🔹 CONDITION EXAMPLES:\n' +
+      ' CONDITION EXAMPLES:\n' +
       '- Role Check: { requiredRole: "architect" }\n' +
       '- Status Check: { requiredStatus: "in-progress" }\n' +
       '- Custom: { customConditions: ["all_subtasks_completed"] }',
@@ -735,13 +735,13 @@ export const WorkflowOperationsSchema = z.object({
     .record(z.any())
     .optional()
     .describe(
-      '📊 METADATA - Additional operation-specific data and context:\n\n' +
-        '🔹 METADATA USAGE:\n' +
+      ' METADATA - Additional operation-specific data and context:\n\n' +
+        ' METADATA USAGE:\n' +
         '- Custom workflow extensions and integrations\n' +
         '- Operation-specific configuration and settings\n' +
         '- Integration with external systems and tools\n' +
         '- Performance metrics and monitoring data\n\n' +
-        '🔹 METADATA EXAMPLES:\n' +
+        ' METADATA EXAMPLES:\n' +
         '- Integration: { "jiraTicket": "PROJ-123", "slackChannel": "#dev-team" }\n' +
         '- Metrics: { "complexity": "high", "riskLevel": "medium" }\n' +
         '- Config: { "autoAssign": true, "notificationDelay": 300 }',
@@ -751,11 +751,11 @@ export const WorkflowOperationsSchema = z.object({
 export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
 
 /**
- * 🚀 COMPREHENSIVE WORKFLOW OPERATION EXAMPLES
+ *  COMPREHENSIVE WORKFLOW OPERATION EXAMPLES
  *
  * ===== CRITICAL DELEGATION OPERATIONS =====
  *
- * 🔹 BOOMERANG → RESEARCHER (Research Request):
+ *  BOOMERANG → RESEARCHER (Research Request):
  * {
  *   "operation": "delegate",
  *   "taskId": "TSK-007",
@@ -779,7 +779,7 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *   }
  * }
  *
- * 🔹 ARCHITECT → SENIOR-DEVELOPER (Implementation Delegation):
+ *  ARCHITECT → SENIOR-DEVELOPER (Implementation Delegation):
  * {
  *   "operation": "delegate",
  *   "taskId": "TSK-005",
@@ -804,7 +804,7 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *   }
  * }
  *
- * 🔹 ARCHITECT → CODE-REVIEW (Review Delegation):
+ *  ARCHITECT → CODE-REVIEW (Review Delegation):
  * {
  *   "operation": "delegate",
  *   "taskId": "TSK-005",
@@ -831,7 +831,7 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *
  * ===== CRITICAL COMPLETION OPERATIONS =====
  *
- * 🔹 RESEARCHER COMPLETION (Research Findings):
+ *  RESEARCHER COMPLETION (Research Findings):
  * {
  *   "operation": "complete",
  *   "taskId": "TSK-007",
@@ -867,7 +867,7 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *   }
  * }
  *
- * 🔹 SENIOR-DEVELOPER COMPLETION (Implementation Complete):
+ *  SENIOR-DEVELOPER COMPLETION (Implementation Complete):
  * {
  *   "operation": "complete",
  *   "taskId": "TSK-005",
@@ -880,11 +880,11 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *       "src/task-workflow/domains/universal/workflow-operations.schema.ts"
  *     ],
  *     "acceptanceCriteriaVerification": {
- *       "comprehensive-field-specs": "✅ Complete - All 10 entities documented with field types, constraints, relationships",
- *       "practical-examples": "✅ Complete - Added 20+ real-world usage examples for each schema",
- *       "batch-operation-docs": "✅ Complete - Detailed createMany/updateMany documentation with subtask examples",
- *       "agent-usability": "✅ Complete - Clear descriptions and decision frameworks for efficient agent usage",
- *       "relationship-mapping": "✅ Complete - Complete relationship documentation with include/select examples"
+ *       "comprehensive-field-specs": " Complete - All 10 entities documented with field types, constraints, relationships",
+ *       "practical-examples": " Complete - Added 20+ real-world usage examples for each schema",
+ *       "batch-operation-docs": " Complete - Detailed createMany/updateMany documentation with subtask examples",
+ *       "agent-usability": " Complete - Clear descriptions and decision frameworks for efficient agent usage",
+ *       "relationship-mapping": " Complete - Complete relationship documentation with include/select examples"
  *     },
  *     "evidence": {
  *       "documentationMetrics": {
@@ -909,7 +909,7 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *   }
  * }
  *
- * 🔹 CODE-REVIEW COMPLETION (Quality Approval):
+ *  CODE-REVIEW COMPLETION (Quality Approval):
  * {
  *   "operation": "complete",
  *   "taskId": "TSK-005",
@@ -917,11 +917,11 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *   "completionData": {
  *     "summary": "Quality review complete. APPROVED. Schema documentation enhancements meet all quality standards. Comprehensive field specifications, excellent practical examples, and clear agent-friendly descriptions. Manual testing confirmed all examples work correctly.",
  *     "acceptanceCriteriaVerification": {
- *       "documentation-quality": "✅ APPROVED - Comprehensive and well-structured",
- *       "practical-examples": "✅ APPROVED - Real-world examples that agents can use directly",
- *       "batch-operations": "✅ APPROVED - Critical createMany/updateMany operations well documented",
- *       "agent-usability": "✅ APPROVED - Clear decision frameworks and usage patterns",
- *       "consistency": "✅ APPROVED - Consistent formatting and structure across all files"
+ *       "documentation-quality": " APPROVED - Comprehensive and well-structured",
+ *       "practical-examples": " APPROVED - Real-world examples that agents can use directly",
+ *       "batch-operations": " APPROVED - Critical createMany/updateMany operations well documented",
+ *       "agent-usability": " APPROVED - Clear decision frameworks and usage patterns",
+ *       "consistency": " APPROVED - Consistent formatting and structure across all files"
  *     },
  *     "evidence": {
  *       "manualTestingResults": {
@@ -948,7 +948,7 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *
  * ===== ESCALATION OPERATIONS =====
  *
- * 🔹 TECHNICAL BLOCKER ESCALATION:
+ *  TECHNICAL BLOCKER ESCALATION:
  * {
  *   "operation": "escalate",
  *   "taskId": "TSK-008",
@@ -976,7 +976,7 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *   }
  * }
  *
- * 🔹 QUALITY REJECTION ESCALATION:
+ *  QUALITY REJECTION ESCALATION:
  * {
  *   "operation": "escalate",
  *   "taskId": "TSK-009",
@@ -1006,7 +1006,7 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *
  * ===== BATCH OPERATIONS =====
  *
- * 🔹 BATCH DELEGATION (Multiple Related Tasks):
+ *  BATCH DELEGATION (Multiple Related Tasks):
  * {
  *   "operation": "delegate",
  *   "fromRole": "architect",
@@ -1029,7 +1029,7 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *   }
  * }
  *
- * 🔹 BATCH COMPLETION (Coordinated Milestone):
+ *  BATCH COMPLETION (Coordinated Milestone):
  * {
  *   "operation": "complete",
  *   "fromRole": "senior-developer",
@@ -1047,11 +1047,11 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *       "tests/auth/auth.integration.test.ts"
  *     ],
  *     "acceptanceCriteriaVerification": {
- *       "user-registration": "✅ Complete with email validation and password hashing",
- *       "secure-login": "✅ Complete with JWT token generation and validation",
- *       "session-management": "✅ Complete with refresh token rotation",
- *       "integration-testing": "✅ Complete with end-to-end test coverage",
- *       "security-validation": "✅ Complete with input sanitization and rate limiting"
+ *       "user-registration": " Complete with email validation and password hashing",
+ *       "secure-login": " Complete with JWT token generation and validation",
+ *       "session-management": " Complete with refresh token rotation",
+ *       "integration-testing": " Complete with end-to-end test coverage",
+ *       "security-validation": " Complete with input sanitization and rate limiting"
  *     },
  *     "evidence": {
  *       "testResults": {
@@ -1076,7 +1076,7 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *
  * ===== MANAGEMENT OPERATIONS =====
  *
- * 🔹 PAUSE OPERATION (Temporary Suspension):
+ *  PAUSE OPERATION (Temporary Suspension):
  * {
  *   "operation": "pause",
  *   "taskId": "TSK-013",
@@ -1093,7 +1093,7 @@ export type WorkflowOperationsInput = z.infer<typeof WorkflowOperationsSchema>;
  *   }
  * }
  *
- * 🔹 RESUME OPERATION (Restore Work):
+ *  RESUME OPERATION (Restore Work):
  * {
  *   "operation": "resume",
  *   "taskId": "TSK-013",
