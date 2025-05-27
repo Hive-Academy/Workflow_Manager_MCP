@@ -38,9 +38,40 @@ query_data({
     },
     researchReports: true,
     reviewReports: true,
+    codebaseAnalysis: true, // MANDATORY: Get boomerang's codebase analysis
   },
 });
 ```
+
+### Step 1.1: CodebaseAnalysis Quality Validation (MANDATORY - No additional MCP calls)
+
+**CRITICAL: Use CodebaseAnalysis to validate implementation quality and consistency:**
+
+**Quality Standards Validation Against Analysis:**
+
+- **Pattern Consistency**: Verify implementation follows established patterns from analysis
+- **Technical Debt Prevention**: Confirm implementation doesn't repeat identified problems
+- **Integration Quality**: Validate implementation respects existing integration points
+- **Standard Compliance**: Verify adherence to documented coding standards
+- **Quality Improvement**: Confirm implementation improves upon identified quality gaps
+
+**Problem Prevention Verification:**
+
+- **Code Smell Elimination**: Verify implementation avoids identified code smells
+- **Root Cause Resolution**: Confirm implementation addresses underlying causes of technical debt
+- **Architecture Consistency**: Validate implementation maintains architectural coherence
+- **Performance Enhancement**: Verify implementation addresses identified performance issues
+- **Security Strengthening**: Confirm implementation enhances identified security weaknesses
+
+**Analysis-Informed Review Focus:**
+
+- **Priority Testing Areas**: Focus testing on areas identified as problematic in analysis
+- **Integration Validation**: Intensive testing of integration points noted in analysis
+- **Quality Gate Emphasis**: Stricter validation in areas where analysis identified gaps
+- **Pattern Verification**: Detailed review of how implementation uses established patterns
+- **Improvement Assessment**: Evaluation of how implementation enhances codebase quality
+
+**RULE: Code review MUST validate that implementation successfully addresses ALL issues identified in codebase analysis**
 
 ### Step 2: Implementation Analysis and Review Planning (No MCP calls)
 

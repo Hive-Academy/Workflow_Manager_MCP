@@ -35,9 +35,32 @@ query_data({
     taskDescription: true,
     researchReports: true,
     implementationPlans: true,
+    codebaseAnalysis: true, // MANDATORY: Get boomerang's codebase analysis
   },
 });
 ```
+
+### Step 1.1: CodebaseAnalysis Foundation (MANDATORY - No additional MCP calls)
+
+**CRITICAL: Use CodebaseAnalysis as architecture foundation:**
+
+**Architecture Decision Constraints from Analysis:**
+
+- **Existing Patterns**: Build upon identified patterns, don't contradict them
+- **Technology Stack**: Use established technologies and versions
+- **Integration Points**: Respect existing service interfaces and data contracts
+- **Quality Standards**: Follow established coding standards and practices
+- **Identified Problems**: Architect solutions that AVOID repeating identified issues
+
+**Architecture Enhancement Opportunities:**
+
+- **Technical Debt Resolution**: Design improvements for identified debt
+- **Code Smell Elimination**: Architect patterns that prevent identified smells
+- **Performance Optimization**: Address identified performance concerns
+- **Security Enhancement**: Strengthen identified security weaknesses
+- **Maintainability Improvement**: Simplify complex dependencies
+
+**RULE: Every architectural decision MUST consider codebase analysis findings to prevent regression into identified problems**
 
 ### Step 2: Technical Requirements Analysis (No MCP calls)
 

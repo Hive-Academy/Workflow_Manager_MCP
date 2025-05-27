@@ -9,8 +9,18 @@ import {
   IReportTemplateService,
   ReportType,
 } from '../../interfaces/service-contracts.interface';
-import { ReportData } from '../../interfaces/report-data.interface';
+import {
+  ReportData,
+  EnhancedInsight,
+} from '../../interfaces/report-data.interface';
 import { ReportingConfigService } from '../infrastructure/reporting-config.service';
+
+// Import services for coordination
+import { ContentGeneratorService } from '../core/content-generator.service';
+import { TemplateFactoryService } from './template-factory.service';
+import { EnhancedInsightsGeneratorService } from '../analytics/enhanced-insights-generator.service';
+import { SchemaDrivenIntelligenceService } from '../analytics/schema-driven-intelligence.service';
+import { SmartResponseSummarizationService } from '../analytics/smart-response-summarization.service';
 
 /**
  * Template Rendering Service
@@ -38,7 +48,14 @@ export class TemplateRenderingService implements IReportTemplateService {
     HandlebarsTemplateDelegate
   >();
 
-  constructor(private readonly config: ReportingConfigService) {
+  constructor(
+    private readonly config: ReportingConfigService,
+    private readonly contentGenerator: ContentGeneratorService,
+    private readonly templateFactory: TemplateFactoryService,
+    private readonly enhancedInsightsGenerator: EnhancedInsightsGeneratorService,
+    private readonly schemaIntelligence: SchemaDrivenIntelligenceService,
+    private readonly smartSummarization: SmartResponseSummarizationService,
+  ) {
     this.handlebarsInstance = Handlebars.create();
     this.registerHelpers();
     // Register partials asynchronously (don't await in constructor)
@@ -73,6 +90,210 @@ export class TemplateRenderingService implements IReportTemplateService {
   }
 
   /**
+   * COORDINATION METHODS - Extracted from ReportGeneratorService
+   */
+
+  /**
+   * Render report template with enhanced coordination
+   * Handles fallback to standard template if enhanced fails
+   */
+  async renderReportTemplateWithCoordination(
+    reportType: ReportType,
+    data: ReportData,
+    customizations?: any,
+  ): Promise<string> {
+    try {
+      // Use enhanced template generation with TemplateFactoryService
+      return await this.generateEnhancedTemplate(
+        reportType,
+        data,
+        customizations,
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Enhanced template generation failed for ${reportType}, falling back to standard template: ${error.message}`,
+      );
+      // Fallback to standard template service
+      return this.renderReportTemplate(reportType, data);
+    }
+  }
+
+  /**
+   * Generate enhanced insights with smart MCP response
+   * Used by MCP operations service for token-efficient responses
+   */
+  async generateInsightsWithSmartResponse(
+    reportType: ReportType,
+    reportData: ReportData,
+    filePath: string,
+  ): Promise<{
+    insights: EnhancedInsight[];
+    smartResponse: {
+      summary: string;
+      keyInsights: string[];
+      actionableRecommendations: string[];
+      tokenCount: number;
+    };
+  }> {
+    // Get enhanced insights from the insights generator
+    const insightsResult =
+      await this.enhancedInsightsGenerator.generateInsightsWithSmartResponse(
+        reportType,
+        reportData,
+        filePath,
+      );
+
+    // Generate optimized smart summary using SmartResponseSummarizationService
+    const smartSummary = await this.smartSummarization.createOptimizedSummary(
+      reportType,
+      reportData,
+      filePath,
+    );
+
+    // Combine insights with optimized smart response
+    return {
+      insights: insightsResult.insights,
+      smartResponse: smartSummary,
+    };
+  }
+
+  /**
+   * Generate smart summary for MCP responses
+   * Creates token-efficient summaries that direct users to comprehensive reports
+   */
+  async generateSmartSummary(
+    reportType: ReportType,
+    reportData: ReportData,
+    filePath: string,
+    maxTokens: number = 200,
+  ): Promise<{
+    summary: string;
+    keyInsights: string[];
+    actionableRecommendations: string[];
+    tokenCount: number;
+  }> {
+    return this.smartSummarization.createOptimizedSummary(
+      reportType,
+      reportData,
+      filePath,
+      maxTokens,
+    );
+  }
+
+  /**
+   * Generate dynamic content using ContentGeneratorService
+   * Provides executive summaries, key insights, and actionable recommendations
+   */
+  generateDynamicContent(
+    reportType: ReportType,
+    data: ReportData,
+  ): {
+    executiveSummary: string;
+    keyInsights: string[];
+    actionableRecommendations: string[];
+    detailedAnalysis: string;
+  } {
+    return {
+      executiveSummary: this.contentGenerator.generateExecutiveSummary(
+        reportType,
+        data,
+      ),
+      keyInsights: this.contentGenerator.generateKeyInsights(reportType, data),
+      actionableRecommendations:
+        this.contentGenerator.generateActionableRecommendations(
+          reportType,
+          data,
+        ),
+      detailedAnalysis: this.contentGenerator.generateDetailedAnalysis(
+        reportType,
+        data,
+      ),
+    };
+  }
+
+  /**
+   * Generate schema-driven insights using SchemaDrivenIntelligenceService
+   * Provides database schema analysis and intelligent recommendations
+   */
+  async generateSchemaInsights(
+    reportType: ReportType,
+    data: ReportData,
+  ): Promise<EnhancedInsight[]> {
+    try {
+      // Create a temporary file path for schema analysis (not actually used for file operations)
+      const tempFilePath = `temp-${reportType}-${Date.now()}.html`;
+
+      const schemaResult = await this.schemaIntelligence.generateSchemaInsights(
+        reportType,
+        data,
+        tempFilePath,
+      );
+
+      return schemaResult.enhancedReportData.enhancedInsights || [];
+    } catch (error) {
+      this.logger.warn(
+        `Failed to generate schema insights for ${reportType}: ${error.message}`,
+      );
+      return [];
+    }
+  }
+
+  /**
+   * Generate enhanced template using TemplateFactoryService
+   * Provides sophisticated template generation and customization
+   */
+  async generateEnhancedTemplate(
+    reportType: ReportType,
+    data: ReportData,
+    customizations?: any,
+  ): Promise<string> {
+    try {
+      // Enhance data with template factory configurations
+      const chartConfig =
+        this.templateFactory.getChartConfiguration(reportType);
+      const contentPriority =
+        this.templateFactory.getContentPriority(reportType);
+      const shouldIncludeCharts =
+        this.templateFactory.shouldIncludeCharts(reportType);
+
+      // Create enhanced data with factory configurations
+      // PRESERVE rich transformed data from ReportDataTransformer
+      const enhancedData = {
+        ...data,
+        chartConfig,
+        contentPriority,
+        shouldIncludeCharts,
+        customizations: customizations || {},
+        // Only add content generation if not already provided by transformer
+        ...(data.dynamicContent || {
+          executiveSummary: this.contentGenerator.generateExecutiveSummary(
+            reportType,
+            data,
+          ),
+          keyInsights: this.contentGenerator.generateKeyInsights(
+            reportType,
+            data,
+          ),
+          actionableRecommendations:
+            this.contentGenerator.generateActionableRecommendations(
+              reportType,
+              data,
+            ),
+        }),
+      };
+
+      // Use the enhanced template rendering with factory configurations
+      return this.renderReportTemplate(reportType, enhancedData);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to generate enhanced template: ${error.message}`,
+      );
+      // Fallback to standard template service
+      return this.renderReportTemplate(reportType, data);
+    }
+  }
+
+  /**
    * Get compiled template with caching
    */
   private async getCompiledTemplate(
@@ -100,12 +321,27 @@ export class TemplateRenderingService implements IReportTemplateService {
     data: ReportData,
     reportType: ReportType,
   ): any {
+    // Transform metrics structure to match template expectations
+    const transformedMetrics = this.transformMetricsForTemplate(
+      data.metrics,
+      reportType,
+    );
+
+    // Transform charts to include chartData structure expected by templates
+    const chartData = this.transformChartsForTemplate(data.charts);
+
     return {
       ...data,
       // Template metadata
       reportType,
       generatedAt: new Date().toISOString(),
       templateVersion: '2.0.0',
+
+      // Flattened metrics structure for template compatibility
+      metrics: transformedMetrics,
+
+      // Chart data in expected format
+      chartData,
 
       // Utility functions available in templates
       utils: {
@@ -120,6 +356,86 @@ export class TemplateRenderingService implements IReportTemplateService {
           return `${Math.round(hours / 24)}d`;
         },
       },
+    };
+  }
+
+  /**
+   * Transform nested metrics structure to flat structure expected by templates
+   */
+  private transformMetricsForTemplate(
+    metrics: any,
+    _reportType: ReportType,
+  ): any {
+    // For individual task reports, return the taskSpecific metrics directly
+    if (metrics.taskSpecific) {
+      return metrics.taskSpecific;
+    }
+
+    // For aggregate reports, flatten the nested structure
+    const transformed: any = {};
+
+    // Flatten task metrics to root level (task-summary template expects this)
+    if (metrics.tasks) {
+      Object.assign(transformed, metrics.tasks);
+    }
+
+    // Keep other metrics nested for specific templates that expect them
+    if (metrics.delegations) {
+      transformed.delegations = metrics.delegations;
+    }
+    if (metrics.codeReviews) {
+      transformed.codeReviews = metrics.codeReviews;
+    }
+    if (metrics.performance) {
+      transformed.performance = metrics.performance;
+    }
+    if (metrics.timeSeriesAnalysis) {
+      transformed.timeSeriesAnalysis = metrics.timeSeriesAnalysis;
+    }
+    if (metrics.implementationPlans) {
+      transformed.implementationPlans = metrics.implementationPlans;
+    }
+    if (metrics.codeReviewInsights) {
+      transformed.codeReviewInsights = metrics.codeReviewInsights;
+    }
+    if (metrics.delegationFlow) {
+      transformed.delegationFlow = metrics.delegationFlow;
+    }
+
+    return transformed;
+  }
+
+  /**
+   * Transform charts array to chartData structure expected by templates
+   */
+  private transformChartsForTemplate(charts: any[]): any {
+    if (!Array.isArray(charts) || charts.length === 0) {
+      return {
+        statusLabels: [],
+        statusData: [],
+        priorityLabels: [],
+        priorityData: [],
+      };
+    }
+
+    // Find specific charts by type or title
+    const statusChart = charts.find(
+      (chart) =>
+        chart.title?.toLowerCase().includes('status') ||
+        chart.type === 'pie' ||
+        chart.type === 'doughnut',
+    );
+
+    const priorityChart = charts.find(
+      (chart) =>
+        chart.title?.toLowerCase().includes('priority') || chart.type === 'bar',
+    );
+
+    return {
+      statusLabels: statusChart?.labels || [],
+      statusData: statusChart?.datasets?.[0]?.data || [],
+      priorityLabels: priorityChart?.labels || [],
+      priorityData: priorityChart?.datasets?.[0]?.data || [],
     };
   }
 

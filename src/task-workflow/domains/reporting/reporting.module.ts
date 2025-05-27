@@ -10,6 +10,14 @@ import { ReportingConfigService } from './services/infrastructure/reporting-conf
 
 // Legacy Analytics Services (maintained for backward compatibility)
 import { MetricsCalculatorService } from './services/data/metrics-calculator.service';
+import { CoreMetricsService } from './services/data/core-metrics.service';
+import { AdvancedAnalyticsService } from './services/analytics/advanced-analytics.service';
+import { TaskHealthAnalysisService } from './services/analytics/task-health-analysis.service';
+
+// Refactored Services (B001 - Core Service Foundation)
+import { ReportDataAccessService } from './services/data/report-data-access.service';
+import { ChartCoordinationService } from './services/analytics/chart-coordination.service';
+import { MetricsCoordinationService } from './services/coordination/metrics-coordination.service';
 import { TimeSeriesAnalysisService } from './services/analytics/time-series-analysis.service';
 import { PerformanceBenchmarkService } from './services/analytics/performance-benchmark.service';
 import { RecommendationEngineService } from './services/analytics/recommendation-engine.service';
@@ -46,6 +54,11 @@ import { IndividualTaskReportStrategy } from './strategies/individual-task-repor
     // Infrastructure
     ReportingConfigService,
 
+    // === REFACTORED SERVICES (B001 - Core Service Foundation) ===
+    ReportDataAccessService,
+    ChartCoordinationService,
+    MetricsCoordinationService,
+
     // === LEGACY SERVICES (Backward Compatibility) ===
 
     // Core Report Services
@@ -54,6 +67,9 @@ import { IndividualTaskReportStrategy } from './strategies/individual-task-repor
 
     // Core Analytics Services (actively used)
     MetricsCalculatorService,
+    CoreMetricsService,
+    AdvancedAnalyticsService,
+    TaskHealthAnalysisService,
     TimeSeriesAnalysisService,
     PerformanceBenchmarkService,
     RecommendationEngineService,

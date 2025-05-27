@@ -80,6 +80,62 @@ query_data({
 
 **Document comprehensive findings** with file locations and code examples
 
+### Step 4.1: CodebaseAnalysis Creation (MANDATORY - 1 MCP call)
+
+**CRITICAL: Create structured codebase analysis for ALL downstream roles:**
+
+```javascript
+mutate_data({
+  operation: 'create',
+  entity: 'codebaseAnalysis',
+  data: {
+    taskId: taskId,
+    architectureFindings: {
+      moduleStructure: 'Domain-driven design with modules/layers',
+      techStack: 'Detailed technology stack with versions',
+      fileStructure: 'Important directories and their purposes',
+      dependencies: 'Key dependencies and integration points'
+    },
+    problemsIdentified: {
+      codeSmells: ['Large classes', 'Duplicate logic', 'Complex dependencies'],
+      technicalDebt: 'Areas needing refactoring or improvement',
+      rootCauses: 'Why problems exist and impact assessment',
+      qualityIssues: 'Code quality concerns specific to task area'
+    },
+    implementationContext: {
+      patterns: ['Repository', 'Service layer', 'Dependency injection'],
+      codingStandards: 'TypeScript standards, naming conventions',
+      qualityGuidelines: 'Testing requirements, documentation standards',
+      integrationApproaches: 'How new code should integrate'
+    },
+    integrationPoints: {
+      apiBoundaries: 'External API endpoints and contracts',
+      serviceInterfaces: 'Internal service communication patterns',
+      dataLayer: 'Database schemas and data access patterns',
+      externalDependencies: 'Third-party services and libraries'
+    },
+    qualityAssessment: {
+      testingCoverage: 'Current testing state and requirements',
+      performanceBaseline: 'Performance considerations and benchmarks',
+      securityConsiderations: 'Security patterns and requirements',
+      documentationState: 'Current documentation and gaps'
+    },
+    filesCovered: ['Array of analyzed files with their roles'],
+    technologyStack: {
+      'detailed tech stack with versions and usage patterns'
+    },
+    analyzedBy: 'boomerang'
+  }
+});
+```
+
+**PURPOSE: This analysis becomes the SOURCE OF TRUTH for:**
+
+- **Researcher**: Understanding implementation context for investigation
+- **Architect**: Building upon existing patterns and avoiding identified problems
+- **Senior Developer**: Following established patterns and integration approaches
+- **Code Review**: Validating against established standards and quality requirements
+
 ### Step 5: Research Decision Framework (No MCP calls)
 
 **Evaluate research necessity using decision criteria:**
@@ -141,7 +197,7 @@ workflow_operations({
 });
 ```
 
-**Total Initial Phase MCP Calls: 3 maximum**
+**Total Initial Phase MCP Calls: 4 maximum (includes mandatory CodebaseAnalysis creation)**
 
 ## Final Phase: Evidence-Based Completion
 

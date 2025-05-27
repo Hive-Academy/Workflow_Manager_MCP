@@ -63,6 +63,11 @@ export type Comment = $Result.DefaultSelection<Prisma.$CommentPayload>
  * 
  */
 export type WorkflowTransition = $Result.DefaultSelection<Prisma.$WorkflowTransitionPayload>
+/**
+ * Model CodebaseAnalysis
+ * 
+ */
+export type CodebaseAnalysis = $Result.DefaultSelection<Prisma.$CodebaseAnalysisPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -288,6 +293,16 @@ export class PrismaClient<
     * ```
     */
   get workflowTransition(): Prisma.WorkflowTransitionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.codebaseAnalysis`: Exposes CRUD operations for the **CodebaseAnalysis** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CodebaseAnalyses
+    * const codebaseAnalyses = await prisma.codebaseAnalysis.findMany()
+    * ```
+    */
+  get codebaseAnalysis(): Prisma.CodebaseAnalysisDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -737,7 +752,8 @@ export namespace Prisma {
     CodeReview: 'CodeReview',
     CompletionReport: 'CompletionReport',
     Comment: 'Comment',
-    WorkflowTransition: 'WorkflowTransition'
+    WorkflowTransition: 'WorkflowTransition',
+    CodebaseAnalysis: 'CodebaseAnalysis'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -756,7 +772,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "task" | "taskDescription" | "implementationPlan" | "subtask" | "delegationRecord" | "researchReport" | "codeReview" | "completionReport" | "comment" | "workflowTransition"
+      modelProps: "task" | "taskDescription" | "implementationPlan" | "subtask" | "delegationRecord" | "researchReport" | "codeReview" | "completionReport" | "comment" | "workflowTransition" | "codebaseAnalysis"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1500,6 +1516,80 @@ export namespace Prisma {
           }
         }
       }
+      CodebaseAnalysis: {
+        payload: Prisma.$CodebaseAnalysisPayload<ExtArgs>
+        fields: Prisma.CodebaseAnalysisFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CodebaseAnalysisFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodebaseAnalysisPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CodebaseAnalysisFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodebaseAnalysisPayload>
+          }
+          findFirst: {
+            args: Prisma.CodebaseAnalysisFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodebaseAnalysisPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CodebaseAnalysisFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodebaseAnalysisPayload>
+          }
+          findMany: {
+            args: Prisma.CodebaseAnalysisFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodebaseAnalysisPayload>[]
+          }
+          create: {
+            args: Prisma.CodebaseAnalysisCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodebaseAnalysisPayload>
+          }
+          createMany: {
+            args: Prisma.CodebaseAnalysisCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CodebaseAnalysisCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodebaseAnalysisPayload>[]
+          }
+          delete: {
+            args: Prisma.CodebaseAnalysisDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodebaseAnalysisPayload>
+          }
+          update: {
+            args: Prisma.CodebaseAnalysisUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodebaseAnalysisPayload>
+          }
+          deleteMany: {
+            args: Prisma.CodebaseAnalysisDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CodebaseAnalysisUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CodebaseAnalysisUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodebaseAnalysisPayload>[]
+          }
+          upsert: {
+            args: Prisma.CodebaseAnalysisUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodebaseAnalysisPayload>
+          }
+          aggregate: {
+            args: Prisma.CodebaseAnalysisAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCodebaseAnalysis>
+          }
+          groupBy: {
+            args: Prisma.CodebaseAnalysisGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CodebaseAnalysisGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CodebaseAnalysisCountArgs<ExtArgs>
+            result: $Utils.Optional<CodebaseAnalysisCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1594,6 +1684,7 @@ export namespace Prisma {
     completionReport?: CompletionReportOmit
     comment?: CommentOmit
     workflowTransition?: WorkflowTransitionOmit
+    codebaseAnalysis?: CodebaseAnalysisOmit
   }
 
   /* Types for Logging */
@@ -2103,6 +2194,7 @@ export namespace Prisma {
     completionReports?: boolean | Task$completionReportsArgs<ExtArgs>
     comments?: boolean | Task$commentsArgs<ExtArgs>
     workflowTransitions?: boolean | Task$workflowTransitionsArgs<ExtArgs>
+    codebaseAnalysis?: boolean | Task$codebaseAnalysisArgs<ExtArgs>
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["task"]>
 
@@ -2159,6 +2251,7 @@ export namespace Prisma {
     completionReports?: boolean | Task$completionReportsArgs<ExtArgs>
     comments?: boolean | Task$commentsArgs<ExtArgs>
     workflowTransitions?: boolean | Task$workflowTransitionsArgs<ExtArgs>
+    codebaseAnalysis?: boolean | Task$codebaseAnalysisArgs<ExtArgs>
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TaskIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2176,6 +2269,7 @@ export namespace Prisma {
       completionReports: Prisma.$CompletionReportPayload<ExtArgs>[]
       comments: Prisma.$CommentPayload<ExtArgs>[]
       workflowTransitions: Prisma.$WorkflowTransitionPayload<ExtArgs>[]
+      codebaseAnalysis: Prisma.$CodebaseAnalysisPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       taskId: string
@@ -2592,6 +2686,7 @@ export namespace Prisma {
     completionReports<T extends Task$completionReportsArgs<ExtArgs> = {}>(args?: Subset<T, Task$completionReportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompletionReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     comments<T extends Task$commentsArgs<ExtArgs> = {}>(args?: Subset<T, Task$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     workflowTransitions<T extends Task$workflowTransitionsArgs<ExtArgs> = {}>(args?: Subset<T, Task$workflowTransitionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkflowTransitionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    codebaseAnalysis<T extends Task$codebaseAnalysisArgs<ExtArgs> = {}>(args?: Subset<T, Task$codebaseAnalysisArgs<ExtArgs>>): Prisma__CodebaseAnalysisClient<$Result.GetResult<Prisma.$CodebaseAnalysisPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3226,6 +3321,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: WorkflowTransitionScalarFieldEnum | WorkflowTransitionScalarFieldEnum[]
+  }
+
+  /**
+   * Task.codebaseAnalysis
+   */
+  export type Task$codebaseAnalysisArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodebaseAnalysis
+     */
+    select?: CodebaseAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodebaseAnalysis
+     */
+    omit?: CodebaseAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodebaseAnalysisInclude<ExtArgs> | null
+    where?: CodebaseAnalysisWhereInput
   }
 
   /**
@@ -13599,6 +13713,1172 @@ export namespace Prisma {
 
 
   /**
+   * Model CodebaseAnalysis
+   */
+
+  export type AggregateCodebaseAnalysis = {
+    _count: CodebaseAnalysisCountAggregateOutputType | null
+    _avg: CodebaseAnalysisAvgAggregateOutputType | null
+    _sum: CodebaseAnalysisSumAggregateOutputType | null
+    _min: CodebaseAnalysisMinAggregateOutputType | null
+    _max: CodebaseAnalysisMaxAggregateOutputType | null
+  }
+
+  export type CodebaseAnalysisAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type CodebaseAnalysisSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type CodebaseAnalysisMinAggregateOutputType = {
+    id: number | null
+    taskId: string | null
+    analyzedAt: Date | null
+    updatedAt: Date | null
+    analyzedBy: string | null
+    analysisVersion: string | null
+  }
+
+  export type CodebaseAnalysisMaxAggregateOutputType = {
+    id: number | null
+    taskId: string | null
+    analyzedAt: Date | null
+    updatedAt: Date | null
+    analyzedBy: string | null
+    analysisVersion: string | null
+  }
+
+  export type CodebaseAnalysisCountAggregateOutputType = {
+    id: number
+    taskId: number
+    architectureFindings: number
+    problemsIdentified: number
+    implementationContext: number
+    integrationPoints: number
+    qualityAssessment: number
+    filesCovered: number
+    technologyStack: number
+    analyzedAt: number
+    updatedAt: number
+    analyzedBy: number
+    analysisVersion: number
+    _all: number
+  }
+
+
+  export type CodebaseAnalysisAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type CodebaseAnalysisSumAggregateInputType = {
+    id?: true
+  }
+
+  export type CodebaseAnalysisMinAggregateInputType = {
+    id?: true
+    taskId?: true
+    analyzedAt?: true
+    updatedAt?: true
+    analyzedBy?: true
+    analysisVersion?: true
+  }
+
+  export type CodebaseAnalysisMaxAggregateInputType = {
+    id?: true
+    taskId?: true
+    analyzedAt?: true
+    updatedAt?: true
+    analyzedBy?: true
+    analysisVersion?: true
+  }
+
+  export type CodebaseAnalysisCountAggregateInputType = {
+    id?: true
+    taskId?: true
+    architectureFindings?: true
+    problemsIdentified?: true
+    implementationContext?: true
+    integrationPoints?: true
+    qualityAssessment?: true
+    filesCovered?: true
+    technologyStack?: true
+    analyzedAt?: true
+    updatedAt?: true
+    analyzedBy?: true
+    analysisVersion?: true
+    _all?: true
+  }
+
+  export type CodebaseAnalysisAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CodebaseAnalysis to aggregate.
+     */
+    where?: CodebaseAnalysisWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodebaseAnalyses to fetch.
+     */
+    orderBy?: CodebaseAnalysisOrderByWithRelationInput | CodebaseAnalysisOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CodebaseAnalysisWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodebaseAnalyses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodebaseAnalyses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CodebaseAnalyses
+    **/
+    _count?: true | CodebaseAnalysisCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CodebaseAnalysisAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CodebaseAnalysisSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CodebaseAnalysisMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CodebaseAnalysisMaxAggregateInputType
+  }
+
+  export type GetCodebaseAnalysisAggregateType<T extends CodebaseAnalysisAggregateArgs> = {
+        [P in keyof T & keyof AggregateCodebaseAnalysis]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCodebaseAnalysis[P]>
+      : GetScalarType<T[P], AggregateCodebaseAnalysis[P]>
+  }
+
+
+
+
+  export type CodebaseAnalysisGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CodebaseAnalysisWhereInput
+    orderBy?: CodebaseAnalysisOrderByWithAggregationInput | CodebaseAnalysisOrderByWithAggregationInput[]
+    by: CodebaseAnalysisScalarFieldEnum[] | CodebaseAnalysisScalarFieldEnum
+    having?: CodebaseAnalysisScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CodebaseAnalysisCountAggregateInputType | true
+    _avg?: CodebaseAnalysisAvgAggregateInputType
+    _sum?: CodebaseAnalysisSumAggregateInputType
+    _min?: CodebaseAnalysisMinAggregateInputType
+    _max?: CodebaseAnalysisMaxAggregateInputType
+  }
+
+  export type CodebaseAnalysisGroupByOutputType = {
+    id: number
+    taskId: string
+    architectureFindings: JsonValue
+    problemsIdentified: JsonValue
+    implementationContext: JsonValue
+    integrationPoints: JsonValue
+    qualityAssessment: JsonValue
+    filesCovered: JsonValue
+    technologyStack: JsonValue
+    analyzedAt: Date
+    updatedAt: Date
+    analyzedBy: string
+    analysisVersion: string
+    _count: CodebaseAnalysisCountAggregateOutputType | null
+    _avg: CodebaseAnalysisAvgAggregateOutputType | null
+    _sum: CodebaseAnalysisSumAggregateOutputType | null
+    _min: CodebaseAnalysisMinAggregateOutputType | null
+    _max: CodebaseAnalysisMaxAggregateOutputType | null
+  }
+
+  type GetCodebaseAnalysisGroupByPayload<T extends CodebaseAnalysisGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CodebaseAnalysisGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CodebaseAnalysisGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CodebaseAnalysisGroupByOutputType[P]>
+            : GetScalarType<T[P], CodebaseAnalysisGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CodebaseAnalysisSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    taskId?: boolean
+    architectureFindings?: boolean
+    problemsIdentified?: boolean
+    implementationContext?: boolean
+    integrationPoints?: boolean
+    qualityAssessment?: boolean
+    filesCovered?: boolean
+    technologyStack?: boolean
+    analyzedAt?: boolean
+    updatedAt?: boolean
+    analyzedBy?: boolean
+    analysisVersion?: boolean
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codebaseAnalysis"]>
+
+  export type CodebaseAnalysisSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    taskId?: boolean
+    architectureFindings?: boolean
+    problemsIdentified?: boolean
+    implementationContext?: boolean
+    integrationPoints?: boolean
+    qualityAssessment?: boolean
+    filesCovered?: boolean
+    technologyStack?: boolean
+    analyzedAt?: boolean
+    updatedAt?: boolean
+    analyzedBy?: boolean
+    analysisVersion?: boolean
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codebaseAnalysis"]>
+
+  export type CodebaseAnalysisSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    taskId?: boolean
+    architectureFindings?: boolean
+    problemsIdentified?: boolean
+    implementationContext?: boolean
+    integrationPoints?: boolean
+    qualityAssessment?: boolean
+    filesCovered?: boolean
+    technologyStack?: boolean
+    analyzedAt?: boolean
+    updatedAt?: boolean
+    analyzedBy?: boolean
+    analysisVersion?: boolean
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codebaseAnalysis"]>
+
+  export type CodebaseAnalysisSelectScalar = {
+    id?: boolean
+    taskId?: boolean
+    architectureFindings?: boolean
+    problemsIdentified?: boolean
+    implementationContext?: boolean
+    integrationPoints?: boolean
+    qualityAssessment?: boolean
+    filesCovered?: boolean
+    technologyStack?: boolean
+    analyzedAt?: boolean
+    updatedAt?: boolean
+    analyzedBy?: boolean
+    analysisVersion?: boolean
+  }
+
+  export type CodebaseAnalysisOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "taskId" | "architectureFindings" | "problemsIdentified" | "implementationContext" | "integrationPoints" | "qualityAssessment" | "filesCovered" | "technologyStack" | "analyzedAt" | "updatedAt" | "analyzedBy" | "analysisVersion", ExtArgs["result"]["codebaseAnalysis"]>
+  export type CodebaseAnalysisInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+  }
+  export type CodebaseAnalysisIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+  }
+  export type CodebaseAnalysisIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+  }
+
+  export type $CodebaseAnalysisPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CodebaseAnalysis"
+    objects: {
+      task: Prisma.$TaskPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      taskId: string
+      architectureFindings: Prisma.JsonValue
+      problemsIdentified: Prisma.JsonValue
+      implementationContext: Prisma.JsonValue
+      integrationPoints: Prisma.JsonValue
+      qualityAssessment: Prisma.JsonValue
+      filesCovered: Prisma.JsonValue
+      technologyStack: Prisma.JsonValue
+      analyzedAt: Date
+      updatedAt: Date
+      analyzedBy: string
+      analysisVersion: string
+    }, ExtArgs["result"]["codebaseAnalysis"]>
+    composites: {}
+  }
+
+  type CodebaseAnalysisGetPayload<S extends boolean | null | undefined | CodebaseAnalysisDefaultArgs> = $Result.GetResult<Prisma.$CodebaseAnalysisPayload, S>
+
+  type CodebaseAnalysisCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CodebaseAnalysisFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CodebaseAnalysisCountAggregateInputType | true
+    }
+
+  export interface CodebaseAnalysisDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CodebaseAnalysis'], meta: { name: 'CodebaseAnalysis' } }
+    /**
+     * Find zero or one CodebaseAnalysis that matches the filter.
+     * @param {CodebaseAnalysisFindUniqueArgs} args - Arguments to find a CodebaseAnalysis
+     * @example
+     * // Get one CodebaseAnalysis
+     * const codebaseAnalysis = await prisma.codebaseAnalysis.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CodebaseAnalysisFindUniqueArgs>(args: SelectSubset<T, CodebaseAnalysisFindUniqueArgs<ExtArgs>>): Prisma__CodebaseAnalysisClient<$Result.GetResult<Prisma.$CodebaseAnalysisPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CodebaseAnalysis that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CodebaseAnalysisFindUniqueOrThrowArgs} args - Arguments to find a CodebaseAnalysis
+     * @example
+     * // Get one CodebaseAnalysis
+     * const codebaseAnalysis = await prisma.codebaseAnalysis.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CodebaseAnalysisFindUniqueOrThrowArgs>(args: SelectSubset<T, CodebaseAnalysisFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CodebaseAnalysisClient<$Result.GetResult<Prisma.$CodebaseAnalysisPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CodebaseAnalysis that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodebaseAnalysisFindFirstArgs} args - Arguments to find a CodebaseAnalysis
+     * @example
+     * // Get one CodebaseAnalysis
+     * const codebaseAnalysis = await prisma.codebaseAnalysis.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CodebaseAnalysisFindFirstArgs>(args?: SelectSubset<T, CodebaseAnalysisFindFirstArgs<ExtArgs>>): Prisma__CodebaseAnalysisClient<$Result.GetResult<Prisma.$CodebaseAnalysisPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CodebaseAnalysis that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodebaseAnalysisFindFirstOrThrowArgs} args - Arguments to find a CodebaseAnalysis
+     * @example
+     * // Get one CodebaseAnalysis
+     * const codebaseAnalysis = await prisma.codebaseAnalysis.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CodebaseAnalysisFindFirstOrThrowArgs>(args?: SelectSubset<T, CodebaseAnalysisFindFirstOrThrowArgs<ExtArgs>>): Prisma__CodebaseAnalysisClient<$Result.GetResult<Prisma.$CodebaseAnalysisPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CodebaseAnalyses that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodebaseAnalysisFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CodebaseAnalyses
+     * const codebaseAnalyses = await prisma.codebaseAnalysis.findMany()
+     * 
+     * // Get first 10 CodebaseAnalyses
+     * const codebaseAnalyses = await prisma.codebaseAnalysis.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const codebaseAnalysisWithIdOnly = await prisma.codebaseAnalysis.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CodebaseAnalysisFindManyArgs>(args?: SelectSubset<T, CodebaseAnalysisFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodebaseAnalysisPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CodebaseAnalysis.
+     * @param {CodebaseAnalysisCreateArgs} args - Arguments to create a CodebaseAnalysis.
+     * @example
+     * // Create one CodebaseAnalysis
+     * const CodebaseAnalysis = await prisma.codebaseAnalysis.create({
+     *   data: {
+     *     // ... data to create a CodebaseAnalysis
+     *   }
+     * })
+     * 
+     */
+    create<T extends CodebaseAnalysisCreateArgs>(args: SelectSubset<T, CodebaseAnalysisCreateArgs<ExtArgs>>): Prisma__CodebaseAnalysisClient<$Result.GetResult<Prisma.$CodebaseAnalysisPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CodebaseAnalyses.
+     * @param {CodebaseAnalysisCreateManyArgs} args - Arguments to create many CodebaseAnalyses.
+     * @example
+     * // Create many CodebaseAnalyses
+     * const codebaseAnalysis = await prisma.codebaseAnalysis.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CodebaseAnalysisCreateManyArgs>(args?: SelectSubset<T, CodebaseAnalysisCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CodebaseAnalyses and returns the data saved in the database.
+     * @param {CodebaseAnalysisCreateManyAndReturnArgs} args - Arguments to create many CodebaseAnalyses.
+     * @example
+     * // Create many CodebaseAnalyses
+     * const codebaseAnalysis = await prisma.codebaseAnalysis.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CodebaseAnalyses and only return the `id`
+     * const codebaseAnalysisWithIdOnly = await prisma.codebaseAnalysis.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CodebaseAnalysisCreateManyAndReturnArgs>(args?: SelectSubset<T, CodebaseAnalysisCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodebaseAnalysisPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CodebaseAnalysis.
+     * @param {CodebaseAnalysisDeleteArgs} args - Arguments to delete one CodebaseAnalysis.
+     * @example
+     * // Delete one CodebaseAnalysis
+     * const CodebaseAnalysis = await prisma.codebaseAnalysis.delete({
+     *   where: {
+     *     // ... filter to delete one CodebaseAnalysis
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CodebaseAnalysisDeleteArgs>(args: SelectSubset<T, CodebaseAnalysisDeleteArgs<ExtArgs>>): Prisma__CodebaseAnalysisClient<$Result.GetResult<Prisma.$CodebaseAnalysisPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CodebaseAnalysis.
+     * @param {CodebaseAnalysisUpdateArgs} args - Arguments to update one CodebaseAnalysis.
+     * @example
+     * // Update one CodebaseAnalysis
+     * const codebaseAnalysis = await prisma.codebaseAnalysis.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CodebaseAnalysisUpdateArgs>(args: SelectSubset<T, CodebaseAnalysisUpdateArgs<ExtArgs>>): Prisma__CodebaseAnalysisClient<$Result.GetResult<Prisma.$CodebaseAnalysisPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CodebaseAnalyses.
+     * @param {CodebaseAnalysisDeleteManyArgs} args - Arguments to filter CodebaseAnalyses to delete.
+     * @example
+     * // Delete a few CodebaseAnalyses
+     * const { count } = await prisma.codebaseAnalysis.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CodebaseAnalysisDeleteManyArgs>(args?: SelectSubset<T, CodebaseAnalysisDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CodebaseAnalyses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodebaseAnalysisUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CodebaseAnalyses
+     * const codebaseAnalysis = await prisma.codebaseAnalysis.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CodebaseAnalysisUpdateManyArgs>(args: SelectSubset<T, CodebaseAnalysisUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CodebaseAnalyses and returns the data updated in the database.
+     * @param {CodebaseAnalysisUpdateManyAndReturnArgs} args - Arguments to update many CodebaseAnalyses.
+     * @example
+     * // Update many CodebaseAnalyses
+     * const codebaseAnalysis = await prisma.codebaseAnalysis.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CodebaseAnalyses and only return the `id`
+     * const codebaseAnalysisWithIdOnly = await prisma.codebaseAnalysis.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CodebaseAnalysisUpdateManyAndReturnArgs>(args: SelectSubset<T, CodebaseAnalysisUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodebaseAnalysisPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CodebaseAnalysis.
+     * @param {CodebaseAnalysisUpsertArgs} args - Arguments to update or create a CodebaseAnalysis.
+     * @example
+     * // Update or create a CodebaseAnalysis
+     * const codebaseAnalysis = await prisma.codebaseAnalysis.upsert({
+     *   create: {
+     *     // ... data to create a CodebaseAnalysis
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CodebaseAnalysis we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CodebaseAnalysisUpsertArgs>(args: SelectSubset<T, CodebaseAnalysisUpsertArgs<ExtArgs>>): Prisma__CodebaseAnalysisClient<$Result.GetResult<Prisma.$CodebaseAnalysisPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CodebaseAnalyses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodebaseAnalysisCountArgs} args - Arguments to filter CodebaseAnalyses to count.
+     * @example
+     * // Count the number of CodebaseAnalyses
+     * const count = await prisma.codebaseAnalysis.count({
+     *   where: {
+     *     // ... the filter for the CodebaseAnalyses we want to count
+     *   }
+     * })
+    **/
+    count<T extends CodebaseAnalysisCountArgs>(
+      args?: Subset<T, CodebaseAnalysisCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CodebaseAnalysisCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CodebaseAnalysis.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodebaseAnalysisAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CodebaseAnalysisAggregateArgs>(args: Subset<T, CodebaseAnalysisAggregateArgs>): Prisma.PrismaPromise<GetCodebaseAnalysisAggregateType<T>>
+
+    /**
+     * Group by CodebaseAnalysis.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodebaseAnalysisGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CodebaseAnalysisGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CodebaseAnalysisGroupByArgs['orderBy'] }
+        : { orderBy?: CodebaseAnalysisGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CodebaseAnalysisGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCodebaseAnalysisGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CodebaseAnalysis model
+   */
+  readonly fields: CodebaseAnalysisFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CodebaseAnalysis.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CodebaseAnalysisClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    task<T extends TaskDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TaskDefaultArgs<ExtArgs>>): Prisma__TaskClient<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CodebaseAnalysis model
+   */
+  interface CodebaseAnalysisFieldRefs {
+    readonly id: FieldRef<"CodebaseAnalysis", 'Int'>
+    readonly taskId: FieldRef<"CodebaseAnalysis", 'String'>
+    readonly architectureFindings: FieldRef<"CodebaseAnalysis", 'Json'>
+    readonly problemsIdentified: FieldRef<"CodebaseAnalysis", 'Json'>
+    readonly implementationContext: FieldRef<"CodebaseAnalysis", 'Json'>
+    readonly integrationPoints: FieldRef<"CodebaseAnalysis", 'Json'>
+    readonly qualityAssessment: FieldRef<"CodebaseAnalysis", 'Json'>
+    readonly filesCovered: FieldRef<"CodebaseAnalysis", 'Json'>
+    readonly technologyStack: FieldRef<"CodebaseAnalysis", 'Json'>
+    readonly analyzedAt: FieldRef<"CodebaseAnalysis", 'DateTime'>
+    readonly updatedAt: FieldRef<"CodebaseAnalysis", 'DateTime'>
+    readonly analyzedBy: FieldRef<"CodebaseAnalysis", 'String'>
+    readonly analysisVersion: FieldRef<"CodebaseAnalysis", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CodebaseAnalysis findUnique
+   */
+  export type CodebaseAnalysisFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodebaseAnalysis
+     */
+    select?: CodebaseAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodebaseAnalysis
+     */
+    omit?: CodebaseAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodebaseAnalysisInclude<ExtArgs> | null
+    /**
+     * Filter, which CodebaseAnalysis to fetch.
+     */
+    where: CodebaseAnalysisWhereUniqueInput
+  }
+
+  /**
+   * CodebaseAnalysis findUniqueOrThrow
+   */
+  export type CodebaseAnalysisFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodebaseAnalysis
+     */
+    select?: CodebaseAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodebaseAnalysis
+     */
+    omit?: CodebaseAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodebaseAnalysisInclude<ExtArgs> | null
+    /**
+     * Filter, which CodebaseAnalysis to fetch.
+     */
+    where: CodebaseAnalysisWhereUniqueInput
+  }
+
+  /**
+   * CodebaseAnalysis findFirst
+   */
+  export type CodebaseAnalysisFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodebaseAnalysis
+     */
+    select?: CodebaseAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodebaseAnalysis
+     */
+    omit?: CodebaseAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodebaseAnalysisInclude<ExtArgs> | null
+    /**
+     * Filter, which CodebaseAnalysis to fetch.
+     */
+    where?: CodebaseAnalysisWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodebaseAnalyses to fetch.
+     */
+    orderBy?: CodebaseAnalysisOrderByWithRelationInput | CodebaseAnalysisOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CodebaseAnalyses.
+     */
+    cursor?: CodebaseAnalysisWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodebaseAnalyses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodebaseAnalyses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodebaseAnalyses.
+     */
+    distinct?: CodebaseAnalysisScalarFieldEnum | CodebaseAnalysisScalarFieldEnum[]
+  }
+
+  /**
+   * CodebaseAnalysis findFirstOrThrow
+   */
+  export type CodebaseAnalysisFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodebaseAnalysis
+     */
+    select?: CodebaseAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodebaseAnalysis
+     */
+    omit?: CodebaseAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodebaseAnalysisInclude<ExtArgs> | null
+    /**
+     * Filter, which CodebaseAnalysis to fetch.
+     */
+    where?: CodebaseAnalysisWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodebaseAnalyses to fetch.
+     */
+    orderBy?: CodebaseAnalysisOrderByWithRelationInput | CodebaseAnalysisOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CodebaseAnalyses.
+     */
+    cursor?: CodebaseAnalysisWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodebaseAnalyses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodebaseAnalyses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodebaseAnalyses.
+     */
+    distinct?: CodebaseAnalysisScalarFieldEnum | CodebaseAnalysisScalarFieldEnum[]
+  }
+
+  /**
+   * CodebaseAnalysis findMany
+   */
+  export type CodebaseAnalysisFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodebaseAnalysis
+     */
+    select?: CodebaseAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodebaseAnalysis
+     */
+    omit?: CodebaseAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodebaseAnalysisInclude<ExtArgs> | null
+    /**
+     * Filter, which CodebaseAnalyses to fetch.
+     */
+    where?: CodebaseAnalysisWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodebaseAnalyses to fetch.
+     */
+    orderBy?: CodebaseAnalysisOrderByWithRelationInput | CodebaseAnalysisOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CodebaseAnalyses.
+     */
+    cursor?: CodebaseAnalysisWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodebaseAnalyses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodebaseAnalyses.
+     */
+    skip?: number
+    distinct?: CodebaseAnalysisScalarFieldEnum | CodebaseAnalysisScalarFieldEnum[]
+  }
+
+  /**
+   * CodebaseAnalysis create
+   */
+  export type CodebaseAnalysisCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodebaseAnalysis
+     */
+    select?: CodebaseAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodebaseAnalysis
+     */
+    omit?: CodebaseAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodebaseAnalysisInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CodebaseAnalysis.
+     */
+    data: XOR<CodebaseAnalysisCreateInput, CodebaseAnalysisUncheckedCreateInput>
+  }
+
+  /**
+   * CodebaseAnalysis createMany
+   */
+  export type CodebaseAnalysisCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CodebaseAnalyses.
+     */
+    data: CodebaseAnalysisCreateManyInput | CodebaseAnalysisCreateManyInput[]
+  }
+
+  /**
+   * CodebaseAnalysis createManyAndReturn
+   */
+  export type CodebaseAnalysisCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodebaseAnalysis
+     */
+    select?: CodebaseAnalysisSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodebaseAnalysis
+     */
+    omit?: CodebaseAnalysisOmit<ExtArgs> | null
+    /**
+     * The data used to create many CodebaseAnalyses.
+     */
+    data: CodebaseAnalysisCreateManyInput | CodebaseAnalysisCreateManyInput[]
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodebaseAnalysisIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CodebaseAnalysis update
+   */
+  export type CodebaseAnalysisUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodebaseAnalysis
+     */
+    select?: CodebaseAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodebaseAnalysis
+     */
+    omit?: CodebaseAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodebaseAnalysisInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CodebaseAnalysis.
+     */
+    data: XOR<CodebaseAnalysisUpdateInput, CodebaseAnalysisUncheckedUpdateInput>
+    /**
+     * Choose, which CodebaseAnalysis to update.
+     */
+    where: CodebaseAnalysisWhereUniqueInput
+  }
+
+  /**
+   * CodebaseAnalysis updateMany
+   */
+  export type CodebaseAnalysisUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CodebaseAnalyses.
+     */
+    data: XOR<CodebaseAnalysisUpdateManyMutationInput, CodebaseAnalysisUncheckedUpdateManyInput>
+    /**
+     * Filter which CodebaseAnalyses to update
+     */
+    where?: CodebaseAnalysisWhereInput
+    /**
+     * Limit how many CodebaseAnalyses to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CodebaseAnalysis updateManyAndReturn
+   */
+  export type CodebaseAnalysisUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodebaseAnalysis
+     */
+    select?: CodebaseAnalysisSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodebaseAnalysis
+     */
+    omit?: CodebaseAnalysisOmit<ExtArgs> | null
+    /**
+     * The data used to update CodebaseAnalyses.
+     */
+    data: XOR<CodebaseAnalysisUpdateManyMutationInput, CodebaseAnalysisUncheckedUpdateManyInput>
+    /**
+     * Filter which CodebaseAnalyses to update
+     */
+    where?: CodebaseAnalysisWhereInput
+    /**
+     * Limit how many CodebaseAnalyses to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodebaseAnalysisIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CodebaseAnalysis upsert
+   */
+  export type CodebaseAnalysisUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodebaseAnalysis
+     */
+    select?: CodebaseAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodebaseAnalysis
+     */
+    omit?: CodebaseAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodebaseAnalysisInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CodebaseAnalysis to update in case it exists.
+     */
+    where: CodebaseAnalysisWhereUniqueInput
+    /**
+     * In case the CodebaseAnalysis found by the `where` argument doesn't exist, create a new CodebaseAnalysis with this data.
+     */
+    create: XOR<CodebaseAnalysisCreateInput, CodebaseAnalysisUncheckedCreateInput>
+    /**
+     * In case the CodebaseAnalysis was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CodebaseAnalysisUpdateInput, CodebaseAnalysisUncheckedUpdateInput>
+  }
+
+  /**
+   * CodebaseAnalysis delete
+   */
+  export type CodebaseAnalysisDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodebaseAnalysis
+     */
+    select?: CodebaseAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodebaseAnalysis
+     */
+    omit?: CodebaseAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodebaseAnalysisInclude<ExtArgs> | null
+    /**
+     * Filter which CodebaseAnalysis to delete.
+     */
+    where: CodebaseAnalysisWhereUniqueInput
+  }
+
+  /**
+   * CodebaseAnalysis deleteMany
+   */
+  export type CodebaseAnalysisDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CodebaseAnalyses to delete
+     */
+    where?: CodebaseAnalysisWhereInput
+    /**
+     * Limit how many CodebaseAnalyses to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CodebaseAnalysis without action
+   */
+  export type CodebaseAnalysisDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodebaseAnalysis
+     */
+    select?: CodebaseAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodebaseAnalysis
+     */
+    omit?: CodebaseAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodebaseAnalysisInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -13758,6 +15038,25 @@ export namespace Prisma {
   export type WorkflowTransitionScalarFieldEnum = (typeof WorkflowTransitionScalarFieldEnum)[keyof typeof WorkflowTransitionScalarFieldEnum]
 
 
+  export const CodebaseAnalysisScalarFieldEnum: {
+    id: 'id',
+    taskId: 'taskId',
+    architectureFindings: 'architectureFindings',
+    problemsIdentified: 'problemsIdentified',
+    implementationContext: 'implementationContext',
+    integrationPoints: 'integrationPoints',
+    qualityAssessment: 'qualityAssessment',
+    filesCovered: 'filesCovered',
+    technologyStack: 'technologyStack',
+    analyzedAt: 'analyzedAt',
+    updatedAt: 'updatedAt',
+    analyzedBy: 'analyzedBy',
+    analysisVersion: 'analysisVersion'
+  };
+
+  export type CodebaseAnalysisScalarFieldEnum = (typeof CodebaseAnalysisScalarFieldEnum)[keyof typeof CodebaseAnalysisScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -13887,6 +15186,7 @@ export namespace Prisma {
     completionReports?: CompletionReportListRelationFilter
     comments?: CommentListRelationFilter
     workflowTransitions?: WorkflowTransitionListRelationFilter
+    codebaseAnalysis?: XOR<CodebaseAnalysisNullableScalarRelationFilter, CodebaseAnalysisWhereInput> | null
   }
 
   export type TaskOrderByWithRelationInput = {
@@ -13910,6 +15210,7 @@ export namespace Prisma {
     completionReports?: CompletionReportOrderByRelationAggregateInput
     comments?: CommentOrderByRelationAggregateInput
     workflowTransitions?: WorkflowTransitionOrderByRelationAggregateInput
+    codebaseAnalysis?: CodebaseAnalysisOrderByWithRelationInput
   }
 
   export type TaskWhereUniqueInput = Prisma.AtLeast<{
@@ -13936,6 +15237,7 @@ export namespace Prisma {
     completionReports?: CompletionReportListRelationFilter
     comments?: CommentListRelationFilter
     workflowTransitions?: WorkflowTransitionListRelationFilter
+    codebaseAnalysis?: XOR<CodebaseAnalysisNullableScalarRelationFilter, CodebaseAnalysisWhereInput> | null
   }, "taskId">
 
   export type TaskOrderByWithAggregationInput = {
@@ -14668,6 +15970,103 @@ export namespace Prisma {
     reason?: StringNullableWithAggregatesFilter<"WorkflowTransition"> | string | null
   }
 
+  export type CodebaseAnalysisWhereInput = {
+    AND?: CodebaseAnalysisWhereInput | CodebaseAnalysisWhereInput[]
+    OR?: CodebaseAnalysisWhereInput[]
+    NOT?: CodebaseAnalysisWhereInput | CodebaseAnalysisWhereInput[]
+    id?: IntFilter<"CodebaseAnalysis"> | number
+    taskId?: StringFilter<"CodebaseAnalysis"> | string
+    architectureFindings?: JsonFilter<"CodebaseAnalysis">
+    problemsIdentified?: JsonFilter<"CodebaseAnalysis">
+    implementationContext?: JsonFilter<"CodebaseAnalysis">
+    integrationPoints?: JsonFilter<"CodebaseAnalysis">
+    qualityAssessment?: JsonFilter<"CodebaseAnalysis">
+    filesCovered?: JsonFilter<"CodebaseAnalysis">
+    technologyStack?: JsonFilter<"CodebaseAnalysis">
+    analyzedAt?: DateTimeFilter<"CodebaseAnalysis"> | Date | string
+    updatedAt?: DateTimeFilter<"CodebaseAnalysis"> | Date | string
+    analyzedBy?: StringFilter<"CodebaseAnalysis"> | string
+    analysisVersion?: StringFilter<"CodebaseAnalysis"> | string
+    task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
+  }
+
+  export type CodebaseAnalysisOrderByWithRelationInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    architectureFindings?: SortOrder
+    problemsIdentified?: SortOrder
+    implementationContext?: SortOrder
+    integrationPoints?: SortOrder
+    qualityAssessment?: SortOrder
+    filesCovered?: SortOrder
+    technologyStack?: SortOrder
+    analyzedAt?: SortOrder
+    updatedAt?: SortOrder
+    analyzedBy?: SortOrder
+    analysisVersion?: SortOrder
+    task?: TaskOrderByWithRelationInput
+  }
+
+  export type CodebaseAnalysisWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    taskId?: string
+    AND?: CodebaseAnalysisWhereInput | CodebaseAnalysisWhereInput[]
+    OR?: CodebaseAnalysisWhereInput[]
+    NOT?: CodebaseAnalysisWhereInput | CodebaseAnalysisWhereInput[]
+    architectureFindings?: JsonFilter<"CodebaseAnalysis">
+    problemsIdentified?: JsonFilter<"CodebaseAnalysis">
+    implementationContext?: JsonFilter<"CodebaseAnalysis">
+    integrationPoints?: JsonFilter<"CodebaseAnalysis">
+    qualityAssessment?: JsonFilter<"CodebaseAnalysis">
+    filesCovered?: JsonFilter<"CodebaseAnalysis">
+    technologyStack?: JsonFilter<"CodebaseAnalysis">
+    analyzedAt?: DateTimeFilter<"CodebaseAnalysis"> | Date | string
+    updatedAt?: DateTimeFilter<"CodebaseAnalysis"> | Date | string
+    analyzedBy?: StringFilter<"CodebaseAnalysis"> | string
+    analysisVersion?: StringFilter<"CodebaseAnalysis"> | string
+    task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
+  }, "id" | "taskId">
+
+  export type CodebaseAnalysisOrderByWithAggregationInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    architectureFindings?: SortOrder
+    problemsIdentified?: SortOrder
+    implementationContext?: SortOrder
+    integrationPoints?: SortOrder
+    qualityAssessment?: SortOrder
+    filesCovered?: SortOrder
+    technologyStack?: SortOrder
+    analyzedAt?: SortOrder
+    updatedAt?: SortOrder
+    analyzedBy?: SortOrder
+    analysisVersion?: SortOrder
+    _count?: CodebaseAnalysisCountOrderByAggregateInput
+    _avg?: CodebaseAnalysisAvgOrderByAggregateInput
+    _max?: CodebaseAnalysisMaxOrderByAggregateInput
+    _min?: CodebaseAnalysisMinOrderByAggregateInput
+    _sum?: CodebaseAnalysisSumOrderByAggregateInput
+  }
+
+  export type CodebaseAnalysisScalarWhereWithAggregatesInput = {
+    AND?: CodebaseAnalysisScalarWhereWithAggregatesInput | CodebaseAnalysisScalarWhereWithAggregatesInput[]
+    OR?: CodebaseAnalysisScalarWhereWithAggregatesInput[]
+    NOT?: CodebaseAnalysisScalarWhereWithAggregatesInput | CodebaseAnalysisScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"CodebaseAnalysis"> | number
+    taskId?: StringWithAggregatesFilter<"CodebaseAnalysis"> | string
+    architectureFindings?: JsonWithAggregatesFilter<"CodebaseAnalysis">
+    problemsIdentified?: JsonWithAggregatesFilter<"CodebaseAnalysis">
+    implementationContext?: JsonWithAggregatesFilter<"CodebaseAnalysis">
+    integrationPoints?: JsonWithAggregatesFilter<"CodebaseAnalysis">
+    qualityAssessment?: JsonWithAggregatesFilter<"CodebaseAnalysis">
+    filesCovered?: JsonWithAggregatesFilter<"CodebaseAnalysis">
+    technologyStack?: JsonWithAggregatesFilter<"CodebaseAnalysis">
+    analyzedAt?: DateTimeWithAggregatesFilter<"CodebaseAnalysis"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"CodebaseAnalysis"> | Date | string
+    analyzedBy?: StringWithAggregatesFilter<"CodebaseAnalysis"> | string
+    analysisVersion?: StringWithAggregatesFilter<"CodebaseAnalysis"> | string
+  }
+
   export type TaskCreateInput = {
     taskId: string
     name: string
@@ -14689,6 +16088,7 @@ export namespace Prisma {
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisCreateNestedOneWithoutTaskInput
   }
 
   export type TaskUncheckedCreateInput = {
@@ -14712,6 +16112,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedCreateNestedOneWithoutTaskInput
   }
 
   export type TaskUpdateInput = {
@@ -14735,6 +16136,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateInput = {
@@ -14758,6 +16160,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskCreateManyInput = {
@@ -15513,6 +16916,114 @@ export namespace Prisma {
     reason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type CodebaseAnalysisCreateInput = {
+    architectureFindings: JsonNullValueInput | InputJsonValue
+    problemsIdentified: JsonNullValueInput | InputJsonValue
+    implementationContext: JsonNullValueInput | InputJsonValue
+    integrationPoints: JsonNullValueInput | InputJsonValue
+    qualityAssessment: JsonNullValueInput | InputJsonValue
+    filesCovered: JsonNullValueInput | InputJsonValue
+    technologyStack: JsonNullValueInput | InputJsonValue
+    analyzedAt?: Date | string
+    updatedAt?: Date | string
+    analyzedBy: string
+    analysisVersion?: string
+    task: TaskCreateNestedOneWithoutCodebaseAnalysisInput
+  }
+
+  export type CodebaseAnalysisUncheckedCreateInput = {
+    id?: number
+    taskId: string
+    architectureFindings: JsonNullValueInput | InputJsonValue
+    problemsIdentified: JsonNullValueInput | InputJsonValue
+    implementationContext: JsonNullValueInput | InputJsonValue
+    integrationPoints: JsonNullValueInput | InputJsonValue
+    qualityAssessment: JsonNullValueInput | InputJsonValue
+    filesCovered: JsonNullValueInput | InputJsonValue
+    technologyStack: JsonNullValueInput | InputJsonValue
+    analyzedAt?: Date | string
+    updatedAt?: Date | string
+    analyzedBy: string
+    analysisVersion?: string
+  }
+
+  export type CodebaseAnalysisUpdateInput = {
+    architectureFindings?: JsonNullValueInput | InputJsonValue
+    problemsIdentified?: JsonNullValueInput | InputJsonValue
+    implementationContext?: JsonNullValueInput | InputJsonValue
+    integrationPoints?: JsonNullValueInput | InputJsonValue
+    qualityAssessment?: JsonNullValueInput | InputJsonValue
+    filesCovered?: JsonNullValueInput | InputJsonValue
+    technologyStack?: JsonNullValueInput | InputJsonValue
+    analyzedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    analyzedBy?: StringFieldUpdateOperationsInput | string
+    analysisVersion?: StringFieldUpdateOperationsInput | string
+    task?: TaskUpdateOneRequiredWithoutCodebaseAnalysisNestedInput
+  }
+
+  export type CodebaseAnalysisUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    taskId?: StringFieldUpdateOperationsInput | string
+    architectureFindings?: JsonNullValueInput | InputJsonValue
+    problemsIdentified?: JsonNullValueInput | InputJsonValue
+    implementationContext?: JsonNullValueInput | InputJsonValue
+    integrationPoints?: JsonNullValueInput | InputJsonValue
+    qualityAssessment?: JsonNullValueInput | InputJsonValue
+    filesCovered?: JsonNullValueInput | InputJsonValue
+    technologyStack?: JsonNullValueInput | InputJsonValue
+    analyzedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    analyzedBy?: StringFieldUpdateOperationsInput | string
+    analysisVersion?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type CodebaseAnalysisCreateManyInput = {
+    id?: number
+    taskId: string
+    architectureFindings: JsonNullValueInput | InputJsonValue
+    problemsIdentified: JsonNullValueInput | InputJsonValue
+    implementationContext: JsonNullValueInput | InputJsonValue
+    integrationPoints: JsonNullValueInput | InputJsonValue
+    qualityAssessment: JsonNullValueInput | InputJsonValue
+    filesCovered: JsonNullValueInput | InputJsonValue
+    technologyStack: JsonNullValueInput | InputJsonValue
+    analyzedAt?: Date | string
+    updatedAt?: Date | string
+    analyzedBy: string
+    analysisVersion?: string
+  }
+
+  export type CodebaseAnalysisUpdateManyMutationInput = {
+    architectureFindings?: JsonNullValueInput | InputJsonValue
+    problemsIdentified?: JsonNullValueInput | InputJsonValue
+    implementationContext?: JsonNullValueInput | InputJsonValue
+    integrationPoints?: JsonNullValueInput | InputJsonValue
+    qualityAssessment?: JsonNullValueInput | InputJsonValue
+    filesCovered?: JsonNullValueInput | InputJsonValue
+    technologyStack?: JsonNullValueInput | InputJsonValue
+    analyzedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    analyzedBy?: StringFieldUpdateOperationsInput | string
+    analysisVersion?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type CodebaseAnalysisUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    taskId?: StringFieldUpdateOperationsInput | string
+    architectureFindings?: JsonNullValueInput | InputJsonValue
+    problemsIdentified?: JsonNullValueInput | InputJsonValue
+    implementationContext?: JsonNullValueInput | InputJsonValue
+    integrationPoints?: JsonNullValueInput | InputJsonValue
+    qualityAssessment?: JsonNullValueInput | InputJsonValue
+    filesCovered?: JsonNullValueInput | InputJsonValue
+    technologyStack?: JsonNullValueInput | InputJsonValue
+    analyzedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    analyzedBy?: StringFieldUpdateOperationsInput | string
+    analysisVersion?: StringFieldUpdateOperationsInput | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[]
@@ -15643,6 +17154,11 @@ export namespace Prisma {
     every?: WorkflowTransitionWhereInput
     some?: WorkflowTransitionWhereInput
     none?: WorkflowTransitionWhereInput
+  }
+
+  export type CodebaseAnalysisNullableScalarRelationFilter = {
+    is?: CodebaseAnalysisWhereInput | null
+    isNot?: CodebaseAnalysisWhereInput | null
   }
 
   export type SortOrderInput = {
@@ -16300,6 +17816,48 @@ export namespace Prisma {
     id?: SortOrder
   }
 
+  export type CodebaseAnalysisCountOrderByAggregateInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    architectureFindings?: SortOrder
+    problemsIdentified?: SortOrder
+    implementationContext?: SortOrder
+    integrationPoints?: SortOrder
+    qualityAssessment?: SortOrder
+    filesCovered?: SortOrder
+    technologyStack?: SortOrder
+    analyzedAt?: SortOrder
+    updatedAt?: SortOrder
+    analyzedBy?: SortOrder
+    analysisVersion?: SortOrder
+  }
+
+  export type CodebaseAnalysisAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type CodebaseAnalysisMaxOrderByAggregateInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    analyzedAt?: SortOrder
+    updatedAt?: SortOrder
+    analyzedBy?: SortOrder
+    analysisVersion?: SortOrder
+  }
+
+  export type CodebaseAnalysisMinOrderByAggregateInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    analyzedAt?: SortOrder
+    updatedAt?: SortOrder
+    analyzedBy?: SortOrder
+    analysisVersion?: SortOrder
+  }
+
+  export type CodebaseAnalysisSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
   export type TaskDescriptionCreateNestedOneWithoutTaskInput = {
     create?: XOR<TaskDescriptionCreateWithoutTaskInput, TaskDescriptionUncheckedCreateWithoutTaskInput>
     connectOrCreate?: TaskDescriptionCreateOrConnectWithoutTaskInput
@@ -16362,6 +17920,12 @@ export namespace Prisma {
     connect?: WorkflowTransitionWhereUniqueInput | WorkflowTransitionWhereUniqueInput[]
   }
 
+  export type CodebaseAnalysisCreateNestedOneWithoutTaskInput = {
+    create?: XOR<CodebaseAnalysisCreateWithoutTaskInput, CodebaseAnalysisUncheckedCreateWithoutTaskInput>
+    connectOrCreate?: CodebaseAnalysisCreateOrConnectWithoutTaskInput
+    connect?: CodebaseAnalysisWhereUniqueInput
+  }
+
   export type TaskDescriptionUncheckedCreateNestedOneWithoutTaskInput = {
     create?: XOR<TaskDescriptionCreateWithoutTaskInput, TaskDescriptionUncheckedCreateWithoutTaskInput>
     connectOrCreate?: TaskDescriptionCreateOrConnectWithoutTaskInput
@@ -16422,6 +17986,12 @@ export namespace Prisma {
     connectOrCreate?: WorkflowTransitionCreateOrConnectWithoutTaskInput | WorkflowTransitionCreateOrConnectWithoutTaskInput[]
     createMany?: WorkflowTransitionCreateManyTaskInputEnvelope
     connect?: WorkflowTransitionWhereUniqueInput | WorkflowTransitionWhereUniqueInput[]
+  }
+
+  export type CodebaseAnalysisUncheckedCreateNestedOneWithoutTaskInput = {
+    create?: XOR<CodebaseAnalysisCreateWithoutTaskInput, CodebaseAnalysisUncheckedCreateWithoutTaskInput>
+    connectOrCreate?: CodebaseAnalysisCreateOrConnectWithoutTaskInput
+    connect?: CodebaseAnalysisWhereUniqueInput
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -16570,6 +18140,16 @@ export namespace Prisma {
     deleteMany?: WorkflowTransitionScalarWhereInput | WorkflowTransitionScalarWhereInput[]
   }
 
+  export type CodebaseAnalysisUpdateOneWithoutTaskNestedInput = {
+    create?: XOR<CodebaseAnalysisCreateWithoutTaskInput, CodebaseAnalysisUncheckedCreateWithoutTaskInput>
+    connectOrCreate?: CodebaseAnalysisCreateOrConnectWithoutTaskInput
+    upsert?: CodebaseAnalysisUpsertWithoutTaskInput
+    disconnect?: CodebaseAnalysisWhereInput | boolean
+    delete?: CodebaseAnalysisWhereInput | boolean
+    connect?: CodebaseAnalysisWhereUniqueInput
+    update?: XOR<XOR<CodebaseAnalysisUpdateToOneWithWhereWithoutTaskInput, CodebaseAnalysisUpdateWithoutTaskInput>, CodebaseAnalysisUncheckedUpdateWithoutTaskInput>
+  }
+
   export type TaskDescriptionUncheckedUpdateOneWithoutTaskNestedInput = {
     create?: XOR<TaskDescriptionCreateWithoutTaskInput, TaskDescriptionUncheckedCreateWithoutTaskInput>
     connectOrCreate?: TaskDescriptionCreateOrConnectWithoutTaskInput
@@ -16690,6 +18270,16 @@ export namespace Prisma {
     update?: WorkflowTransitionUpdateWithWhereUniqueWithoutTaskInput | WorkflowTransitionUpdateWithWhereUniqueWithoutTaskInput[]
     updateMany?: WorkflowTransitionUpdateManyWithWhereWithoutTaskInput | WorkflowTransitionUpdateManyWithWhereWithoutTaskInput[]
     deleteMany?: WorkflowTransitionScalarWhereInput | WorkflowTransitionScalarWhereInput[]
+  }
+
+  export type CodebaseAnalysisUncheckedUpdateOneWithoutTaskNestedInput = {
+    create?: XOR<CodebaseAnalysisCreateWithoutTaskInput, CodebaseAnalysisUncheckedCreateWithoutTaskInput>
+    connectOrCreate?: CodebaseAnalysisCreateOrConnectWithoutTaskInput
+    upsert?: CodebaseAnalysisUpsertWithoutTaskInput
+    disconnect?: CodebaseAnalysisWhereInput | boolean
+    delete?: CodebaseAnalysisWhereInput | boolean
+    connect?: CodebaseAnalysisWhereUniqueInput
+    update?: XOR<XOR<CodebaseAnalysisUpdateToOneWithWhereWithoutTaskInput, CodebaseAnalysisUpdateWithoutTaskInput>, CodebaseAnalysisUncheckedUpdateWithoutTaskInput>
   }
 
   export type TaskCreateNestedOneWithoutTaskDescriptionInput = {
@@ -17000,6 +18590,20 @@ export namespace Prisma {
     upsert?: TaskUpsertWithoutWorkflowTransitionsInput
     connect?: TaskWhereUniqueInput
     update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutWorkflowTransitionsInput, TaskUpdateWithoutWorkflowTransitionsInput>, TaskUncheckedUpdateWithoutWorkflowTransitionsInput>
+  }
+
+  export type TaskCreateNestedOneWithoutCodebaseAnalysisInput = {
+    create?: XOR<TaskCreateWithoutCodebaseAnalysisInput, TaskUncheckedCreateWithoutCodebaseAnalysisInput>
+    connectOrCreate?: TaskCreateOrConnectWithoutCodebaseAnalysisInput
+    connect?: TaskWhereUniqueInput
+  }
+
+  export type TaskUpdateOneRequiredWithoutCodebaseAnalysisNestedInput = {
+    create?: XOR<TaskCreateWithoutCodebaseAnalysisInput, TaskUncheckedCreateWithoutCodebaseAnalysisInput>
+    connectOrCreate?: TaskCreateOrConnectWithoutCodebaseAnalysisInput
+    upsert?: TaskUpsertWithoutCodebaseAnalysisInput
+    connect?: TaskWhereUniqueInput
+    update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutCodebaseAnalysisInput, TaskUpdateWithoutCodebaseAnalysisInput>, TaskUncheckedUpdateWithoutCodebaseAnalysisInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -17506,6 +19110,40 @@ export namespace Prisma {
     data: WorkflowTransitionCreateManyTaskInput | WorkflowTransitionCreateManyTaskInput[]
   }
 
+  export type CodebaseAnalysisCreateWithoutTaskInput = {
+    architectureFindings: JsonNullValueInput | InputJsonValue
+    problemsIdentified: JsonNullValueInput | InputJsonValue
+    implementationContext: JsonNullValueInput | InputJsonValue
+    integrationPoints: JsonNullValueInput | InputJsonValue
+    qualityAssessment: JsonNullValueInput | InputJsonValue
+    filesCovered: JsonNullValueInput | InputJsonValue
+    technologyStack: JsonNullValueInput | InputJsonValue
+    analyzedAt?: Date | string
+    updatedAt?: Date | string
+    analyzedBy: string
+    analysisVersion?: string
+  }
+
+  export type CodebaseAnalysisUncheckedCreateWithoutTaskInput = {
+    id?: number
+    architectureFindings: JsonNullValueInput | InputJsonValue
+    problemsIdentified: JsonNullValueInput | InputJsonValue
+    implementationContext: JsonNullValueInput | InputJsonValue
+    integrationPoints: JsonNullValueInput | InputJsonValue
+    qualityAssessment: JsonNullValueInput | InputJsonValue
+    filesCovered: JsonNullValueInput | InputJsonValue
+    technologyStack: JsonNullValueInput | InputJsonValue
+    analyzedAt?: Date | string
+    updatedAt?: Date | string
+    analyzedBy: string
+    analysisVersion?: string
+  }
+
+  export type CodebaseAnalysisCreateOrConnectWithoutTaskInput = {
+    where: CodebaseAnalysisWhereUniqueInput
+    create: XOR<CodebaseAnalysisCreateWithoutTaskInput, CodebaseAnalysisUncheckedCreateWithoutTaskInput>
+  }
+
   export type TaskDescriptionUpsertWithoutTaskInput = {
     update: XOR<TaskDescriptionUpdateWithoutTaskInput, TaskDescriptionUncheckedUpdateWithoutTaskInput>
     create: XOR<TaskDescriptionCreateWithoutTaskInput, TaskDescriptionUncheckedCreateWithoutTaskInput>
@@ -17782,6 +19420,46 @@ export namespace Prisma {
     reason?: StringNullableFilter<"WorkflowTransition"> | string | null
   }
 
+  export type CodebaseAnalysisUpsertWithoutTaskInput = {
+    update: XOR<CodebaseAnalysisUpdateWithoutTaskInput, CodebaseAnalysisUncheckedUpdateWithoutTaskInput>
+    create: XOR<CodebaseAnalysisCreateWithoutTaskInput, CodebaseAnalysisUncheckedCreateWithoutTaskInput>
+    where?: CodebaseAnalysisWhereInput
+  }
+
+  export type CodebaseAnalysisUpdateToOneWithWhereWithoutTaskInput = {
+    where?: CodebaseAnalysisWhereInput
+    data: XOR<CodebaseAnalysisUpdateWithoutTaskInput, CodebaseAnalysisUncheckedUpdateWithoutTaskInput>
+  }
+
+  export type CodebaseAnalysisUpdateWithoutTaskInput = {
+    architectureFindings?: JsonNullValueInput | InputJsonValue
+    problemsIdentified?: JsonNullValueInput | InputJsonValue
+    implementationContext?: JsonNullValueInput | InputJsonValue
+    integrationPoints?: JsonNullValueInput | InputJsonValue
+    qualityAssessment?: JsonNullValueInput | InputJsonValue
+    filesCovered?: JsonNullValueInput | InputJsonValue
+    technologyStack?: JsonNullValueInput | InputJsonValue
+    analyzedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    analyzedBy?: StringFieldUpdateOperationsInput | string
+    analysisVersion?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type CodebaseAnalysisUncheckedUpdateWithoutTaskInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    architectureFindings?: JsonNullValueInput | InputJsonValue
+    problemsIdentified?: JsonNullValueInput | InputJsonValue
+    implementationContext?: JsonNullValueInput | InputJsonValue
+    integrationPoints?: JsonNullValueInput | InputJsonValue
+    qualityAssessment?: JsonNullValueInput | InputJsonValue
+    filesCovered?: JsonNullValueInput | InputJsonValue
+    technologyStack?: JsonNullValueInput | InputJsonValue
+    analyzedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    analyzedBy?: StringFieldUpdateOperationsInput | string
+    analysisVersion?: StringFieldUpdateOperationsInput | string
+  }
+
   export type TaskCreateWithoutTaskDescriptionInput = {
     taskId: string
     name: string
@@ -17802,6 +19480,7 @@ export namespace Prisma {
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisCreateNestedOneWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutTaskDescriptionInput = {
@@ -17824,6 +19503,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedCreateNestedOneWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutTaskDescriptionInput = {
@@ -17862,6 +19542,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutTaskDescriptionInput = {
@@ -17884,6 +19565,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskCreateWithoutImplementationPlansInput = {
@@ -17906,6 +19588,7 @@ export namespace Prisma {
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisCreateNestedOneWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutImplementationPlansInput = {
@@ -17928,6 +19611,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedCreateNestedOneWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutImplementationPlansInput = {
@@ -18008,6 +19692,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutImplementationPlansInput = {
@@ -18030,6 +19715,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedUpdateOneWithoutTaskNestedInput
   }
 
   export type SubtaskUpsertWithWhereUniqueWithoutPlanInput = {
@@ -18068,6 +19754,7 @@ export namespace Prisma {
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisCreateNestedOneWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutSubtasksInput = {
@@ -18090,6 +19777,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedCreateNestedOneWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutSubtasksInput = {
@@ -18212,6 +19900,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutSubtasksInput = {
@@ -18234,6 +19923,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedUpdateOneWithoutTaskNestedInput
   }
 
   export type ImplementationPlanUpsertWithoutSubtasksInput = {
@@ -18322,6 +20012,7 @@ export namespace Prisma {
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisCreateNestedOneWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutDelegationRecordsInput = {
@@ -18344,6 +20035,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedCreateNestedOneWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutDelegationRecordsInput = {
@@ -18420,6 +20112,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutDelegationRecordsInput = {
@@ -18442,6 +20135,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedUpdateOneWithoutTaskNestedInput
   }
 
   export type SubtaskUpsertWithoutDelegationRecordsInput = {
@@ -18508,6 +20202,7 @@ export namespace Prisma {
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisCreateNestedOneWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutResearchReportsInput = {
@@ -18530,6 +20225,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedCreateNestedOneWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutResearchReportsInput = {
@@ -18568,6 +20264,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutResearchReportsInput = {
@@ -18590,6 +20287,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskCreateWithoutCodeReviewsInput = {
@@ -18612,6 +20310,7 @@ export namespace Prisma {
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisCreateNestedOneWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutCodeReviewsInput = {
@@ -18634,6 +20333,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedCreateNestedOneWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutCodeReviewsInput = {
@@ -18672,6 +20372,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutCodeReviewsInput = {
@@ -18694,6 +20395,7 @@ export namespace Prisma {
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskCreateWithoutCompletionReportsInput = {
@@ -18716,6 +20418,7 @@ export namespace Prisma {
     codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisCreateNestedOneWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutCompletionReportsInput = {
@@ -18738,6 +20441,7 @@ export namespace Prisma {
     codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedCreateNestedOneWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutCompletionReportsInput = {
@@ -18776,6 +20480,7 @@ export namespace Prisma {
     codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutCompletionReportsInput = {
@@ -18798,6 +20503,7 @@ export namespace Prisma {
     codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskCreateWithoutCommentsInput = {
@@ -18820,6 +20526,7 @@ export namespace Prisma {
     codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisCreateNestedOneWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutCommentsInput = {
@@ -18842,6 +20549,7 @@ export namespace Prisma {
     codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
     workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedCreateNestedOneWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutCommentsInput = {
@@ -18918,6 +20626,7 @@ export namespace Prisma {
     codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutCommentsInput = {
@@ -18940,6 +20649,7 @@ export namespace Prisma {
     codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
     workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedUpdateOneWithoutTaskNestedInput
   }
 
   export type SubtaskUpsertWithoutCommentsInput = {
@@ -19006,6 +20716,7 @@ export namespace Prisma {
     codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
     comments?: CommentCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisCreateNestedOneWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutWorkflowTransitionsInput = {
@@ -19028,6 +20739,7 @@ export namespace Prisma {
     codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
     completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedCreateNestedOneWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutWorkflowTransitionsInput = {
@@ -19066,6 +20778,7 @@ export namespace Prisma {
     codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
     comments?: CommentUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUpdateOneWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutWorkflowTransitionsInput = {
@@ -19088,6 +20801,115 @@ export namespace Prisma {
     codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
     completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
+    codebaseAnalysis?: CodebaseAnalysisUncheckedUpdateOneWithoutTaskNestedInput
+  }
+
+  export type TaskCreateWithoutCodebaseAnalysisInput = {
+    taskId: string
+    name: string
+    status: string
+    creationDate?: Date | string
+    completionDate?: Date | string | null
+    owner?: string | null
+    currentMode?: string | null
+    priority?: string | null
+    dependencies?: NullableJsonNullValueInput | InputJsonValue
+    redelegationCount?: number
+    gitBranch?: string | null
+    taskDescription?: TaskDescriptionCreateNestedOneWithoutTaskInput
+    implementationPlans?: ImplementationPlanCreateNestedManyWithoutTaskInput
+    subtasks?: SubtaskCreateNestedManyWithoutTaskInput
+    delegationRecords?: DelegationRecordCreateNestedManyWithoutTaskInput
+    researchReports?: ResearchReportCreateNestedManyWithoutTaskInput
+    codeReviews?: CodeReviewCreateNestedManyWithoutTaskInput
+    completionReports?: CompletionReportCreateNestedManyWithoutTaskInput
+    comments?: CommentCreateNestedManyWithoutTaskInput
+    workflowTransitions?: WorkflowTransitionCreateNestedManyWithoutTaskInput
+  }
+
+  export type TaskUncheckedCreateWithoutCodebaseAnalysisInput = {
+    taskId: string
+    name: string
+    status: string
+    creationDate?: Date | string
+    completionDate?: Date | string | null
+    owner?: string | null
+    currentMode?: string | null
+    priority?: string | null
+    dependencies?: NullableJsonNullValueInput | InputJsonValue
+    redelegationCount?: number
+    gitBranch?: string | null
+    taskDescription?: TaskDescriptionUncheckedCreateNestedOneWithoutTaskInput
+    implementationPlans?: ImplementationPlanUncheckedCreateNestedManyWithoutTaskInput
+    subtasks?: SubtaskUncheckedCreateNestedManyWithoutTaskInput
+    delegationRecords?: DelegationRecordUncheckedCreateNestedManyWithoutTaskInput
+    researchReports?: ResearchReportUncheckedCreateNestedManyWithoutTaskInput
+    codeReviews?: CodeReviewUncheckedCreateNestedManyWithoutTaskInput
+    completionReports?: CompletionReportUncheckedCreateNestedManyWithoutTaskInput
+    comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
+    workflowTransitions?: WorkflowTransitionUncheckedCreateNestedManyWithoutTaskInput
+  }
+
+  export type TaskCreateOrConnectWithoutCodebaseAnalysisInput = {
+    where: TaskWhereUniqueInput
+    create: XOR<TaskCreateWithoutCodebaseAnalysisInput, TaskUncheckedCreateWithoutCodebaseAnalysisInput>
+  }
+
+  export type TaskUpsertWithoutCodebaseAnalysisInput = {
+    update: XOR<TaskUpdateWithoutCodebaseAnalysisInput, TaskUncheckedUpdateWithoutCodebaseAnalysisInput>
+    create: XOR<TaskCreateWithoutCodebaseAnalysisInput, TaskUncheckedCreateWithoutCodebaseAnalysisInput>
+    where?: TaskWhereInput
+  }
+
+  export type TaskUpdateToOneWithWhereWithoutCodebaseAnalysisInput = {
+    where?: TaskWhereInput
+    data: XOR<TaskUpdateWithoutCodebaseAnalysisInput, TaskUncheckedUpdateWithoutCodebaseAnalysisInput>
+  }
+
+  export type TaskUpdateWithoutCodebaseAnalysisInput = {
+    taskId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    creationDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    completionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    owner?: NullableStringFieldUpdateOperationsInput | string | null
+    currentMode?: NullableStringFieldUpdateOperationsInput | string | null
+    priority?: NullableStringFieldUpdateOperationsInput | string | null
+    dependencies?: NullableJsonNullValueInput | InputJsonValue
+    redelegationCount?: IntFieldUpdateOperationsInput | number
+    gitBranch?: NullableStringFieldUpdateOperationsInput | string | null
+    taskDescription?: TaskDescriptionUpdateOneWithoutTaskNestedInput
+    implementationPlans?: ImplementationPlanUpdateManyWithoutTaskNestedInput
+    subtasks?: SubtaskUpdateManyWithoutTaskNestedInput
+    delegationRecords?: DelegationRecordUpdateManyWithoutTaskNestedInput
+    researchReports?: ResearchReportUpdateManyWithoutTaskNestedInput
+    codeReviews?: CodeReviewUpdateManyWithoutTaskNestedInput
+    completionReports?: CompletionReportUpdateManyWithoutTaskNestedInput
+    comments?: CommentUpdateManyWithoutTaskNestedInput
+    workflowTransitions?: WorkflowTransitionUpdateManyWithoutTaskNestedInput
+  }
+
+  export type TaskUncheckedUpdateWithoutCodebaseAnalysisInput = {
+    taskId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    creationDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    completionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    owner?: NullableStringFieldUpdateOperationsInput | string | null
+    currentMode?: NullableStringFieldUpdateOperationsInput | string | null
+    priority?: NullableStringFieldUpdateOperationsInput | string | null
+    dependencies?: NullableJsonNullValueInput | InputJsonValue
+    redelegationCount?: IntFieldUpdateOperationsInput | number
+    gitBranch?: NullableStringFieldUpdateOperationsInput | string | null
+    taskDescription?: TaskDescriptionUncheckedUpdateOneWithoutTaskNestedInput
+    implementationPlans?: ImplementationPlanUncheckedUpdateManyWithoutTaskNestedInput
+    subtasks?: SubtaskUncheckedUpdateManyWithoutTaskNestedInput
+    delegationRecords?: DelegationRecordUncheckedUpdateManyWithoutTaskNestedInput
+    researchReports?: ResearchReportUncheckedUpdateManyWithoutTaskNestedInput
+    codeReviews?: CodeReviewUncheckedUpdateManyWithoutTaskNestedInput
+    completionReports?: CompletionReportUncheckedUpdateManyWithoutTaskNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
+    workflowTransitions?: WorkflowTransitionUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type ImplementationPlanCreateManyTaskInput = {
