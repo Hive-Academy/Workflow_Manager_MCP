@@ -4,17 +4,53 @@
  */
 
 export interface CommunicationCollaborationData {
-  generatedAt: string;
+  generatedAt?: string;
   dateRange?: string;
 
-  collaborationStats: {
+  // Main communication section that the service expects
+  communication: {
+    overallScore: number;
+    metrics: CommunicationMetric[];
+    chartLabels: string[];
+    chartData: number[];
+    chartColors: string[];
+  };
+
+  // Collaboration section that the service expects
+  collaboration: {
+    events: CollaborationEvent[];
+    effectiveness: number;
+    totalEvents: number;
+    activeParticipants: number;
+  };
+
+  // Team interaction section that the service expects
+  teamInteraction: {
+    interactions: TeamInteraction[];
+    networkStrength: number;
+    communicationFlow: string;
+    chartLabels: string[];
+    chartData: number[];
+    chartColors: string[];
+  };
+
+  // Workflow coordination section that the service expects
+  workflow: {
+    coordination: WorkflowCoordination[];
+    efficiency: number;
+    bottlenecks: string[];
+    recommendations: string[];
+  };
+
+  // Legacy fields for backward compatibility
+  collaborationStats?: {
     totalInteractions: number;
     roleTransitions: number;
     avgResponseTime: string;
     collaborationScore: number;
   };
 
-  communicationMetrics: {
+  communicationMetrics?: {
     clarity: MetricScore;
     responsiveness: MetricScore;
     collaboration: MetricScore;
@@ -23,13 +59,13 @@ export interface CommunicationCollaborationData {
     teamAlignment: MetricScore;
   };
 
-  workflowSteps: WorkflowStep[];
+  workflowSteps?: WorkflowStep[];
 
-  channels: CommunicationChannel[];
+  channels?: CommunicationChannel[];
 
-  issues: CollaborationIssue[];
+  issues?: CollaborationIssue[];
 
-  rolePerformance: {
+  rolePerformance?: {
     boomerang: RoleMetrics;
     researcher: RoleMetrics;
     architect: RoleMetrics;
@@ -37,13 +73,62 @@ export interface CommunicationCollaborationData {
     'code-review': RoleMetrics;
   };
 
-  recommendations: CollaborationRecommendation[];
+  recommendations?: CollaborationRecommendation[];
 
   task?: {
     comments?: any[];
   };
 }
 
+// New exports that the service needs
+export interface CommunicationMetric {
+  name: string;
+  value: string;
+  target: string;
+  status: 'good' | 'warning' | 'error';
+  statusClass: string;
+  description: string;
+  icon: string;
+  trend: 'improving' | 'stable' | 'declining';
+  trendClass: string;
+}
+
+export interface CollaborationEvent {
+  type: 'delegation' | 'review' | 'status_update' | 'feedback';
+  timestamp: string;
+  participants: string[];
+  description: string;
+  outcome: 'successful' | 'failed' | 'pending';
+  outcomeClass: string;
+  duration: string;
+  impact: 'high' | 'medium' | 'low';
+  impactClass: string;
+}
+
+export interface TeamInteraction {
+  role: string;
+  interactionCount: number;
+  averageResponseTime: string;
+  communicationQuality: number;
+  collaborationScore: number;
+  lastInteraction: string;
+  status: 'active' | 'limited' | 'inactive';
+  statusClass: string;
+}
+
+export interface WorkflowCoordination {
+  phase: string;
+  efficiency: number;
+  bottlenecks: number;
+  averageHandoffTime: string;
+  coordinationScore: number;
+  status: 'good' | 'needs-improvement' | 'poor';
+  statusClass: string;
+  lastUpdate: string;
+  participants: string[];
+}
+
+// Legacy interfaces for backward compatibility
 export interface MetricScore {
   score: number;
   icon: string;

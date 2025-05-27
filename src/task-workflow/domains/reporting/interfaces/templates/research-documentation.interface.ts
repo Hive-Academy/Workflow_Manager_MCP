@@ -5,9 +5,12 @@
 
 export interface ResearchDocumentationData {
   research: {
+    completionRate: number; // Added this property that the service expects
     completeness: number;
     sourceCount: number;
     depth: string;
+    totalFindings: number; // Added this property
+    criticalFindings: number; // Added this property
     findings: ResearchFinding[];
     findingsLabels: string[];
     findingsData: number[];
@@ -15,17 +18,22 @@ export interface ResearchDocumentationData {
   };
 
   documentation: {
+    sections: DocumentationSection[]; // Added this property that the service expects
+    overallCompleteness: number; // Added this property
+    chartLabels: string[]; // Added this property
+    chartData: number[]; // Added this property
+    chartColors: string[]; // Added this property
     quality: number;
     metrics: DocumentationMetric[];
     qualityLabels: string[];
     qualityData: number[];
   };
 
-  sources: {
+  sources?: {
     categories: SourceCategory[];
   };
 
-  methodology: {
+  methodology?: {
     approach: string[];
     validation: string[];
     timeline: MethodologyPhase[];
@@ -33,10 +41,15 @@ export interface ResearchDocumentationData {
 
   gaps: {
     identified: KnowledgeGap[];
+    totalGaps: number; // Added this property that the service expects
+    criticalGaps: number; // Added this property
+    chartLabels: string[]; // Added this property
+    chartData: number[]; // Added this property
+    chartColors: string[]; // Added this property
     mitigations: MitigationStrategy[];
   };
 
-  impact: {
+  impact?: {
     areas: ImpactArea[];
     chartLabels: string[];
     confidenceData: number[];
@@ -46,17 +59,34 @@ export interface ResearchDocumentationData {
 
   recommendations: ResearchRecommendation[];
 
-  futureResearch: FutureResearchArea[];
+  futureResearch?: FutureResearchArea[];
 }
 
 export interface ResearchFinding {
+  title: string; // Added this property that the service expects
+  description: string; // Added this property
   category: string;
-  categoryBorderClass: string;
-  summary: string;
+  categoryBorderClass?: string;
+  priority: string; // Added this property that the service expects
+  source: string; // Added this property
   confidence: string;
-  confidenceClass: string;
-  sourceCount: number;
-  validation: string;
+  confidenceClass?: string;
+  sourceCount?: number;
+  validation?: string;
+  impact: string; // Added this property
+  actionRequired: boolean; // Added this property
+  summary?: string;
+}
+
+// Added this interface that the service expects
+export interface DocumentationSection {
+  name: string;
+  completeness: number;
+  status: string;
+  statusClass: string;
+  lastUpdated: string;
+  wordCount: number;
+  issues: string[];
 }
 
 export interface DocumentationMetric {
@@ -91,6 +121,8 @@ export interface KnowledgeGap {
   severity: string;
   impact: string;
   priority: string;
+  researchRequired: boolean; // Added this property that the service expects
+  estimatedEffort: string; // Added this property
 }
 
 export interface MitigationStrategy {
@@ -117,12 +149,16 @@ export interface ResearchRecommendation {
   title: string;
   description: string;
   priority: string;
-  confidence: number;
-  confidenceClass: string;
-  evidenceLevel: string;
-  evidenceClass: string;
+  effort: string; // Added this property that the service expects
+  impact: string; // Added this property
+  category: string; // Added this property
+  deadline: string; // Added this property
+  icon: string; // Added this property
+  confidence?: number;
+  confidenceClass?: string;
+  evidenceLevel?: string;
+  evidenceClass?: string;
   supportingFindings?: string;
-  icon: string;
 }
 
 export interface FutureResearchArea {

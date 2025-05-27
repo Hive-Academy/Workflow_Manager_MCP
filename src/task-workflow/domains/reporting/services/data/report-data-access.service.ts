@@ -198,14 +198,43 @@ export class ReportDataAccessService {
    * Extracted from report-generator.service.ts
    */
   isIndividualTaskReport(reportType: ReportType): boolean {
-    return [
+    const individualTaskReports: ReportType[] = [
       'task_progress_health',
       'implementation_execution',
       'code_review_quality',
       'delegation_flow_analysis_task',
       'research_documentation',
       'communication_collaboration',
-    ].includes(reportType);
+    ];
+
+    return individualTaskReports.includes(reportType);
+  }
+
+  /**
+   * Get research report data for a specific task
+   * Used by CodeReviewResearchService
+   */
+  async getResearchReport(taskId: string): Promise<any> {
+    this.logger.debug(`Fetching research report for task: ${taskId}`);
+
+    // Get research report from database via MetricsCalculatorService
+    return await this.metricsCalculator.getResearchDocumentationMetrics(taskId);
+  }
+
+  /**
+   * Get workflow transitions for a specific task
+   * Used by CommunicationCollaborationService
+   */
+  async getWorkflowTransitions(taskId: string): Promise<any[]> {
+    this.logger.debug(`Fetching workflow transitions for task: ${taskId}`);
+
+    // Get workflow transitions from database via MetricsCalculatorService
+    const delegationMetrics = await this.metricsCalculator.getDelegationMetrics(
+      { taskId },
+    );
+
+    // Return the mode transitions as workflow transitions
+    return delegationMetrics.modeTransitions || [];
   }
 
   /**
