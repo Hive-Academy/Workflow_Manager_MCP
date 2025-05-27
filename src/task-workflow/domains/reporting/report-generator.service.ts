@@ -15,6 +15,11 @@ import { TemplateRenderingService } from './services/rendering/template-renderin
 import { MetricsCoordinationService } from './services/coordination/metrics-coordination.service';
 import { RecommendationEngineService } from './services/analytics/recommendation-engine.service';
 
+// Template Data Services - NEW ARCHITECTURE
+import { TemplateDataService } from './services/data/template-data.service';
+import { SpecializedTemplateDataService } from './services/data/specialized-template-data.service';
+import { IndividualTaskTemplateDataService } from './services/data/individual-task-template-data.service';
+
 // Infrastructure Services
 import { ReportPathGeneratorService } from './services/infrastructure/report-path-generator.service';
 
@@ -22,6 +27,7 @@ import { ReportPathGeneratorService } from './services/infrastructure/report-pat
  * Report Generator Service - THIN ORCHESTRATOR
  *
  * REFACTORED: Simplified to be a thin orchestrator following SOLID principles
+ * NOW USES: Specialized template data services for rich insights and recommendations
  *
  * SOLID PRINCIPLES APPLIED:
  * - SRP: Single responsibility - orchestrates report generation workflow
@@ -31,7 +37,10 @@ import { ReportPathGeneratorService } from './services/infrastructure/report-pat
  * - DIP: Depends on abstractions, not concrete implementations
  *
  * ARCHITECTURE: All business logic extracted to focused services:
- * - ReportDataAccessService: Data retrieval and filtering
+ * - TemplateDataService: Rich template data with insights for aggregate reports
+ * - SpecializedTemplateDataService: Specialized aggregate report data
+ * - IndividualTaskTemplateDataService: Individual task report data with insights
+ * - ReportDataAccessService: Generic data retrieval (being phased out)
  * - MetricsCoordinationService: Enhanced metrics coordination
  * - ChartCoordinationService: Chart generation coordination
  * - TemplateRenderingService: Template rendering and coordination
@@ -48,6 +57,11 @@ export class ReportGeneratorService {
     private readonly chartCoordination: ChartCoordinationService,
     private readonly templateRendering: TemplateRenderingService,
     private readonly recommendationEngine: RecommendationEngineService,
+
+    // Template Data Services - NEW ARCHITECTURE
+    private readonly templateDataService: TemplateDataService,
+    private readonly specializedTemplateDataService: SpecializedTemplateDataService,
+    private readonly individualTaskTemplateDataService: IndividualTaskTemplateDataService,
 
     // Infrastructure Services
     private readonly reportPathGenerator: ReportPathGeneratorService,
@@ -146,40 +160,119 @@ export class ReportGeneratorService {
     endDate?: Date,
     filters?: ReportFilters,
   ): Promise<ReportData> {
-    // Special handling for task_summary - use typed interface with proper chart integration
-    if (reportType === 'task_summary') {
-      const whereClause = this.dataAccess.buildWhereClause(
-        startDate,
-        endDate,
-        filters,
-      );
+    // Use SpecializedTemplateDataService for specific aggregate reports
+    let templateData;
 
-      // Get base metrics for chart generation
-      const baseMetrics = await this.dataAccess.getBaseMetrics(whereClause);
-
-      // Get task summary data (without chart generation)
-      const taskSummaryData = await this.dataAccess.getTaskSummaryDataLegacy(
-        startDate,
-        endDate,
-        filters,
-      );
-
-      // Generate charts using ChartCoordinationService (PROPER INTEGRATION!)
-      const charts = await this.chartCoordination.generateAllCharts(
-        reportType,
-        baseMetrics,
-        {}, // No enhanced metrics needed for task summary
-      );
-
-      // Convert TaskSummaryReportData to ReportData format
-      return {
-        ...taskSummaryData,
-        dateRange: startDate && endDate ? { startDate, endDate } : undefined,
-        charts, // Use actual chart services!
-        recommendations: [], // TODO: Add recommendations for task summary
-      } as ReportData;
+    switch (reportType) {
+      case 'task_summary':
+        // Use TemplateDataService for task_summary
+        templateData = await this.templateDataService.getTaskSummaryData(
+          startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          endDate || new Date(),
+          filters as Record<string, string>,
+        );
+        break;
+      case 'delegation_analytics':
+        // Use delegation flow analysis as closest match
+        templateData =
+          await this.specializedTemplateDataService.getDelegationFlowAnalysisData(
+            startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            endDate || new Date(),
+            filters as Record<string, string>,
+          );
+        break;
+      case 'performance_dashboard':
+        // Use comprehensive data as closest match for performance dashboard
+        templateData =
+          await this.specializedTemplateDataService.getComprehensiveData(
+            startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            endDate || new Date(),
+            filters as Record<string, string>,
+          );
+        break;
+      case 'comprehensive':
+        templateData =
+          await this.specializedTemplateDataService.getComprehensiveData(
+            startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            endDate || new Date(),
+            filters as Record<string, string>,
+          );
+        break;
+      case 'implementation_plan_analytics':
+        templateData =
+          await this.specializedTemplateDataService.getImplementationPlanAnalyticsData(
+            startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            endDate || new Date(),
+            filters as Record<string, string>,
+          );
+        break;
+      case 'code_review_insights':
+        templateData =
+          await this.specializedTemplateDataService.getCodeReviewInsightsData(
+            startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            endDate || new Date(),
+            filters as Record<string, string>,
+          );
+        break;
+      case 'delegation_flow_analysis':
+        templateData =
+          await this.specializedTemplateDataService.getDelegationFlowAnalysisData(
+            startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            endDate || new Date(),
+            filters as Record<string, string>,
+          );
+        break;
+      default:
+        // Fallback to coordination-based method for unknown report types
+        return this.generateCoordinationBasedReportData(
+          reportType,
+          startDate,
+          endDate,
+          filters,
+        );
     }
 
+    // Convert specialized template data to ReportData format
+    return {
+      title: this.getReportTitle(reportType),
+      generatedAt: (templateData as any).generatedAt || new Date(),
+      dateRange: startDate && endDate ? { startDate, endDate } : undefined,
+      filters,
+      metrics: (templateData as any).metrics || {},
+      charts: (templateData as any).chartData
+        ? Object.entries((templateData as any).chartData).map(
+            ([key, chartInfo]: [string, any]) => ({
+              type: chartInfo.type || 'bar',
+              title: chartInfo.title || key,
+              labels: chartInfo.labels || [],
+              datasets: chartInfo.datasets || [
+                {
+                  label: 'Data',
+                  data: chartInfo.data || [],
+                  backgroundColor: '#3B82F6',
+                },
+              ],
+            }),
+          )
+        : [],
+      recommendations:
+        (templateData as any).insights
+          ?.map((insight: any) => insight.recommendation as string)
+          .filter((rec: string) => Boolean(rec)) || [],
+      enhancedInsights: (templateData as any).insights || [],
+    };
+  }
+
+  /**
+   * COORDINATION-BASED REPORT: Fallback for unknown report types
+   * Uses the coordination-based approach for reports not yet migrated to template data services
+   */
+  private async generateCoordinationBasedReportData(
+    reportType: ReportType,
+    startDate?: Date,
+    endDate?: Date,
+    filters?: ReportFilters,
+  ): Promise<ReportData> {
     // Step 1: Build where clause using ReportDataAccessService
     const whereClause = this.dataAccess.buildWhereClause(
       startDate,
@@ -231,7 +324,7 @@ export class ReportGeneratorService {
 
   /**
    * INDIVIDUAL TASK REPORT: Generate individual task report data
-   * Delegates to ReportDataAccessService for task-specific metrics
+   * Uses IndividualTaskTemplateDataService for rich insights and complete data
    */
   private async generateIndividualTaskReportData(
     reportType: ReportType,
@@ -241,24 +334,83 @@ export class ReportGeneratorService {
       `Generating individual task report: ${reportType} for ${taskId}`,
     );
 
-    // Get task-specific metrics using data access service
-    const taskMetrics = await this.dataAccess.getIndividualTaskMetrics(
-      reportType,
-      taskId,
-    );
+    // Use specialized individual task template data service
+    let templateData;
 
-    // For individual task reports, create minimal structure
+    switch (reportType) {
+      case 'task_progress_health':
+        templateData =
+          await this.individualTaskTemplateDataService.getTaskProgressHealthData(
+            taskId,
+          );
+        break;
+      case 'implementation_execution':
+        templateData =
+          await this.individualTaskTemplateDataService.getImplementationExecutionData(
+            taskId,
+          );
+        break;
+      case 'code_review_quality':
+        templateData =
+          await this.individualTaskTemplateDataService.getCodeReviewQualityData(
+            taskId,
+          );
+        break;
+      case 'delegation_flow_analysis_task':
+        // Use task progress health as fallback since getDelegationFlowAnalysisTaskData doesn't exist
+        templateData =
+          await this.individualTaskTemplateDataService.getTaskProgressHealthData(
+            taskId,
+          );
+        break;
+      case 'research_documentation':
+        templateData =
+          await this.individualTaskTemplateDataService.getResearchDocumentationData(
+            taskId,
+          );
+        break;
+      case 'communication_collaboration':
+        templateData =
+          await this.individualTaskTemplateDataService.getCommunicationCollaborationData(
+            taskId,
+          );
+        break;
+      default:
+        // Fallback to generic individual task data
+        templateData =
+          await this.individualTaskTemplateDataService.getTaskProgressHealthData(
+            taskId,
+          );
+    }
+
+    // Convert template data to ReportData format
     const reportData: ReportData = {
       title: this.getTaskReportTitle(reportType, taskId),
-      generatedAt: new Date(),
+      generatedAt: (templateData as any).generatedAt || new Date(),
       taskId,
-      metrics: { taskSpecific: taskMetrics },
-      charts: [], // Individual task reports typically don't need charts
+      metrics: (templateData as any).metrics || {},
+      charts: (templateData as any).chartData
+        ? [
+            {
+              type: 'line',
+              title: 'Progress Over Time',
+              labels: (templateData as any).chartData.progressLabels || [],
+              datasets: [
+                {
+                  label: 'Progress %',
+                  data: (templateData as any).chartData.progressData || [],
+                  backgroundColor: '#3B82F6',
+                  borderColor: '#1D4ED8',
+                },
+              ],
+            },
+          ]
+        : [],
       recommendations:
-        this.recommendationEngine.generateTaskSpecificRecommendations(
-          taskId,
-          taskMetrics,
-        ),
+        (templateData as any).insights
+          ?.map((insight: any) => insight.recommendation as string)
+          .filter((rec: string) => Boolean(rec)) || [],
+      enhancedInsights: (templateData as any).insights || [],
     };
 
     return reportData;
