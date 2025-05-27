@@ -18,3 +18,4 @@ prisma/migrations/*/*.sql
 prisma/workflow-manager.db
 /prisma/data/**
 /workflow-manager-mcp-reports
+prisma/data/workflow.db
