@@ -168,8 +168,4 @@ export interface IRecommendationEngineService {
  */
 export interface IReportTemplateService {
   renderReportTemplate(reportType: ReportType, data: any): Promise<string>;
-
-  saveTemporaryFile(content: string, extension?: string): Promise<string>;
-
-  cleanupTemporaryFile(filepath: string): Promise<void>;
 }

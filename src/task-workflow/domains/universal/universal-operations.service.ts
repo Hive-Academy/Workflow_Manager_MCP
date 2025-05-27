@@ -287,35 +287,35 @@ export class UniversalOperationsService {
     const aggregation = input.aggregation!;
     const result: any = {};
 
-    if (aggregation.count && !aggregation.groupBy) {
+    if (aggregation._count && !aggregation.by) {
       result.count = await model.count({ where: input.where });
     }
 
-    if (aggregation.groupBy && aggregation.groupBy.length > 0) {
+    if (aggregation.by && aggregation.by.length > 0) {
       const groupByOptions: any = {
-        by: aggregation.groupBy,
+        by: aggregation.by,
         where: input.where,
       };
 
       // Only add aggregation functions if they have valid fields
-      if (aggregation.count) {
+      if (aggregation._count) {
         groupByOptions._count = { _all: true };
       }
 
-      if (aggregation.sum && Object.keys(aggregation.sum).length > 0) {
-        groupByOptions._sum = aggregation.sum;
+      if (aggregation._sum && Object.keys(aggregation._sum).length > 0) {
+        groupByOptions._sum = aggregation._sum;
       }
 
-      if (aggregation.avg && Object.keys(aggregation.avg).length > 0) {
-        groupByOptions._avg = aggregation.avg;
+      if (aggregation._avg && Object.keys(aggregation._avg).length > 0) {
+        groupByOptions._avg = aggregation._avg;
       }
 
-      if (aggregation.min && Object.keys(aggregation.min).length > 0) {
-        groupByOptions._min = aggregation.min;
+      if (aggregation._min && Object.keys(aggregation._min).length > 0) {
+        groupByOptions._min = aggregation._min;
       }
 
-      if (aggregation.max && Object.keys(aggregation.max).length > 0) {
-        groupByOptions._max = aggregation.max;
+      if (aggregation._max && Object.keys(aggregation._max).length > 0) {
+        groupByOptions._max = aggregation._max;
       }
 
       result.groupBy = await model.groupBy(groupByOptions);

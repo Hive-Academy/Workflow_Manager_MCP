@@ -1,12 +1,12 @@
 // src/task-workflow/domains/reporting/chart-generation.module.ts
 
 import { Module } from '@nestjs/common';
-import { ChartGenerationRefactoredService } from './services/chart-generation-refactored.service';
-import { ChartFactoryService } from './services/chart-factory.service';
-import { ChartCalculationService } from './services/chart-calculation.service';
-import { BaseChartGenerator } from './services/generators/base-chart.generator';
-import { AdvancedChartGenerator } from './services/generators/advanced-chart.generator';
-import { SpecializedChartGenerator } from './services/generators/specialized-chart.generator';
+import { ChartGenerationService } from './services/rendering/chart-generation.service';
+import { ChartFactoryService } from './services/rendering/chart-factory.service';
+import { ChartCalculationService } from './services/rendering/chart-calculation.service';
+import { BaseChartGenerator } from './services/rendering/base-chart.generator';
+import { AdvancedChartGenerator } from './services/rendering/advanced-chart.generator';
+import { SpecializedChartGenerator } from './services/rendering/specialized-chart.generator';
 
 /**
  * Chart Generation Module
@@ -18,7 +18,7 @@ import { SpecializedChartGenerator } from './services/generators/specialized-cha
     // Core services
     ChartCalculationService,
     ChartFactoryService,
-    ChartGenerationRefactoredService,
+    ChartGenerationService,
 
     // Chart generators
     BaseChartGenerator,
@@ -28,11 +28,11 @@ import { SpecializedChartGenerator } from './services/generators/specialized-cha
     // Alias for backward compatibility
     {
       provide: 'IChartGenerationService',
-      useClass: ChartGenerationRefactoredService,
+      useClass: ChartGenerationService,
     },
   ],
   exports: [
-    ChartGenerationRefactoredService,
+    ChartGenerationService,
     ChartFactoryService,
     'IChartGenerationService',
   ],

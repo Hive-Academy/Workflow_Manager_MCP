@@ -10,19 +10,30 @@ import {
   ReportFilters,
   ReportMetrics,
 } from './interfaces/report-data.interface';
-import { EnhancedInsightsGeneratorService } from './services/enhanced-insights-generator.service';
-import { MetricsCalculatorService } from './services/metrics-calculator.service';
-import { TimeSeriesAnalysisService } from './services/time-series-analysis.service';
-import { PerformanceBenchmarkService } from './services/performance-benchmark.service';
-import { ChartGenerationRefactoredService } from './services/chart-generation-refactored.service';
-import { RecommendationEngineService } from './services/recommendation-engine.service';
-import { ReportTemplateService } from './services/report-template.service';
-import { ContentGeneratorService } from './services/content-generator.service';
-import { SchemaDrivenIntelligenceService } from './services/schema-driven-intelligence.service';
-import { SmartResponseSummarizationService } from './services/smart-response-summarization.service';
-import { ChartFactoryService } from './services/chart-factory.service';
-import { TemplateFactoryService } from './services/template-factory.service';
-import { ReportPathGeneratorService } from './services/report-path-generator.service';
+
+// New Architecture Services
+import { ReportPathGeneratorService } from './services/infrastructure/report-path-generator.service';
+import { MetricsCalculatorService } from './services/data/metrics-calculator.service';
+import { ReportTemplateService } from './services/core/report-template.service';
+
+// Strategy Pattern for SOLID Principles
+import { ReportStrategyFactory } from './strategies/report-strategy.factory';
+
+// Data Transformation for Rich Metrics Utilization
+import { ReportDataTransformer } from './transformers/report-data.transformer';
+import {
+  ContentGeneratorService,
+  ChartGenerationService,
+  ChartFactoryService,
+  TimeSeriesAnalysisService,
+  PerformanceBenchmarkService,
+  RecommendationEngineService,
+  TemplateFactoryService,
+  EnhancedInsightsGeneratorService,
+  SchemaDrivenIntelligenceService,
+  SmartResponseSummarizationService,
+  EnhancedInsight,
+} from './services';
 
 /**
  * Report Generator Service
@@ -41,10 +52,14 @@ export class ReportGeneratorService {
   private readonly logger = new Logger(ReportGeneratorService.name);
 
   constructor(
+    // Strategy Pattern for SOLID Principles
+    private readonly strategyFactory: ReportStrategyFactory,
+
+    // Legacy Services (Backward Compatibility)
     private readonly metricsCalculator: MetricsCalculatorService,
     private readonly timeSeriesAnalysis: TimeSeriesAnalysisService,
     private readonly performanceBenchmark: PerformanceBenchmarkService,
-    private readonly chartGeneration: ChartGenerationRefactoredService,
+    private readonly chartGeneration: ChartGenerationService,
     private readonly recommendationEngine: RecommendationEngineService,
     private readonly reportTemplate: ReportTemplateService,
     private readonly enhancedInsightsGenerator: EnhancedInsightsGeneratorService,
@@ -57,8 +72,47 @@ export class ReportGeneratorService {
   ) {}
 
   /**
-   * Main orchestration method - delegates to specialized services
+   * Generate complete report with data and template rendering
+   * This is the preferred method for new implementations
+   */
+  async generateCompleteReport(
+    reportType: ReportType,
+    options: {
+      startDate?: Date;
+      endDate?: Date;
+      taskId?: string;
+      includeCharts?: boolean;
+      priority?: string;
+      owner?: string;
+      mode?: string;
+    } = {},
+  ): Promise<string> {
+    this.logger.log(`Generating complete report: ${reportType}`);
+
+    // Build filters from options
+    const filters = {
+      ...(options.taskId && { taskId: options.taskId }),
+      ...(options.priority && { priority: options.priority }),
+      ...(options.owner && { owner: options.owner }),
+      ...(options.mode && { mode: options.mode }),
+    };
+
+    // Generate report data
+    const reportData = await this.generateReportData(
+      reportType,
+      options.startDate,
+      options.endDate,
+      Object.keys(filters).length > 0 ? filters : undefined,
+    );
+
+    // Render template
+    return await this.renderReportTemplate(reportType, reportData);
+  }
+
+  /**
+   * LEGACY: Main orchestration method - delegates to specialized services
    * Following SRP: This method only coordinates, doesn't implement business logic
+   * @deprecated Use generateCompleteReport for new implementations
    */
   async generateReportData(
     reportType: ReportType,
@@ -83,12 +137,15 @@ export class ReportGeneratorService {
     // Get base metrics (always required for aggregate reports)
     const baseMetrics = await this.getBaseMetrics(whereClause);
 
-    // Get enhanced metrics based on report type (OCP in action)
+    // Get enhanced metrics based on report type using Strategy Pattern
+    const strategy = this.strategyFactory.getStrategy(reportType);
+    const metricsConfig = strategy.getRequiredMetrics(reportType);
     const enhancedMetrics = await this.getEnhancedMetrics(
       reportType,
       whereClause,
       startDate,
       endDate,
+      metricsConfig,
     );
 
     // Combine all metrics
@@ -96,6 +153,13 @@ export class ReportGeneratorService {
       ...baseMetrics,
       ...enhancedMetrics,
     };
+
+    // Transform aggregate report data using rich metrics transformer
+    const transformedAggregateData = this.transformAggregateReportData(
+      reportType,
+      baseMetrics,
+      enhancedMetrics,
+    );
 
     // Generate charts and recommendations using both chart services for enhanced visualization
     const [charts, enhancedCharts, recommendations] = await Promise.all([
@@ -124,6 +188,8 @@ export class ReportGeneratorService {
       metrics: allMetrics,
       charts: { ...charts, ...enhancedCharts },
       recommendations,
+      // Add transformed aggregate data for template rendering
+      ...transformedAggregateData,
     };
 
     // Add enhanced insights to the report data
@@ -168,6 +234,12 @@ export class ReportGeneratorService {
     // Get task-specific metrics based on report type
     const taskMetrics = await this.getIndividualTaskMetrics(reportType, taskId);
 
+    // Transform metrics into template-expected structure using rich data transformer
+    const transformedData = this.transformIndividualTaskDataWithRichMetrics(
+      reportType,
+      taskMetrics,
+    );
+
     // Generate task-specific charts and recommendations
     const [charts, recommendations] = await Promise.all([
       this.chartGeneration.generateTaskSpecificChartData(
@@ -187,6 +259,8 @@ export class ReportGeneratorService {
       metrics: { taskSpecific: taskMetrics },
       charts,
       recommendations,
+      // Add transformed data for template rendering
+      ...transformedData,
     };
 
     // Generate dynamic content for individual task reports
@@ -211,22 +285,22 @@ export class ReportGeneratorService {
   async renderReportTemplate(
     reportType: ReportType,
     data: ReportData,
+    customizations?: any,
   ): Promise<string> {
-    return this.reportTemplate.renderReportTemplate(reportType, data);
-  }
-
-  /**
-   * File management - delegates to specialized service
-   */
-  async saveTemporaryFile(
-    content: string,
-    extension: string = 'html',
-  ): Promise<string> {
-    return this.reportTemplate.saveTemporaryFile(content, extension);
-  }
-
-  async cleanupTemporaryFile(filepath: string): Promise<void> {
-    return this.reportTemplate.cleanupTemporaryFile(filepath);
+    try {
+      // Use enhanced template generation with TemplateFactoryService
+      return await this.generateEnhancedTemplate(
+        reportType,
+        data,
+        customizations,
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Enhanced template generation failed for ${reportType}, falling back to standard template: ${error.message}`,
+      );
+      // Fallback to standard template service
+      return this.reportTemplate.renderReportTemplate(reportType, data);
+    }
   }
 
   /**
@@ -238,7 +312,7 @@ export class ReportGeneratorService {
     reportData: ReportData,
     filePath: string,
   ): Promise<{
-    insights: import('./services/enhanced-insights-generator.service').EnhancedInsight[];
+    insights: EnhancedInsight[];
     smartResponse: {
       summary: string;
       keyInsights: string[];
@@ -371,29 +445,39 @@ export class ReportGeneratorService {
     whereClause: WhereClause,
     startDate?: Date,
     endDate?: Date,
+    metricsConfig?: {
+      includeImplementationPlans: boolean;
+      includeCodeReviewInsights: boolean;
+      includeDelegationFlow: boolean;
+      includeTimeSeries: boolean;
+      includeBenchmarks: boolean;
+    },
   ) {
     const enhancedMetrics: Partial<ReportMetrics> = {};
 
+    // Use strategy configuration instead of hardcoded methods
+    const config = metricsConfig || this.getDefaultMetricsConfig(reportType);
+
     // Implementation Plan Analytics
-    if (this.shouldIncludeImplementationPlans(reportType)) {
+    if (config.includeImplementationPlans) {
       enhancedMetrics.implementationPlans =
         await this.metricsCalculator.getImplementationPlanMetrics(whereClause);
     }
 
     // Code Review Insights
-    if (this.shouldIncludeCodeReviewInsights(reportType)) {
+    if (config.includeCodeReviewInsights) {
       enhancedMetrics.codeReviewInsights =
         await this.metricsCalculator.getCodeReviewInsights(whereClause);
     }
 
     // Delegation Flow Analysis
-    if (this.shouldIncludeDelegationFlow(reportType)) {
+    if (config.includeDelegationFlow) {
       enhancedMetrics.delegationFlow =
         await this.metricsCalculator.getDelegationFlowMetrics(whereClause);
     }
 
     // Time Series Analysis
-    if (this.shouldIncludeTimeSeries(reportType)) {
+    if (config.includeTimeSeries) {
       enhancedMetrics.timeSeriesAnalysis =
         await this.timeSeriesAnalysis.getTimeSeriesMetrics(
           whereClause,
@@ -403,7 +487,7 @@ export class ReportGeneratorService {
     }
 
     // Performance Benchmarks
-    if (this.shouldIncludeBenchmarks(reportType)) {
+    if (config.includeBenchmarks) {
       enhancedMetrics.performanceBenchmarks =
         await this.performanceBenchmark.getPerformanceBenchmarks(
           whereClause,
@@ -415,37 +499,34 @@ export class ReportGeneratorService {
     return enhancedMetrics;
   }
 
-  // Strategy pattern for determining what metrics to include (OCP principle)
-  private shouldIncludeImplementationPlans(reportType: ReportType): boolean {
-    return (
-      reportType === 'implementation_plan_analytics' ||
-      reportType === 'comprehensive'
-    );
-  }
-
-  private shouldIncludeCodeReviewInsights(reportType: ReportType): boolean {
-    return (
-      reportType === 'code_review_insights' || reportType === 'comprehensive'
-    );
-  }
-
-  private shouldIncludeDelegationFlow(reportType: ReportType): boolean {
-    return (
-      reportType === 'delegation_flow_analysis' ||
-      reportType === 'comprehensive'
-    );
-  }
-
-  private shouldIncludeTimeSeries(reportType: ReportType): boolean {
-    return (
-      reportType === 'performance_dashboard' || reportType === 'comprehensive'
-    );
-  }
-
-  private shouldIncludeBenchmarks(reportType: ReportType): boolean {
-    return (
-      reportType === 'performance_dashboard' || reportType === 'comprehensive'
-    );
+  // Fallback method for backward compatibility
+  private getDefaultMetricsConfig(reportType: ReportType) {
+    try {
+      const strategy = this.strategyFactory.getStrategy(reportType);
+      return strategy.getRequiredMetrics(reportType);
+    } catch {
+      // Fallback to legacy logic if strategy not found
+      return {
+        includeImplementationPlans: [
+          'implementation_plan_analytics',
+          'comprehensive',
+        ].includes(reportType),
+        includeCodeReviewInsights: [
+          'code_review_insights',
+          'comprehensive',
+        ].includes(reportType),
+        includeDelegationFlow: [
+          'delegation_flow_analysis',
+          'comprehensive',
+        ].includes(reportType),
+        includeTimeSeries: ['performance_dashboard', 'comprehensive'].includes(
+          reportType,
+        ),
+        includeBenchmarks: ['performance_dashboard', 'comprehensive'].includes(
+          reportType,
+        ),
+      };
+    }
   }
 
   // Utility methods
@@ -469,23 +550,13 @@ export class ReportGeneratorService {
   }
 
   private getReportTitle(reportType: ReportType): string {
-    const titles: Record<ReportType, string> = {
-      task_summary: 'Task Summary Report',
-      delegation_analytics: 'Delegation Analytics Report',
-      performance_dashboard: 'Performance Dashboard Report',
-      comprehensive: 'Comprehensive Workflow Report',
-      implementation_plan_analytics: 'Implementation Plan Analytics Report',
-      code_review_insights: 'Code Review Insights Report',
-      delegation_flow_analysis: 'Delegation Flow Analysis Report',
-      // Individual Task Report Types (B005)
-      task_progress_health: 'Task Progress Health Report',
-      implementation_execution: 'Implementation Execution Report',
-      code_review_quality: 'Code Review Quality Report',
-      delegation_flow_analysis_task: 'Task Delegation Flow Analysis Report',
-      research_documentation: 'Research Documentation Report',
-      communication_collaboration: 'Communication Collaboration Report',
-    };
-    return titles[reportType] || 'Workflow Report';
+    try {
+      const strategy = this.strategyFactory.getStrategy(reportType);
+      return strategy.getReportTitle(reportType);
+    } catch {
+      // Fallback for unknown report types
+      return `${reportType} Report`;
+    }
   }
 
   // Individual task report helper methods (B005)
@@ -533,13 +604,97 @@ export class ReportGeneratorService {
   }
 
   /**
+   * Transform aggregate report data using rich metrics transformer
+   * Replaces basic metrics passing with structured template-ready data
+   */
+  private transformAggregateReportData(
+    reportType: ReportType,
+    baseMetrics: any,
+    enhancedMetrics: any,
+  ): any {
+    switch (reportType) {
+      case 'task_summary':
+        return ReportDataTransformer.transformTaskSummaryData(
+          baseMetrics.tasks,
+          baseMetrics.delegations,
+          baseMetrics.codeReviews,
+          baseMetrics.performance,
+        );
+      case 'delegation_analytics':
+        return ReportDataTransformer.transformDelegationAnalyticsData(
+          baseMetrics.delegations,
+          enhancedMetrics.delegationFlow,
+        );
+      case 'implementation_plan_analytics':
+        return ReportDataTransformer.transformImplementationPlanAnalyticsData(
+          enhancedMetrics.implementationPlans,
+        );
+      case 'code_review_insights':
+        return ReportDataTransformer.transformCodeReviewInsightsData(
+          enhancedMetrics.codeReviewInsights,
+        );
+      case 'performance_dashboard':
+      case 'comprehensive':
+      case 'delegation_flow_analysis':
+        // For now, return empty object - these need custom transformers
+        return {};
+      default:
+        return {};
+    }
+  }
+
+  /**
+   * Transform individual task metrics into template-expected structure
+   * Converts flat metrics into nested objects expected by Handlebars templates
+   */
+  /**
+   * Transform individual task data using rich metrics transformer
+   * Replaces hardcoded placeholder transformations with rich data utilization
+   */
+  private transformIndividualTaskDataWithRichMetrics(
+    reportType: ReportType,
+    taskMetrics: any,
+  ): any {
+    switch (reportType) {
+      case 'task_progress_health':
+        return ReportDataTransformer.transformTaskProgressHealthData(
+          taskMetrics,
+        );
+      case 'implementation_execution':
+        return ReportDataTransformer.transformImplementationExecutionData(
+          taskMetrics,
+        );
+      case 'code_review_quality':
+        return ReportDataTransformer.transformCodeReviewQualityData(
+          taskMetrics,
+        );
+      case 'delegation_flow_analysis_task':
+        return ReportDataTransformer.transformTaskDelegationFlowData(
+          taskMetrics,
+        );
+      case 'research_documentation':
+        return ReportDataTransformer.transformResearchDocumentationData(
+          taskMetrics,
+        );
+      case 'communication_collaboration':
+        return ReportDataTransformer.transformCommunicationCollaborationData(
+          taskMetrics,
+        );
+      default:
+        return {};
+    }
+  }
+
+  // Old placeholder transformation methods removed - replaced by ReportDataTransformer
+
+  /**
    * Generate enhanced chart data using ChartFactoryService
    * Integrates the sophisticated 2,532-line ChartFactoryService for advanced visualizations
    */
-  private async generateEnhancedChartData(
+  private generateEnhancedChartData(
     reportType: ReportType,
     metrics: ReportMetrics,
-  ): Promise<any> {
+  ): any {
     try {
       // Use ChartFactoryService for advanced chart generation
       return this.chartFactory.createCharts(
@@ -591,12 +746,42 @@ export class ReportGeneratorService {
     customizations?: any,
   ): Promise<string> {
     try {
-      // Use TemplateFactoryService for advanced template generation
-      return await this.templateFactory.generateAdvancedTemplate(
-        reportType,
-        data,
-        customizations,
-      );
+      // Enhance data with template factory configurations
+      const chartConfig =
+        this.templateFactory.getChartConfiguration(reportType);
+      const contentPriority =
+        this.templateFactory.getContentPriority(reportType);
+      const shouldIncludeCharts =
+        this.templateFactory.shouldIncludeCharts(reportType);
+
+      // Create enhanced data with factory configurations
+      // PRESERVE rich transformed data from ReportDataTransformer
+      const enhancedData = {
+        ...data,
+        chartConfig,
+        contentPriority,
+        shouldIncludeCharts,
+        customizations: customizations || {},
+        // Only add content generation if not already provided by transformer
+        ...(data.dynamicContent || {
+          executiveSummary: this.contentGenerator.generateExecutiveSummary(
+            reportType,
+            data,
+          ),
+          keyInsights: this.contentGenerator.generateKeyInsights(
+            reportType,
+            data,
+          ),
+          actionableRecommendations:
+            this.contentGenerator.generateActionableRecommendations(
+              reportType,
+              data,
+            ),
+        }),
+      };
+
+      // Use the enhanced template rendering with factory configurations
+      return this.reportTemplate.renderReportTemplate(reportType, enhancedData);
     } catch (error) {
       this.logger.warn(
         `Failed to generate enhanced template: ${error.message}`,
