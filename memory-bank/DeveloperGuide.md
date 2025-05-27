@@ -68,26 +68,55 @@ npm install
 ### 8.1. Schema Maintenance Protocol
 
 **Status**: ✅ **All schemas aligned** with database models (Completed TSK-004 on 2025-05-23)
+**Documentation Status**: ✅ **Comprehensive schema documentation** completed (TSK-005 on 2025-05-25)
 
 **Key Principles**:
+
 - **Type Consistency**: All Zod schemas must match exact Prisma model field types (string, int, DateTime, etc.)
 - **Field Alignment**: Schema fields must correspond 1:1 with database columns (no extra fields, no missing required fields)
 - **Relationship Handling**: Foreign key fields properly defined with correct types and constraints
 - **Validation Rules**: Database constraints (unique, nullable, length) reflected in Zod validation
+- **Comprehensive Documentation**: All schema files enhanced with complete field specifications, practical examples, and usage patterns
+
+**Universal Tool Documentation Enhancement (TSK-005)**:
+
+- **850+ lines of comprehensive documentation** added to universal tool schemas
+- **Complete field specifications** for all 10 entities with data types, constraints, and validation rules
+- **65+ practical examples** covering all major query, mutation, and workflow operation patterns
+- **Tool description files** extracted to maintainable TypeScript utility files in `src/task-workflow/domains/universal/descriptions/`
+- **Entity-to-Prisma model mapping** clearly documented for agent efficiency
+- **Performance considerations** and optimization tips included throughout
+
+**Enhanced Schema Files**:
+
+- `universal-query.schema.ts`: Complete entity documentation with filtering, pagination, and aggregation examples
+- `universal-mutation.schema.ts`: Comprehensive CRUD operation examples with batch patterns and relationship management
+- `workflow-operations.schema.ts`: Role-based delegation and state transition documentation with practical scenarios
+- `descriptions/`: Maintainable TypeScript files containing detailed tool descriptions and examples
 
 **Domain Structure**: Schemas organized in 5 domains under `src/task-workflow/domains/`:
+
 - **CORE**: Task, TaskDescription, ImplementationPlan, Subtask operations
-- **TASK**: DelegationRecord, ResearchReport, CodeReview, CompletionReport operations  
+- **TASK**: DelegationRecord, ResearchReport, CodeReview, CompletionReport operations
 - **QUERY**: Search, list, context retrieval with slice support
 - **WORKFLOW**: Role transitions, state management, completion tracking
 - **INTERACTION**: Comments, command processing, user interactions
+- **UNIVERSAL**: Comprehensive universal tools with complete documentation (enhanced in TSK-005)
 
 **Critical Schema Patterns**:
+
 - ID fields: Use `z.number().int()` for autoincrement, `z.string()` for UUID
 - Timestamps: Always `z.date()` for DateTime fields
 - JSON fields: Use `z.any()` or specific object schemas for Prisma Json type
 - Optional fields: Use `.optional()` only for truly nullable database columns
 - Foreign keys: Always include required FK fields with correct types
+
+**Agent Usage Guidelines**:
+
+- **Universal tools** (`query_data`, `mutate_data`, `workflow_operations`) now have comprehensive documentation for efficient usage
+- **Field specifications** eliminate guesswork about available fields and relationships
+- **Practical examples** accelerate implementation with proven patterns
+- **Quick reference** available through tool description files for common operations
 
 ### 8.2. Standardized Responses for Unchanged/Not Found/Empty Contexts
 

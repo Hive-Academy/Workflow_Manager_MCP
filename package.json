@@ -65,6 +65,8 @@
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "fastmcp": "^1.27.6",
+    "handlebars": "^4.7.8",
+    "hbs": "^4.2.0",
     "playwright": "^1.48.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
