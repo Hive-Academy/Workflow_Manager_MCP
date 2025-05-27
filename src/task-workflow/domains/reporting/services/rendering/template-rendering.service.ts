@@ -21,6 +21,7 @@ import { TemplateFactoryService } from './template-factory.service';
 import { EnhancedInsightsGeneratorService } from '../analytics/enhanced-insights-generator.service';
 import { SchemaDrivenIntelligenceService } from '../analytics/schema-driven-intelligence.service';
 import { SmartResponseSummarizationService } from '../analytics/smart-response-summarization.service';
+import { IndividualTaskTemplateDataService } from '../data/individual-task-template-data.service';
 
 /**
  * Template Rendering Service
@@ -55,6 +56,7 @@ export class TemplateRenderingService implements IReportTemplateService {
     private readonly enhancedInsightsGenerator: EnhancedInsightsGeneratorService,
     private readonly schemaIntelligence: SchemaDrivenIntelligenceService,
     private readonly smartSummarization: SmartResponseSummarizationService,
+    private readonly individualTaskTemplateData: IndividualTaskTemplateDataService,
   ) {
     this.handlebarsInstance = Handlebars.create();
     this.registerHelpers();
@@ -236,6 +238,162 @@ export class TemplateRenderingService implements IReportTemplateService {
       );
       return [];
     }
+  }
+
+  /**
+   * Render individual task template with specialized data service
+   * Handles task-specific report types that require detailed analysis
+   */
+  async renderIndividualTaskTemplate(
+    reportType: ReportType,
+    taskId: string,
+    filters?: Record<string, string>,
+  ): Promise<string> {
+    try {
+      this.logger.debug(
+        `Rendering individual task template: ${reportType} for task: ${taskId}`,
+      );
+
+      // Get task-specific data using the specialized service
+      let templateData: any;
+
+      switch (reportType) {
+        case 'task_progress_health':
+          templateData =
+            await this.individualTaskTemplateData.getTaskProgressHealthData(
+              taskId,
+              filters,
+            );
+          break;
+        case 'implementation_execution':
+          templateData =
+            await this.individualTaskTemplateData.getImplementationExecutionData(
+              taskId,
+              filters,
+            );
+          break;
+        case 'code_review_quality':
+          templateData =
+            await this.individualTaskTemplateData.getCodeReviewQualityData(
+              taskId,
+              filters,
+            );
+          break;
+        case 'research_documentation':
+          templateData =
+            await this.individualTaskTemplateData.getResearchDocumentationData(
+              taskId,
+              filters,
+            );
+          break;
+        case 'communication_collaboration':
+          templateData =
+            await this.individualTaskTemplateData.getCommunicationCollaborationData(
+              taskId,
+              filters,
+            );
+          break;
+        default:
+          throw new Error(
+            `Unsupported individual task report type: ${reportType}`,
+          );
+      }
+
+      // Convert to ReportData format for template rendering
+      const reportData: ReportData = {
+        title: this.getIndividualTaskReportTitle(reportType, taskId),
+        generatedAt: new Date(),
+        taskId,
+        metrics: { taskSpecific: templateData },
+        charts: [],
+        recommendations: [],
+      };
+
+      // Render using standard template rendering with enhanced data
+      return await this.renderReportTemplate(reportType, reportData);
+    } catch (error) {
+      this.logger.error(
+        `Failed to render individual task template ${reportType} for task ${taskId}`,
+        error.stack,
+      );
+      return this.generateIndividualTaskErrorTemplate(
+        reportType,
+        taskId,
+        error,
+      );
+    }
+  }
+
+  /**
+   * Get appropriate title for individual task reports
+   */
+  private getIndividualTaskReportTitle(
+    reportType: ReportType,
+    taskId: string,
+  ): string {
+    const titleMap = {
+      task_progress_health: `Task Progress Health Analysis - ${taskId}`,
+      implementation_execution: `Implementation Execution Analysis - ${taskId}`,
+      code_review_quality: `Code Review Quality Assessment - ${taskId}`,
+      research_documentation: `Research Documentation Analysis - ${taskId}`,
+      communication_collaboration: `Communication & Collaboration Analysis - ${taskId}`,
+    };
+
+    return (
+      titleMap[reportType as keyof typeof titleMap] ||
+      `Individual Task Report - ${taskId}`
+    );
+  }
+
+  /**
+   * Generate error template for individual task reports
+   */
+  private generateIndividualTaskErrorTemplate(
+    reportType: ReportType,
+    taskId: string,
+    error: any,
+  ): string {
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Individual Task Report Error - ${taskId}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body class="bg-gray-50 p-8">
+        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+          <div class="flex items-center mb-6">
+            <div class="bg-red-100 p-3 rounded-full mr-4">
+              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">Individual Task Report Error</h1>
+              <p class="text-gray-600">Report Type: ${reportType} | Task ID: ${taskId}</p>
+            </div>
+          </div>
+          
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <h2 class="text-lg font-semibold text-red-800 mb-2">Error Details</h2>
+            <p class="text-red-700 font-mono text-sm">${error.message}</p>
+          </div>
+          
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h2 class="text-lg font-semibold text-blue-800 mb-2">Troubleshooting</h2>
+            <ul class="text-blue-700 text-sm space-y-1">
+              <li>• Verify that task ID "${taskId}" exists in the system</li>
+              <li>• Check that the task has sufficient data for ${reportType} analysis</li>
+              <li>• Ensure the IndividualTaskTemplateDataService is properly configured</li>
+              <li>• Review the template file for ${reportType.replace(/_/g, '-')}.hbs</li>
+            </ul>
+          </div>
+        </div>
+      </body>
+    </html>
+    `;
   }
 
   /**

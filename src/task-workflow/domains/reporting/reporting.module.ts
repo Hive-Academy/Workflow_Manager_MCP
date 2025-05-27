@@ -14,6 +14,11 @@ import { CoreMetricsService } from './services/data/core-metrics.service';
 import { AdvancedAnalyticsService } from './services/analytics/advanced-analytics.service';
 import { TaskHealthAnalysisService } from './services/analytics/task-health-analysis.service';
 
+// Template Data Services (B003 - Template Type Safety Integration)
+import { TemplateDataService } from './services/data/template-data.service';
+import { SpecializedTemplateDataService } from './services/data/specialized-template-data.service';
+import { IndividualTaskTemplateDataService } from './services/data/individual-task-template-data.service';
+
 // Refactored Services (B001 - Core Service Foundation)
 import { ReportDataAccessService } from './services/data/report-data-access.service';
 import { ChartCoordinationService } from './services/analytics/chart-coordination.service';
@@ -58,6 +63,11 @@ import { IndividualTaskReportStrategy } from './strategies/individual-task-repor
     ReportDataAccessService,
     ChartCoordinationService,
     MetricsCoordinationService,
+
+    // === TEMPLATE DATA SERVICES (B003 - Template Type Safety Integration) ===
+    TemplateDataService,
+    SpecializedTemplateDataService,
+    IndividualTaskTemplateDataService,
 
     // === LEGACY SERVICES (Backward Compatibility) ===
 
