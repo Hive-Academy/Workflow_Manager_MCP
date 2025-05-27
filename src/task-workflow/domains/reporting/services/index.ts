@@ -43,6 +43,10 @@ export * from './rendering/specialized-chart.generator';
 
 // Data Services
 export * from './data/metrics-calculator.service';
+export * from './data/template-data.service';
+export * from './data/specialized-template-data.service';
+export * from './data/individual-task-template-data.service';
+export * from './data/report-data-access.service';
 
 // Analytics Services
 export * from './analytics/time-series-analysis.service';

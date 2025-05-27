@@ -1,442 +1,63 @@
-# WORKFLOW MANAGER MCP REFERENCE GUIDE
+# Workflow Manager MCP: Key Patterns and Examples
 
-## IMPORTANT USAGE GUIDELINES
+This guide provides essential patterns and examples for common operations with the Workflow Manager MCP server. Use alongside the schema definitions for efficient operations.
 
-This reference guide provides essential information about entity structure, required parameters, and field types for the Workflow Manager MCP server. Following these guidelines ensures successful operations:
+## Query Patterns
 
-1. **Consult this guide** when constructing any query, mutation, or workflow operation
-2. **Verify required fields** for each entity type before creating or updating records
-3. **Use batch operations** (`createMany`, `updateMany`) whenever working with multiple records
-4. **Match field types exactly** as specified (string, int, json, etc.)
-5. **Follow established workflow patterns** to maintain proper task state
-6. **Check entity relationships** before performing operations (e.g., ensure `taskId` exists)
-7. **Prioritize efficiency** through batch operations and proper filtering
-
-This guide reflects the exact database schema of the Workflow Manager system.
-
----
-
-# Entity Field Requirements
-
-## 1. Task
-
-**Required Fields:**
-
-- `taskId` (string): Unique identifier for the task
-- `name` (string): Name/title of the task
-- `status` (string): Current status
-
-**Optional Fields:**
-
-- `creationDate` (datetime): Automatically set to now() if not provided
-- `completionDate` (datetime): Date task was completed
-- `owner` (string): Task owner
-- `currentMode` (string): Current role (boomerang, architect, etc.)
-- `priority` (string): Task priority (Low, Medium, High, Critical)
-- `dependencies` (json): Array of dependent task IDs
-- `redelegationCount` (int): Automatically set to 0 if not provided
-- `gitBranch` (string): Associated git branch
-
-**Status Values:**
-
-- "not-started"
-- "in-progress"
-- "needs-review"
-- "completed"
-- "needs-changes"
-- "paused"
-- "cancelled"
-
-**Create Example:**
+### Basic Entity Query
 
 ```json
 {
-  "operation": "create",
   "entity": "task",
-  "data": {
-    "taskId": "TSK-123",
-    "name": "Implement Authentication",
-    "status": "not-started",
-    "priority": "High",
-    "currentMode": "boomerang"
+  "where": { "status": "in-progress" }
+}
+```
+
+### Query with Related Data
+
+```json
+{
+  "entity": "task",
+  "where": { "taskId": "TSK-123" },
+  "include": {
+    "taskDescription": true,
+    "subtasks": true
   }
 }
 ```
 
-## 2. TaskDescription
-
-**Required Fields:**
-
-- `taskId` (string): Must match an existing task
-- `description` (string): Main task description
-- `businessRequirements` (string): Business requirements
-- `technicalRequirements` (string): Technical requirements
-- `acceptanceCriteria` (json): Array of acceptance criteria
-
-**Example:**
+### Filtered Related Data
 
 ```json
 {
-  "operation": "create",
-  "entity": "taskDescription",
-  "data": {
-    "taskId": "TSK-123",
-    "description": "Implement a secure authentication system",
-    "businessRequirements": "Users must be able to securely log in",
-    "technicalRequirements": "Use JWT tokens with secure password hashing",
-    "acceptanceCriteria": [
-      "Users can register with email/password",
-      "Users can login with valid credentials",
-      "Passwords are securely hashed"
-    ]
-  }
-}
-```
-
-## 3. ImplementationPlan
-
-**Required Fields:**
-
-- `taskId` (string): Must match an existing task
-- `overview` (string): Plan overview
-- `approach` (string): Implementation approach
-- `technicalDecisions` (string): Technical decisions
-- `filesToModify` (json): Array of files to modify
-- `createdBy` (string): Creator role (architect, etc.)
-
-**Example:**
-
-```json
-{
-  "operation": "create",
   "entity": "implementationPlan",
-  "data": {
-    "taskId": "TSK-123",
-    "overview": "Authentication implementation plan",
-    "approach": "Using JWT tokens with passport-jwt",
-    "technicalDecisions": "Bcrypt for password hashing, jsonwebtoken for JWT",
-    "filesToModify": [
-      "src/auth/auth.service.ts",
-      "src/auth/auth.controller.ts"
-    ],
-    "createdBy": "architect"
-  }
-}
-```
-
-## 4. Subtask
-
-**Required Fields:**
-
-- `taskId` (string): Must match an existing task
-- `planId` (int): Must match an existing implementation plan ID
-- `name` (string): Subtask name
-- `description` (string): Subtask description
-- `sequenceNumber` (int): Order in the implementation plan
-- `status` (string): Current status
-
-**Optional Fields:**
-
-- `assignedTo` (string): Role assigned to
-- `estimatedDuration` (string): Duration estimate
-- `startedAt` (datetime): When work started
-- `completedAt` (datetime): When completed
-- `batchId` (string): Batch identifier for grouping
-- `batchTitle` (string): Title of the batch
-
-**Status Values:** Same as Task
-
-**Batch Creation Example (RECOMMENDED):**
-
-```json
-{
-  "operation": "createMany",
-  "entity": "subtask",
-  "data": [
-    {
-      "taskId": "TSK-123",
-      "planId": 5,
-      "name": "Create Authentication Module",
-      "description": "Set up the module structure",
-      "sequenceNumber": 1,
-      "status": "not-started",
-      "batchId": "AUTH-BATCH-1"
-    },
-    {
-      "taskId": "TSK-123",
-      "planId": 5,
-      "name": "Implement JWT Strategy",
-      "description": "Set up JWT token generation and validation",
-      "sequenceNumber": 2,
-      "status": "not-started",
-      "batchId": "AUTH-BATCH-1"
-    }
-  ]
-}
-```
-
-## 5. DelegationRecord
-
-**Required Fields:**
-
-- `taskId` (string): Must match an existing task
-- `fromMode` (string): Source role
-- `toMode` (string): Target role
-
-**Optional Fields:**
-
-- `subtaskId` (int): Related subtask ID
-- `delegationTimestamp` (datetime): Automatically set to now() if not provided
-- `completionTimestamp` (datetime): When delegation completed
-- `success` (boolean): Whether delegation succeeded
-- `rejectionReason` (string): If rejected, the reason
-- `redelegationCount` (int): Automatically set to 0 if not provided
-
-**Example:**
-
-```json
-{
-  "operation": "create",
-  "entity": "delegation",
-  "data": {
-    "taskId": "TSK-123",
-    "fromMode": "architect",
-    "toMode": "senior-developer"
-  }
-}
-```
-
-## 6. ResearchReport
-
-**Required Fields:**
-
-- `taskId` (string): Must match an existing task
-- `title` (string): Report title
-- `summary` (string): Summary of findings
-- `findings` (string): Detailed findings
-- `recommendations` (string): Recommendations
-- `references` (json): Array of references
-
-**Example:**
-
-```json
-{
-  "operation": "create",
-  "entity": "researchReport",
-  "data": {
-    "taskId": "TSK-123",
-    "title": "Authentication Libraries Research",
-    "summary": "Evaluated JWT libraries for Node.js",
-    "findings": "Multiple libraries available with varying features",
-    "recommendations": "Use jsonwebtoken with passport-jwt",
-    "references": [
-      "https://jwt.io/",
-      "https://github.com/auth0/node-jsonwebtoken"
-    ]
-  }
-}
-```
-
-## 7. CodeReview
-
-**Required Fields:**
-
-- `taskId` (string): Must match an existing task
-- `status` (string): Review status
-- `summary` (string): Review summary
-- `strengths` (string): Code strengths
-- `issues` (string): Issues found
-- `acceptanceCriteriaVerification` (json): Verification results
-- `manualTestingResults` (string): Testing results
-
-**Optional Fields:**
-
-- `requiredChanges` (string): Required changes if not approved
-
-**Status Values:**
-
-- "APPROVED"
-- "APPROVED_WITH_RESERVATIONS"
-- "NEEDS_CHANGES"
-
-**Example:**
-
-```json
-{
-  "operation": "create",
-  "entity": "codeReviewReport",
-  "data": {
-    "taskId": "TSK-123",
-    "status": "APPROVED",
-    "summary": "Authentication implementation meets all requirements",
-    "strengths": "Clean code structure, secure implementation",
-    "issues": "Minor: Consider adding rate limiting",
-    "acceptanceCriteriaVerification": {
-      "Users can register": true,
-      "Users can login": true,
-      "Passwords are securely hashed": true
-    },
-    "manualTestingResults": "All auth flows tested successfully"
-  }
-}
-```
-
-## 8. CompletionReport
-
-**Required Fields:**
-
-- `taskId` (string): Must match an existing task
-- `summary` (string): Completion summary
-- `filesModified` (json): Array of modified files
-- `delegationSummary` (string): Summary of delegations
-- `acceptanceCriteriaVerification` (json): Verification results
-
-**Example:**
-
-```json
-{
-  "operation": "create",
-  "entity": "completionReport",
-  "data": {
-    "taskId": "TSK-123",
-    "summary": "Authentication system successfully implemented",
-    "filesModified": [
-      "src/auth/auth.service.ts",
-      "src/auth/auth.controller.ts"
-    ],
-    "delegationSummary": "Task completed through architect → developer → code-review workflow",
-    "acceptanceCriteriaVerification": {
-      "Users can register": "implemented",
-      "Users can login": "implemented",
-      "Passwords are securely hashed": "implemented"
+  "where": { "taskId": "TSK-123" },
+  "include": {
+    "subtasks": {
+      "where": { "status": "not-started" },
+      "orderBy": { "sequenceNumber": "asc" }
     }
   }
 }
 ```
 
-## 9. Comment
+## Mutation Patterns
 
-**Required Fields:**
-
-- `taskId` (string): Must match an existing task
-- `mode` (string): Role making the comment
-- `content` (string): Comment content
-
-**Optional Fields:**
-
-- `subtaskId` (int): Related subtask ID
-
-**Example:**
+### Create Task with Description
 
 ```json
-{
-  "operation": "create",
-  "entity": "comment",
-  "data": {
-    "taskId": "TSK-123",
-    "mode": "architect",
-    "content": "Implementation plan ready. Focus on security."
-  }
-}
-```
-
-## 10. WorkflowTransition
-
-**Required Fields:**
-
-- `taskId` (string): Must match an existing task
-- `fromMode` (string): Source role/mode
-- `toMode` (string): Target role/mode
-
-**Optional Fields:**
-
-- `reason` (string): Reason for transition
-- `transitionTimestamp` (datetime): Automatically set to now() if not provided
-
-**Example:**
-
-```json
-{
-  "operation": "create",
-  "entity": "workflowTransition",
-  "data": {
-    "taskId": "TSK-123",
-    "fromMode": "architect",
-    "toMode": "senior-developer",
-    "reason": "Implementation plan complete, ready for development"
-  }
-}
-```
-
-## 11. CodebaseAnalysis
-
-**Required Fields:**
-
-- `taskId` (string): Must match an existing task
-- `architectureFindings` (json): Architecture analysis
-- `problemsIdentified` (json): Issues found
-- `implementationContext` (json): Implementation context
-- `integrationPoints` (json): Integration details
-- `qualityAssessment` (json): Quality metrics
-- `filesCovered` (json): Files analyzed
-- `technologyStack` (json): Tech stack details
-- `analyzedBy` (string): Role that performed analysis
-
-**Example:**
-
-```json
-{
-  "operation": "create",
-  "entity": "codebaseAnalysis",
-  "data": {
-    "taskId": "TSK-123",
-    "architectureFindings": {
-      "pattern": "MVC",
-      "layers": ["Controller", "Service", "Repository"]
-    },
-    "problemsIdentified": {
-      "issues": ["Inconsistent error handling", "Missing validation"]
-    },
-    "implementationContext": {
-      "standards": "NestJS style guide",
-      "patterns": "Repository pattern"
-    },
-    "integrationPoints": {
-      "external": ["Payment Gateway", "Email Service"]
-    },
-    "qualityAssessment": {
-      "testCoverage": "70%",
-      "codeQuality": "Good"
-    },
-    "filesCovered": ["src/auth/*", "src/users/*"],
-    "technologyStack": {
-      "framework": "NestJS",
-      "database": "PostgreSQL",
-      "orm": "Prisma"
-    },
-    "analyzedBy": "architect"
-  }
-}
-```
-
-## Common Workflow Operations
-
-### 1. Task Creation Workflow
-
-```json
-// 1. Create task
+// Create task
 {
   "operation": "create",
   "entity": "task",
   "data": {
     "taskId": "TSK-123",
     "name": "Implement Authentication",
-    "status": "not-started",
-    "priority": "High"
+    "status": "not-started"
   }
 }
 
-// 2. Add task description
+// Then add description
 {
   "operation": "create",
   "entity": "taskDescription",
@@ -448,18 +69,9 @@ This guide reflects the exact database schema of the Workflow Manager system.
     "acceptanceCriteria": ["User registration", "User login"]
   }
 }
-
-// 3. Delegate to researcher
-{
-  "operation": "delegate",
-  "taskId": "TSK-123",
-  "fromRole": "boomerang",
-  "toRole": "researcher",
-  "message": "Research authentication libraries"
-}
 ```
 
-### 2. Implementation Plan with Subtasks
+### Create Implementation Plan with Subtasks (Critical Pattern)
 
 ```json
 // 1. Create implementation plan
@@ -483,10 +95,10 @@ This guide reflects the exact database schema of the Workflow Manager system.
   "data": [
     {
       "taskId": "TSK-123",
-      "planId": 5,
+      "planId": 5,  // MUST be a number
       "name": "Setup Authentication Module",
       "description": "Create module structure",
-      "sequenceNumber": 1,
+      "sequenceNumber": 1,  // MUST be a number
       "status": "not-started",
       "batchId": "AUTH-BATCH"
     },
@@ -501,21 +113,11 @@ This guide reflects the exact database schema of the Workflow Manager system.
     }
   ]
 }
-
-// 3. Delegate to developer
-{
-  "operation": "delegate",
-  "taskId": "TSK-123",
-  "fromRole": "architect",
-  "toRole": "senior-developer",
-  "message": "Implementation plan ready"
-}
 ```
 
-### 3. Batch Status Update (Important for Performance)
+### Batch Status Update
 
 ```json
-// Update all subtasks in batch
 {
   "operation": "updateMany",
   "entity": "subtask",
@@ -524,16 +126,28 @@ This guide reflects the exact database schema of the Workflow Manager system.
     "taskId": "TSK-123"
   },
   "data": {
-    "status": "completed",
-    "completedAt": "2024-01-15T10:00:00Z"
+    "status": "completed"
   }
 }
 ```
 
-### 4. Task Completion Sequence
+## Workflow Operation Patterns
+
+### Task Delegation
 
 ```json
-// 1. Developer completes task
+{
+  "operation": "delegate",
+  "taskId": "TSK-123",
+  "fromRole": "architect",
+  "toRole": "senior-developer",
+  "message": "Implementation plan ready. Please implement."
+}
+```
+
+### Task Completion
+
+```json
 {
   "operation": "complete",
   "taskId": "TSK-123",
@@ -547,88 +161,55 @@ This guide reflects the exact database schema of the Workflow Manager system.
     }
   }
 }
+```
 
-// 2. Delegate to code review
+### Issue Escalation
+
+```json
 {
-  "operation": "delegate",
+  "operation": "escalate",
   "taskId": "TSK-123",
-  "fromRole": "architect",
-  "toRole": "code-review",
-  "message": "Implementation complete, ready for review"
-}
-
-// 3. Create code review
-{
-  "operation": "create",
-  "entity": "codeReviewReport",
-  "data": {
-    "taskId": "TSK-123",
-    "status": "APPROVED",
-    "summary": "Code meets all requirements",
-    "strengths": "Clean implementation",
-    "issues": "None found",
-    "acceptanceCriteriaVerification": {
-      "User registration": true,
-      "User login": true
-    },
-    "manualTestingResults": "All tests pass"
-  }
-}
-
-// 4. Delegate back to boomerang
-{
-  "operation": "delegate",
-  "taskId": "TSK-123",
-  "fromRole": "code-review",
-  "toRole": "boomerang",
-  "message": "Review complete, approved"
-}
-
-// 5. Mark task as completed
-{
-  "operation": "update",
-  "entity": "task",
-  "where": { "taskId": "TSK-123" },
-  "data": {
-    "status": "completed",
-    "completionDate": "2024-01-20T14:30:00Z"
+  "fromRole": "senior-developer",
+  "toRole": "architect",
+  "rejectionData": {
+    "reason": "Technical blocker: Library compatibility issue",
+    "severity": "high",
+    "blockers": ["Dependency conflict"]
   }
 }
 ```
 
-## Tips for Successful Operations
+## Critical Type Requirements
 
-1. **Always match data types correctly:**
+### Numbers vs Strings
 
-   - String for text values
-   - JSON arrays for fields like `acceptanceCriteria`, `filesModified`, etc.
-   - Integer for numeric fields like `sequenceNumber`
-   - Boolean for true/false fields
+- `planId` must be a number: `"planId": 5` (not `"planId": "5"`)
+- `sequenceNumber` must be a number: `"sequenceNumber": 1` (not `"sequenceNumber": "1"`)
+- `subtaskId` must be a number: `"subtaskId": 3` (not `"subtaskId": "3"`)
 
-2. **When creating related entities:**
+### Arrays vs Objects
 
-   - Ensure the `taskId` exists before creating related records
-   - For subtasks, ensure the `planId` points to a valid implementation plan
+- For `createMany`, data must be an array: `"data": [{ ... }, { ... }]`
+- For JSON fields, use arrays or objects as appropriate:
+  - `"acceptanceCriteria": ["Criterion 1", "Criterion 2"]`
+  - `"technologyStack": { "framework": "NestJS" }`
 
-3. **For batch operations:**
+## Common Workflow Sequence
 
-   - Use `createMany` for creating multiple subtasks
-   - Use `updateMany` for updating multiple records with the same changes
-   - Include proper filtering in `where` clause to target specific records
+1. Create task → Add task description
+2. Delegate to researcher → Create research report → Delegate back
+3. Delegate to architect → Create implementation plan → Create subtasks
+4. Delegate to developer → Update subtask status → Complete implementation
+5. Delegate to code review → Create code review → Delegate back
+6. Complete task
 
-4. **Field formatting guidelines:**
+## Common Status and Role Values
 
-   - Dates should use ISO 8601 format: `YYYY-MM-DDThh:mm:ssZ`
-   - JSON arrays should be properly formatted: `["item1", "item2"]`
-   - JSON objects should use proper nesting: `{"key1": "value", "key2": {"nested": "value"}}`
+### Status Values
 
-5. **Common workflow statuses and roles:**
+- Task/Subtask: "not-started", "in-progress", "needs-review", "completed", "needs-changes"
+- Code Review: "APPROVED", "APPROVED_WITH_RESERVATIONS", "NEEDS_CHANGES"
 
-   - Status values: "not-started", "in-progress", "needs-review", "completed", "needs-changes"
-   - Role values: "boomerang", "researcher", "architect", "senior-developer", "code-review"
+### Role Values
 
-6. **Preventing common errors:**
-   - Missing required fields (refer to this guide)
-   - Type mismatches (string vs. integer)
-   - Invalid foreign keys (taskId, planId)
-   - Inconsistent data across related entities
+- "boomerang", "researcher", "architect", "senior-developer", "code-review"

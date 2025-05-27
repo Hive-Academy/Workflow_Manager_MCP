@@ -32,10 +32,10 @@ export class ReportDataAccessService {
   constructor(private readonly metricsCalculator: MetricsCalculatorService) {}
 
   /**
-   * Get task summary report data
+   * Get task summary report data (Legacy method - maintained for backward compatibility)
    * Transforms nested metrics into flat structure expected by task-summary template
    */
-  async getTaskSummaryData(
+  async getTaskSummaryDataLegacy(
     startDate?: Date,
     endDate?: Date,
     filters?: ReportFilters,
