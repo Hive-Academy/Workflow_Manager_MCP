@@ -19,6 +19,16 @@ import { TemplateDataService } from './services/data/template-data.service';
 import { SpecializedTemplateDataService } from './services/data/specialized-template-data.service';
 import { IndividualTaskTemplateDataService } from './services/data/individual-task-template-data.service';
 
+// Focused Template Data Services (B005 - Specialized Service Refactoring)
+import { ComprehensiveTemplateDataService } from './services/data/comprehensive-template-data.service';
+import { ImplementationPlanTemplateDataService } from './services/data/implementation-plan-template-data.service';
+import { CodeReviewDelegationTemplateDataService } from './services/data/code-review-delegation-template-data.service';
+
+// Individual Task Focused Services (B005 - Individual Service Refactoring)
+import { TaskProgressExecutionService } from './services/data/task-progress-execution.service';
+import { CodeReviewResearchService } from './services/data/code-review-research.service';
+import { CommunicationCollaborationService } from './services/data/communication-collaboration.service';
+
 // Refactored Services (B001 - Core Service Foundation)
 import { ReportDataAccessService } from './services/data/report-data-access.service';
 import { ChartCoordinationService } from './services/analytics/chart-coordination.service';
@@ -69,6 +79,16 @@ import { IndividualTaskReportStrategy } from './strategies/individual-task-repor
     SpecializedTemplateDataService,
     IndividualTaskTemplateDataService,
 
+    // === FOCUSED TEMPLATE DATA SERVICES (B005 - Specialized Service Refactoring) ===
+    ComprehensiveTemplateDataService,
+    ImplementationPlanTemplateDataService,
+    CodeReviewDelegationTemplateDataService,
+
+    // === INDIVIDUAL TASK FOCUSED SERVICES (B005 - Individual Service Refactoring) ===
+    TaskProgressExecutionService,
+    CodeReviewResearchService,
+    CommunicationCollaborationService,
+
     // === LEGACY SERVICES (Backward Compatibility) ===
 
     // Core Report Services
@@ -100,6 +120,11 @@ import { IndividualTaskReportStrategy } from './strategies/individual-task-repor
 
     // MCP Operations (unified interface for both database and analytics reports)
     ReportMcpOperationsService,
+
+    // Individual Task Focused Services (B005 - Individual Service Refactoring)
+    TaskProgressExecutionService,
+    CodeReviewResearchService,
+    CommunicationCollaborationService,
   ],
   exports: [
     // === NEW ARCHITECTURE EXPORTS ===

@@ -158,7 +158,7 @@ export class ReportGeneratorService {
       const baseMetrics = await this.dataAccess.getBaseMetrics(whereClause);
 
       // Get task summary data (without chart generation)
-      const taskSummaryData = await this.dataAccess.getTaskSummaryData(
+      const taskSummaryData = await this.dataAccess.getTaskSummaryDataLegacy(
         startDate,
         endDate,
         filters,

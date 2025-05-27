@@ -1,19 +1,44 @@
-// Core Template Interfaces
-export * from './templates/task-summary.interface';
-export * from './templates/delegation-analytics.interface';
-export * from './templates/performance-dashboard.interface';
-export * from './templates/comprehensive.interface';
-export * from './templates/implementation-plan-analytics.interface';
-export * from './templates/code-review-insights.interface';
-export * from './templates/delegation-flow-analysis.interface';
+/**
+ * Reporting Interfaces Index
+ *
+ * Essential exports for reporting functionality.
+ */
 
-// Individual Task Template Interfaces
-export * from './templates/task-progress-health.interface';
-export * from './templates/implementation-execution.interface';
-export * from './templates/code-review-quality.interface';
-export * from './templates/research-documentation.interface';
-export * from './templates/communication-collaboration.interface';
+// Core Template Data Services and Types
+export {
+  TaskSummaryTemplateData,
+  TaskSummaryDataService,
+} from './templates/task-summary-template.interface';
 
-// Base Interfaces
-export * from './base-report.interface';
-export * from './chart-data.interface';
+export {
+  DelegationAnalyticsTemplateData,
+  DelegationAnalyticsDataService,
+} from './templates/delegation-analytics-template.interface';
+
+export {
+  PerformanceDashboardTemplateData,
+  PerformanceDashboardDataService,
+} from './templates/performance-dashboard-template.interface';
+
+export {
+  ComprehensiveTemplateData,
+  ComprehensiveDataService,
+} from './templates/comprehensive-template.interface';
+
+export {
+  ImplementationPlanAnalyticsTemplateData,
+  ImplementationPlanAnalyticsDataService,
+} from './templates/implementation-plan-analytics-template.interface';
+
+export {
+  CodeReviewInsightsTemplateData,
+  CodeReviewInsightsDataService,
+} from './templates/code-review-insights-template.interface';
+
+export {
+  DelegationFlowAnalysisTemplateData,
+  DelegationFlowAnalysisDataService,
+} from './templates/delegation-flow-analysis-template.interface';
+
+// Core Data Interfaces
+export * from './report-data.interface';
