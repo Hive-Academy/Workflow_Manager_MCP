@@ -28,20 +28,20 @@ const GenerateReportInputSchema = z.object({
     'communication_collaboration',
   ]).describe(`Type of report to generate. Available report types:
 
-**📊 AGGREGATE ANALYTICS REPORTS:**
+** AGGREGATE ANALYTICS REPORTS:**
 • task_summary - Overview of task completion rates, status distribution, and basic metrics
 • delegation_analytics - Deep dive into delegation patterns, handoff efficiency, and role performance
 • performance_dashboard - Real-time performance metrics with trending and benchmarks
 
-**🔍 SPECIALIZED AGGREGATE INSIGHTS:**
+** SPECIALIZED AGGREGATE INSIGHTS:**
 • implementation_plan_analytics - Analysis of implementation plan quality, subtask breakdown, and execution patterns
 • code_review_insights - Code review approval rates, common issues, and quality trends
 • delegation_flow_analysis - Detailed workflow analysis showing delegation paths and bottlenecks
 
-**📈 COMPREHENSIVE:**
+** COMPREHENSIVE:**
 • comprehensive - Complete analysis combining all report types with executive summary
 
-**🎯 INDIVIDUAL TASK REPORTS (B005):**
+** INDIVIDUAL TASK REPORTS (B005):**
 • task_progress_health - Individual task progress and health analysis (requires taskId filter)
 • implementation_execution - Task implementation execution analysis (requires taskId filter)
 • code_review_quality - Task-specific code review quality metrics (requires taskId filter)
@@ -77,11 +77,11 @@ const GenerateReportInputSchema = z.object({
   outputFormat: z.enum(['pdf', 'png', 'jpeg', 'html']).default('pdf')
     .describe(`Output format for the report:
 
-**📄 DOCUMENT FORMATS:**
+** DOCUMENT FORMATS:**
 • pdf - Professional PDF document (recommended for sharing and archiving)
 • html - Interactive HTML with charts and responsive design
 
-**🖼️ IMAGE FORMATS:**
+** IMAGE FORMATS:**
 • png - High-quality PNG image (great for presentations and dashboards)
 • jpeg - Compressed JPEG image (smaller file size, good for quick sharing)
 
@@ -167,28 +167,28 @@ export class ReportMcpOperationsService {
     name: 'generate_workflow_report',
     description: `Generate comprehensive workflow reports with analytics, charts, and recommendations. Supports multiple output formats including PDF, PNG, JPEG, and HTML.
 
-**🎯 REPORT TYPES AVAILABLE:**
+** REPORT TYPES AVAILABLE:**
 
-**📊 Core Analytics:**
+** Core Analytics:**
 • task_summary - Task completion overview with status breakdown
 • delegation_analytics - Delegation patterns and role efficiency analysis  
 • performance_dashboard - Real-time metrics with performance trending
 
-**🔍 Specialized Analysis:**
+** Specialized Analysis:**
 • implementation_plan_analytics - Implementation quality and execution patterns
 • code_review_insights - Code review trends and quality metrics
 • delegation_flow_analysis - Workflow bottleneck and delegation path analysis
 
-**📈 Executive Summary:**
+** Executive Summary:**
 • comprehensive - Complete analysis combining all metrics with recommendations
 
-**💾 OUTPUT FORMATS:**
+** OUTPUT FORMATS:**
 • PDF - Professional documents (recommended for reports)
 • HTML - Interactive dashboards with live charts
 • PNG - High-quality images for presentations
 • JPEG - Compressed images for quick sharing
 
-**📁 FILE ORGANIZATION:**
+** FILE ORGANIZATION:**
 Reports are automatically organized in 'workflow-manager-mcp-reports' with meaningful names:
 • Format: {reportType}_{dateRange}_{filters}_{timestamp}.{extension}
 • Example: "performance_dashboard_2024-01-15_to_2024-01-22_owner-john_20240122_143052.pdf"`,
@@ -294,19 +294,14 @@ Reports are automatically organized in 'workflow-manager-mcp-reports' with meani
           await fs.writeFile(filepath, htmlContent, 'utf-8');
         } else {
           // Use default service path
-          filepath = await this.reportGenerator.saveTemporaryFile(
-            htmlContent,
-            'html',
-          );
+          filepath = 'html';
         }
-
-        const stats = await fs.stat(filepath);
 
         result = {
           filename,
           filepath,
           mimeType: 'text/html',
-          size: stats.size,
+          size: htmlContent.length,
         };
       } else {
         // For PDF/image formats, use Playwright to render
@@ -494,7 +489,6 @@ Reports are automatically organized in 'workflow-manager-mcp-reports' with meani
       // Try to clean up from both possible locations
       await Promise.allSettled([
         this.reportRenderer.cleanupRenderedReport(input.filename),
-        this.reportGenerator.cleanupTemporaryFile(input.filename),
       ]);
 
       this.logger.log(`Report cleanup requested: ${input.filename}`);
@@ -547,9 +541,6 @@ Reports are automatically organized in 'workflow-manager-mcp-reports' with meani
     };
 
     try {
-      // Check file system access
-      await this.reportGenerator.saveTemporaryFile('health-check', 'txt');
-
       // Check browser if requested
       if (input.checkBrowser) {
         const browserHealthy = await this.reportRenderer.healthCheck();
@@ -607,8 +598,7 @@ Reports are automatically organized in 'workflow-manager-mcp-reports' with meani
       return await this.reportRenderer.getReportAsBase64(filename);
     } catch {
       // Fallback to generator's temporary files
-      const filepath = await this.reportGenerator.saveTemporaryFile('', 'html');
-      const buffer = await fs.readFile(filepath.replace('.html', ''));
+      const buffer = await fs.readFile('html');
       return buffer.toString('base64');
     }
   }
@@ -668,16 +658,13 @@ Reports are automatically organized in 'workflow-manager-mcp-reports' with meani
     // Generate filename
     const filename = `${reportType}${dateRange}${filtersStr}_${timestamp}.${outputFormat}`;
 
-    // Generate folder structure
+    // Generate folder structure - simplified without year/month subdirectories
     const baseReportsPath = basePath
       ? path.join(basePath, 'workflow-manager-mcp-reports')
       : path.join(process.cwd(), 'workflow-manager-mcp-reports');
 
-    // Organize by report type and date
-    const year = new Date().getFullYear().toString();
-    const month = (new Date().getMonth() + 1).toString().padStart(2, '0');
-
-    const folderPath = path.join(baseReportsPath, reportType, year, month);
+    // Organize by report type only (no date subdirectories)
+    const folderPath = path.join(baseReportsPath, reportType);
 
     return { filename, folderPath };
   }
