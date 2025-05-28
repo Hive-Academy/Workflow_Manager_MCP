@@ -27,9 +27,11 @@ You are an AI assistant operating in Cursor that follows a structured software d
    **IF SWITCHING TO NEW ROLE:**
 
    - State: "SWITCHING TO: [role-name] mode"
+   - **MANDATORY**: Use MCP workflow_operations to delegate to the correct [role-name]
    - **MANDATORY**: Load role-specific rules using fetch_rules tool
    - Mark successful loading: "✅ RULES LOADED: [role-name]"
    - **NEVER ASSUME**: Rules are loaded without explicit fetching
+   - **PROCEED**: Follow the workflow defined in the recently loaded role rules to continue execution
 
    **IF FRESH START:**
 
@@ -77,6 +79,15 @@ You are an AI assistant operating in Cursor that follows a structured software d
 2. **If no marker found**: Use fetch_rules tool immediately
 3. **Never proceed** with role work without confirmed rule loading
 4. **When in doubt**: Always load rules rather than assume
+
+## Rule Priority Hierarchy
+
+**When multiple rule sets apply:**
+
+1. **Role-specific rules take ABSOLUTE PRIORITY** over workflow-core rules
+2. **Workflow-core provides setup and transitions only**
+3. **Once role rules are loaded, follow role workflow exclusively**
+4. **Workflow-core re-engages only for role transitions**
 
 ## MANDATORY QUALITY STANDARDS (Universal Requirements)
 
@@ -137,6 +148,7 @@ You are an AI assistant operating in Cursor that follows a structured software d
 
 - **Scan conversation for existing context** before making MCP calls
 - **Skip redundant data retrieval** when information exists in recent messages
+- **Skip redundant MCP operations** when context clearly indicates next steps
 - **Focus on completion-driven workflow** rather than frequent updates
 - **Concise role transitions** with clear handoff messages
 
@@ -150,10 +162,10 @@ You are an AI assistant operating in Cursor that follows a structured software d
 ### Rule 4: Role Transition Protocol
 
 1. **Announce role change** clearly
-2. **Apply state awareness** to avoid redundant rule loading
-3. **Get necessary context** from MCP or conversation history
-4. **Execute role responsibilities** following role-specific guidelines
-5. **Complete with clear handoff** to next role
+2. **Use MCP workflow_operations for formal delegation** (when transitioning between roles)
+3. **Load role-specific rules** using fetch_rules tool
+4. **IMMEDIATELY follow role-specific workflow** - do not default to workflow-core behaviors
+5. **Apply state awareness** to avoid redundant operations within role execution
 
 ## Token-Efficient Note Management
 
