@@ -1,11 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { QueryWorkflowStatusSchema, QueryWorkflowStatusInput } from './schemas/query-workflow-status.schema';
+import {
+  QueryWorkflowStatusSchema,
+  QueryWorkflowStatusInput,
+} from './schemas/query-workflow-status.schema';
 
 /**
  * Query Workflow Status Service
- * 
+ *
  * Pre-configured delegation and workflow status queries.
  */
 @Injectable()
@@ -52,24 +55,39 @@ Pre-configured delegation and workflow status queries.
       }
 
       return {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({
-            success: true,
-            data: result,
-            metadata: { queryType: input.queryType, taskId: input.taskId }
-          }, null, 2)
-        }]
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                success: true,
+                data: result,
+                metadata: { queryType: input.queryType, taskId: input.taskId },
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     } catch (error: any) {
       return {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({
-            success: false,
-            error: { message: error.message, code: 'QUERY_WORKFLOW_STATUS_FAILED' }
-          }, null, 2)
-        }]
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                success: false,
+                error: {
+                  message: error.message,
+                  code: 'QUERY_WORKFLOW_STATUS_FAILED',
+                },
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     }
   }
@@ -87,25 +105,27 @@ Pre-configured delegation and workflow status queries.
         priority: true,
         creationDate: true,
         completionDate: true,
-      }
+      },
     });
   }
 
   private async getDelegationHistory(input: QueryWorkflowStatusInput) {
-    if (!input.taskId) throw new Error('TaskId required for delegation_history query');
+    if (!input.taskId)
+      throw new Error('TaskId required for delegation_history query');
 
     return await this.prisma.delegationRecord.findMany({
       where: { taskId: input.taskId },
-      orderBy: { delegationTimestamp: 'asc' }
+      orderBy: { delegationTimestamp: 'asc' },
     });
   }
 
   private async getWorkflowTransitions(input: QueryWorkflowStatusInput) {
-    if (!input.taskId) throw new Error('TaskId required for workflow_transitions query');
+    if (!input.taskId)
+      throw new Error('TaskId required for workflow_transitions query');
 
     return await this.prisma.workflowTransition.findMany({
       where: { taskId: input.taskId },
-      orderBy: { transitionTimestamp: 'asc' }
+      orderBy: { transitionTimestamp: 'asc' },
     });
   }
 
@@ -124,7 +144,7 @@ Pre-configured delegation and workflow status queries.
         priority: true,
         creationDate: true,
       },
-      orderBy: { creationDate: 'desc' }
+      orderBy: { creationDate: 'desc' },
     });
   }
 }

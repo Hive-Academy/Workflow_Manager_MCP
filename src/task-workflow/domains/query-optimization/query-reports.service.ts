@@ -1,11 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { QueryReportsSchema, QueryReportsInput } from './schemas/query-reports.schema';
+import {
+  QueryReportsSchema,
+  QueryReportsInput,
+} from './schemas/query-reports.schema';
 
 /**
  * Query Reports Service
- * 
+ *
  * Pre-configured report queries for all report types with evidence relationships.
  */
 @Injectable()
@@ -38,7 +41,16 @@ Pre-configured report queries for all report types with evidence relationships.
   })
   async queryReports(input: QueryReportsInput): Promise<any> {
     try {
-      const { taskId, reportTypes, mode, includeComments, includeEvidence, reviewStatus, researchedBy, reviewedBy } = input;
+      const {
+        taskId,
+        reportTypes,
+        mode,
+        includeComments,
+        includeEvidence,
+        reviewStatus,
+        researchedBy,
+        reviewedBy,
+      } = input;
 
       const reports: any = {};
 
@@ -47,21 +59,26 @@ Pre-configured report queries for all report types with evidence relationships.
         const researchWhere: any = { taskId };
         if (researchedBy) researchWhere.researchedBy = researchedBy;
 
-        const researchInclude: any = {};
-        if (includeComments) researchInclude.comments = { orderBy: { createdAt: 'desc' } };
+        if (mode === 'summary') {
+          reports.research = await this.prisma.researchReport.findMany({
+            where: researchWhere,
+            select: {
+              taskId: true,
+              findings: true,
+              createdAt: true,
+            },
+          });
+        } else {
+          const researchInclude: any = {};
+          if (includeComments && mode === 'evidence_focused') {
+            // Note: comments are not directly related to research, get separately
+          }
 
-        const researchSelect = mode === 'summary' ? {
-          taskId: true,
-          findings: true,
-          researchedBy: true,
-          researchDate: true,
-        } : undefined;
-
-        reports.research = await this.prisma.researchReport.findMany({
-          where: researchWhere,
-          include: mode !== 'summary' ? researchInclude : undefined,
-          select: researchSelect,
-        });
+          reports.research = await this.prisma.researchReport.findMany({
+            where: researchWhere,
+            include: researchInclude,
+          });
+        }
       }
 
       // Code review reports
@@ -70,32 +87,39 @@ Pre-configured report queries for all report types with evidence relationships.
         if (reviewStatus) reviewWhere.status = reviewStatus;
         if (reviewedBy) reviewWhere.reviewedBy = reviewedBy;
 
-        const reviewSelect = mode === 'summary' ? {
-          taskId: true,
-          status: true,
-          qualityRating: true,
-          reviewedBy: true,
-          reviewDate: true,
-        } : undefined;
-
-        reports.codeReview = await this.prisma.codeReviewReport.findMany({
-          where: reviewWhere,
-          select: reviewSelect,
-        });
+        if (mode === 'summary') {
+          reports.codeReview = await this.prisma.codeReview.findMany({
+            where: reviewWhere,
+            select: {
+              taskId: true,
+              status: true,
+              summary: true,
+              createdAt: true,
+            },
+          });
+        } else {
+          reports.codeReview = await this.prisma.codeReview.findMany({
+            where: reviewWhere,
+          });
+        }
       }
 
       // Completion reports
       if (reportTypes.includes('completion')) {
-        const completionSelect = mode === 'summary' ? {
-          taskId: true,
-          summary: true,
-          completionDate: true,
-        } : undefined;
-
-        reports.completion = await this.prisma.completionReport.findMany({
-          where: { taskId },
-          select: completionSelect,
-        });
+        if (mode === 'summary') {
+          reports.completion = await this.prisma.completionReport.findMany({
+            where: { taskId },
+            select: {
+              taskId: true,
+              summary: true,
+              createdAt: true,
+            },
+          });
+        } else {
+          reports.completion = await this.prisma.completionReport.findMany({
+            where: { taskId },
+          });
+        }
       }
 
       // Evidence gathering for evidence_focused mode
@@ -103,18 +127,18 @@ Pre-configured report queries for all report types with evidence relationships.
         reports.evidence = {
           delegations: await this.prisma.delegationRecord.findMany({
             where: { taskId },
-            orderBy: { delegationTimestamp: 'desc' }
+            orderBy: { delegationTimestamp: 'desc' },
           }),
           transitions: await this.prisma.workflowTransition.findMany({
             where: { taskId },
-            orderBy: { transitionTimestamp: 'desc' }
-          })
+            orderBy: { transitionTimestamp: 'desc' },
+          }),
         };
 
         if (includeComments) {
           reports.evidence.comments = await this.prisma.comment.findMany({
             where: { taskId },
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
           });
         }
       }
@@ -122,34 +146,49 @@ Pre-configured report queries for all report types with evidence relationships.
       // Summary stats
       const summary = {
         taskId,
-        reportTypes: reportTypes.filter(type => reports[type === 'code_review' ? 'codeReview' : type]?.length > 0),
+        reportTypes: reportTypes.filter(
+          (type) =>
+            reports[type === 'code_review' ? 'codeReview' : type]?.length > 0,
+        ),
         mode,
         totals: {
           research: reports.research?.length || 0,
           codeReview: reports.codeReview?.length || 0,
           completion: reports.completion?.length || 0,
-        }
+        },
       };
 
       return {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({
-            success: true,
-            data: { summary, reports },
-            metadata: { taskId, mode, reportTypes }
-          }, null, 2)
-        }]
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                success: true,
+                data: { summary, reports },
+                metadata: { taskId, mode, reportTypes },
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     } catch (error: any) {
       return {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({
-            success: false,
-            error: { message: error.message, code: 'QUERY_REPORTS_FAILED' }
-          }, null, 2)
-        }]
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                success: false,
+                error: { message: error.message, code: 'QUERY_REPORTS_FAILED' },
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     }
   }

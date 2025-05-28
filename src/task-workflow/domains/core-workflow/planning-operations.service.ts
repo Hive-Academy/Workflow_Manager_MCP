@@ -75,7 +75,7 @@ Implementation planning and batch subtask management.
           result = await this.getBatch(input);
           break;
         default:
-          throw new Error(`Unknown operation: ${input.operation}`);
+          throw new Error(`Unknown operation: ${String(input.operation)}`);
       }
 
       const responseTime = performance.now() - startTime;
@@ -100,7 +100,7 @@ Implementation planning and batch subtask management.
             ),
           },
         ],
-      };
+      } as const;
     } catch (error: any) {
       this.logger.error(`Planning operation failed:`, error);
 
@@ -159,27 +159,56 @@ Implementation planning and batch subtask management.
       throw new Error('Plan data is required for update');
     }
 
-    const whereClause = planId ? { id: planId } : { taskId };
-
-    const plan = await this.prisma.implementationPlan.update({
-      where: whereClause,
-      data: {
-        ...(planData.overview && { overview: planData.overview }),
-        ...(planData.approach && { approach: planData.approach }),
-        ...(planData.technicalDecisions && {
-          technicalDecisions: planData.technicalDecisions,
-        }),
-        ...(planData.filesToModify && {
-          filesToModify: planData.filesToModify,
-        }),
-        ...(planData.createdBy && { createdBy: planData.createdBy }),
-      },
-      include: {
-        subtasks: {
-          orderBy: { sequenceNumber: 'asc' },
+    let plan;
+    if (planId) {
+      plan = await this.prisma.implementationPlan.update({
+        where: { id: planId },
+        data: {
+          ...(planData.overview && { overview: planData.overview }),
+          ...(planData.approach && { approach: planData.approach }),
+          ...(planData.technicalDecisions && {
+            technicalDecisions: planData.technicalDecisions,
+          }),
+          ...(planData.filesToModify && {
+            filesToModify: planData.filesToModify,
+          }),
+          ...(planData.createdBy && { createdBy: planData.createdBy }),
         },
-      },
-    });
+        include: {
+          subtasks: {
+            orderBy: { sequenceNumber: 'asc' },
+          },
+        },
+      });
+    } else {
+      const existingPlan = await this.prisma.implementationPlan.findFirst({
+        where: { taskId },
+      });
+
+      if (!existingPlan) {
+        throw new Error(`Implementation plan not found for task ${taskId}`);
+      }
+
+      plan = await this.prisma.implementationPlan.update({
+        where: { id: existingPlan.id },
+        data: {
+          ...(planData.overview && { overview: planData.overview }),
+          ...(planData.approach && { approach: planData.approach }),
+          ...(planData.technicalDecisions && {
+            technicalDecisions: planData.technicalDecisions,
+          }),
+          ...(planData.filesToModify && {
+            filesToModify: planData.filesToModify,
+          }),
+          ...(planData.createdBy && { createdBy: planData.createdBy }),
+        },
+        include: {
+          subtasks: {
+            orderBy: { sequenceNumber: 'asc' },
+          },
+        },
+      });
+    }
 
     return plan;
   }
@@ -209,22 +238,23 @@ Implementation planning and batch subtask management.
 
     // Group subtasks by batch if included
     if (includeBatches && plan.subtasks) {
-      const batches = plan.subtasks.reduce((acc: any, subtask: any) => {
+      const batchMap: Record<string, any> = {};
+
+      plan.subtasks.forEach((subtask: any) => {
         const batchId = subtask.batchId || 'no-batch';
-        if (!acc[batchId]) {
-          acc[batchId] = {
+        if (!batchMap[batchId]) {
+          batchMap[batchId] = {
             batchId,
             batchTitle: subtask.batchTitle || 'Untitled Batch',
             subtasks: [],
           };
         }
-        acc[batchId].subtasks.push(subtask);
-        return acc;
-      }, {});
+        batchMap[batchId].subtasks.push(subtask);
+      });
 
       return {
         ...plan,
-        batches: Object.values(batches),
+        batches: Object.values(batchMap),
       };
     }
 

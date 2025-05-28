@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-// Task Operations Schema - Clear, focused parameters for task management
-export const TaskOperationsSchema = z.object({
+// Base schema for all operations
+const BaseTaskOperationsSchema = z.object({
   operation: z.enum(['create', 'update', 'get', 'list']),
 
   // For create/update operations
@@ -51,11 +51,32 @@ export const TaskOperationsSchema = z.object({
     .optional(),
 
   // For filtering/querying
-  taskId: z.string().optional(),
   status: z.string().optional(),
   priority: z.string().optional(),
   includeDescription: z.boolean().default(true),
   includeAnalysis: z.boolean().default(false),
 });
+
+// Discriminated union for operations that need taskId vs those that don't
+export const TaskOperationsSchema = z.discriminatedUnion('operation', [
+  // Operations that require taskId
+  BaseTaskOperationsSchema.extend({
+    operation: z.literal('get'),
+    taskId: z.string(),
+  }),
+  BaseTaskOperationsSchema.extend({
+    operation: z.literal('update'),
+    taskId: z.string(),
+  }),
+  // Operations that don't require taskId
+  BaseTaskOperationsSchema.extend({
+    operation: z.literal('create'),
+    taskId: z.string().optional(),
+  }),
+  BaseTaskOperationsSchema.extend({
+    operation: z.literal('list'),
+    taskId: z.string().optional(),
+  }),
+]);
 
 export type TaskOperationsInput = z.infer<typeof TaskOperationsSchema>;

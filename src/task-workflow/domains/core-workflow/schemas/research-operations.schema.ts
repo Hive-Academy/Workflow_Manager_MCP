@@ -15,14 +15,11 @@ export const ResearchOperationsSchema = z.object({
   // For research operations
   researchData: z
     .object({
+      title: z.string().optional(),
+      summary: z.string().optional(),
       findings: z.string(),
       recommendations: z.string().optional(),
-      investigationSummary: z.string().optional(),
-      technologyOptions: z.array(z.string()).optional(),
-      implementationApproaches: z.array(z.string()).optional(),
-      riskAssessment: z.string().optional(),
-      resourceRequirements: z.string().optional(),
-      researchedBy: z.string(),
+      references: z.array(z.string()).optional(),
     })
     .optional(),
 
@@ -30,18 +27,13 @@ export const ResearchOperationsSchema = z.object({
   commentData: z
     .object({
       content: z.string(),
-      author: z.string(),
-      contextType: z
-        .enum(['general', 'technical', 'business', 'clarification'])
-        .default('general'),
+      author: z.string(), // Will be mapped to 'mode' field in database
     })
     .optional(),
 
   // For querying
   includeComments: z.boolean().default(true),
-  commentType: z
-    .enum(['general', 'technical', 'business', 'clarification'])
-    .optional(),
+  commentType: z.string().optional(), // Maps to 'mode' field
 });
 
 export type ResearchOperationsInput = z.infer<typeof ResearchOperationsSchema>;
