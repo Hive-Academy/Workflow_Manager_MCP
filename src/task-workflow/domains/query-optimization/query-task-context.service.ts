@@ -1,11 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { QueryTaskContextSchema, QueryTaskContextInput } from './schemas/query-task-context.schema';
+import {
+  QueryTaskContextSchema,
+  QueryTaskContextInput,
+} from './schemas/query-task-context.schema';
 
 /**
  * Query Task Context Service
- * 
+ *
  * Pre-configured task context queries with comprehensive relationships.
  * Eliminates complex include/select decisions.
  */
@@ -40,11 +43,20 @@ Pre-configured task context retrieval with comprehensive relationships.
   })
   async queryTaskContext(input: QueryTaskContextInput): Promise<any> {
     try {
-      const { taskId, includeLevel, includePlans, includeSubtasks, includeAnalysis, includeComments, subtaskStatus, batchId } = input;
+      const {
+        taskId,
+        includeLevel,
+        includePlans,
+        includeSubtasks,
+        includeAnalysis,
+        includeComments,
+        subtaskStatus,
+        batchId,
+      } = input;
 
       // Build include based on level
       const include: any = {};
-      
+
       // Always include description
       include.taskDescription = true;
 
@@ -56,23 +68,33 @@ Pre-configured task context retrieval with comprehensive relationships.
 
           include.implementationPlans = {
             include: {
-              subtasks: includeSubtasks ? {
-                where: Object.keys(subtaskWhere).length > 0 ? subtaskWhere : undefined,
-                orderBy: { sequenceNumber: 'asc' }
-              } : false
-            }
+              subtasks: includeSubtasks
+                ? {
+                    where:
+                      Object.keys(subtaskWhere).length > 0
+                        ? subtaskWhere
+                        : undefined,
+                    orderBy: { sequenceNumber: 'asc' },
+                  }
+                : false,
+            },
           };
         }
       }
 
       if (includeLevel === 'comprehensive') {
         if (includeAnalysis) include.codebaseAnalysis = true;
-        if (includeComments) include.comments = { orderBy: { createdAt: 'desc' } };
+        if (includeComments)
+          include.comments = { orderBy: { createdAt: 'desc' } };
         include.researchReports = { include: { comments: includeComments } };
         include.codeReviewReports = true;
         include.completionReports = true;
-        include.delegationRecords = { orderBy: { delegationTimestamp: 'desc' } };
-        include.workflowTransitions = { orderBy: { transitionTimestamp: 'desc' } };
+        include.delegationRecords = {
+          orderBy: { delegationTimestamp: 'desc' },
+        };
+        include.workflowTransitions = {
+          orderBy: { transitionTimestamp: 'desc' },
+        };
       }
 
       const task = await this.prisma.task.findUnique({
@@ -94,7 +116,7 @@ Pre-configured task context retrieval with comprehensive relationships.
                 acc[batch] = {
                   batchId: batch,
                   batchTitle: subtask.batchTitle || 'Untitled Batch',
-                  subtasks: []
+                  subtasks: [],
                 };
               }
               acc[batch].subtasks.push(subtask);
@@ -107,28 +129,43 @@ Pre-configured task context retrieval with comprehensive relationships.
       }
 
       return {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({
-            success: true,
-            data: task,
-            metadata: {
-              includeLevel,
-              relationships: Object.keys(include),
-              taskId
-            }
-          }, null, 2)
-        }]
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                success: true,
+                data: task,
+                metadata: {
+                  includeLevel,
+                  relationships: Object.keys(include),
+                  taskId,
+                },
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     } catch (error: any) {
       return {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({
-            success: false,
-            error: { message: error.message, code: 'QUERY_TASK_CONTEXT_FAILED' }
-          }, null, 2)
-        }]
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                success: false,
+                error: {
+                  message: error.message,
+                  code: 'QUERY_TASK_CONTEXT_FAILED',
+                },
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     }
   }

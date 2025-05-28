@@ -1,11 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { ResearchOperationsSchema, ResearchOperationsInput } from './schemas/research-operations.schema';
+import {
+  ResearchOperationsSchema,
+  ResearchOperationsInput,
+} from './schemas/research-operations.schema';
 
 /**
  * Research Operations Service
- * 
+ *
  * Focused service for research reports and comment management.
  * Clear operations for knowledge gathering and communication.
  */
@@ -67,7 +70,7 @@ Research reports and communication management.
           result = await this.getComments(input);
           break;
         default:
-          throw new Error(`Unknown operation: ${input.operation}`);
+          throw new Error(`Unknown operation: ${String(input.operation)}`);
       }
 
       const responseTime = performance.now() - startTime;
@@ -76,15 +79,19 @@ Research reports and communication management.
         content: [
           {
             type: 'text',
-            text: JSON.stringify({
-              success: true,
-              data: result,
-              metadata: {
-                operation: input.operation,
-                taskId: input.taskId,
-                responseTime: Math.round(responseTime),
+            text: JSON.stringify(
+              {
+                success: true,
+                data: result,
+                metadata: {
+                  operation: input.operation,
+                  taskId: input.taskId,
+                  responseTime: Math.round(responseTime),
+                },
               },
-            }, null, 2),
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -95,14 +102,18 @@ Research reports and communication management.
         content: [
           {
             type: 'text',
-            text: JSON.stringify({
-              success: false,
-              error: {
-                message: error.message,
-                code: 'RESEARCH_OPERATION_FAILED',
-                operation: input.operation,
+            text: JSON.stringify(
+              {
+                success: false,
+                error: {
+                  message: error.message,
+                  code: 'RESEARCH_OPERATION_FAILED',
+                  operation: input.operation,
+                },
               },
-            }, null, 2),
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -119,20 +130,11 @@ Research reports and communication management.
     const research = await this.prisma.researchReport.create({
       data: {
         taskId,
+        title: researchData.title || 'Research Report',
+        summary: researchData.summary || '',
         findings: researchData.findings,
         recommendations: researchData.recommendations || '',
-        investigationSummary: researchData.investigationSummary || '',
-        technologyOptions: researchData.technologyOptions || [],
-        implementationApproaches: researchData.implementationApproaches || [],
-        riskAssessment: researchData.riskAssessment || '',
-        resourceRequirements: researchData.resourceRequirements || '',
-        researchedBy: researchData.researchedBy,
-        researchDate: new Date(),
-      },
-      include: {
-        comments: {
-          orderBy: { createdAt: 'desc' },
-        },
+        references: researchData.references || [],
       },
     });
 
@@ -146,22 +148,27 @@ Research reports and communication management.
       throw new Error('Research data is required for update');
     }
 
-    const research = await this.prisma.researchReport.update({
+    // Find the research report by taskId first
+    const existingResearch = await this.prisma.researchReport.findFirst({
       where: { taskId },
+    });
+
+    if (!existingResearch) {
+      throw new Error(`Research report not found for task ${taskId}`);
+    }
+
+    const research = await this.prisma.researchReport.update({
+      where: { id: existingResearch.id },
       data: {
+        ...(researchData.title && { title: researchData.title }),
+        ...(researchData.summary && { summary: researchData.summary }),
         ...(researchData.findings && { findings: researchData.findings }),
-        ...(researchData.recommendations && { recommendations: researchData.recommendations }),
-        ...(researchData.investigationSummary && { investigationSummary: researchData.investigationSummary }),
-        ...(researchData.technologyOptions && { technologyOptions: researchData.technologyOptions }),
-        ...(researchData.implementationApproaches && { implementationApproaches: researchData.implementationApproaches }),
-        ...(researchData.riskAssessment && { riskAssessment: researchData.riskAssessment }),
-        ...(researchData.resourceRequirements && { resourceRequirements: researchData.resourceRequirements }),
-        ...(researchData.researchedBy && { researchedBy: researchData.researchedBy }),
-      },
-      include: {
-        comments: {
-          orderBy: { createdAt: 'desc' },
-        },
+        ...(researchData.recommendations && {
+          recommendations: researchData.recommendations,
+        }),
+        ...(researchData.references && {
+          references: researchData.references,
+        }),
       },
     });
 
@@ -171,20 +178,25 @@ Research reports and communication management.
   private async getResearch(input: ResearchOperationsInput): Promise<any> {
     const { taskId, includeComments } = input;
 
-    const include: any = {};
-    if (includeComments) {
-      include.comments = {
-        orderBy: { createdAt: 'desc' },
-      };
-    }
-
-    const research = await this.prisma.researchReport.findUnique({
+    const research = await this.prisma.researchReport.findFirst({
       where: { taskId },
-      include,
     });
 
     if (!research) {
       throw new Error(`Research report not found for task ${taskId}`);
+    }
+
+    // If comments requested, get them separately since they're not directly related
+    if (includeComments) {
+      const comments = await this.prisma.comment.findMany({
+        where: { taskId },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      return {
+        ...research,
+        comments,
+      };
     }
 
     return research;
@@ -201,9 +213,7 @@ Research reports and communication management.
       data: {
         taskId,
         content: commentData.content,
-        author: commentData.author,
-        contextType: commentData.contextType,
-        createdAt: new Date(),
+        mode: commentData.author || 'system', // Map author to mode field
       },
     });
 
@@ -215,7 +225,7 @@ Research reports and communication management.
 
     const where: any = { taskId };
     if (commentType) {
-      where.contextType = commentType;
+      where.mode = commentType; // Map contextType to mode field
     }
 
     const comments = await this.prisma.comment.findMany({
@@ -225,11 +235,14 @@ Research reports and communication management.
 
     const summary = {
       total: comments.length,
-      byType: comments.reduce((acc: any, comment: any) => {
-        acc[comment.contextType] = (acc[comment.contextType] || 0) + 1;
-        return acc;
-      }, {}),
+      byType: {} as Record<string, number>,
     };
+
+    // Build summary properly typed
+    comments.forEach((comment) => {
+      const type = comment.mode;
+      summary.byType[type] = (summary.byType[type] || 0) + 1;
+    });
 
     return {
       summary,

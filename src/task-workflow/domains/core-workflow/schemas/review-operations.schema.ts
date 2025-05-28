@@ -21,12 +21,11 @@ export const ReviewOperationsSchema = z.object({
         'NEEDS_CHANGES',
       ]),
       summary: z.string(),
-      qualityRating: z.number().min(1).max(10).optional(),
-      securityValidation: z.string().optional(),
-      performanceAssessment: z.string().optional(),
-      codeQualityIssues: z.array(z.string()).optional(),
-      recommendations: z.array(z.string()).optional(),
-      reviewedBy: z.string(),
+      strengths: z.string().optional(),
+      issues: z.string().optional(),
+      acceptanceCriteriaVerification: z.record(z.any()).optional(),
+      manualTestingResults: z.string().optional(),
+      requiredChanges: z.string().optional(),
     })
     .optional(),
 

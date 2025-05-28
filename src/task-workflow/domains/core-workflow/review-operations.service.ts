@@ -70,7 +70,9 @@ Code review and completion report management.
           result = await this.getCompletion(input);
           break;
         default:
-          throw new Error(`Unknown operation: ${input.operation}`);
+          throw new Error(
+            `Unknown operation: ${String((input as any).operation)}`,
+          );
       }
 
       const responseTime = performance.now() - startTime;
@@ -127,19 +129,17 @@ Code review and completion report management.
       throw new Error('Review data is required for creation');
     }
 
-    const review = await this.prisma.codeReviewReport.create({
+    const review = await this.prisma.codeReview.create({
       data: {
         taskId,
         status: reviewData.status,
         summary: reviewData.summary,
-        qualityRating: reviewData.qualityRating || 5,
-        securityValidation: reviewData.securityValidation || 'Not assessed',
-        performanceAssessment:
-          reviewData.performanceAssessment || 'Not assessed',
-        codeQualityIssues: reviewData.codeQualityIssues || [],
-        recommendations: reviewData.recommendations || [],
-        reviewedBy: reviewData.reviewedBy,
-        reviewDate: new Date(),
+        strengths: reviewData.strengths || '',
+        issues: reviewData.issues || '',
+        acceptanceCriteriaVerification:
+          reviewData.acceptanceCriteriaVerification || {},
+        manualTestingResults: reviewData.manualTestingResults || '',
+        requiredChanges: reviewData.requiredChanges || null,
       },
     });
 
@@ -153,27 +153,32 @@ Code review and completion report management.
       throw new Error('Review data is required for update');
     }
 
-    const review = await this.prisma.codeReviewReport.update({
+    // Find the code review by taskId first
+    const existingReview = await this.prisma.codeReview.findFirst({
       where: { taskId },
+    });
+
+    if (!existingReview) {
+      throw new Error(`Code review not found for task ${taskId}`);
+    }
+
+    const review = await this.prisma.codeReview.update({
+      where: { id: existingReview.id },
       data: {
         ...(reviewData.status && { status: reviewData.status }),
         ...(reviewData.summary && { summary: reviewData.summary }),
-        ...(reviewData.qualityRating && {
-          qualityRating: reviewData.qualityRating,
+        ...(reviewData.strengths && { strengths: reviewData.strengths }),
+        ...(reviewData.issues && { issues: reviewData.issues }),
+        ...(reviewData.acceptanceCriteriaVerification && {
+          acceptanceCriteriaVerification:
+            reviewData.acceptanceCriteriaVerification,
         }),
-        ...(reviewData.securityValidation && {
-          securityValidation: reviewData.securityValidation,
+        ...(reviewData.manualTestingResults && {
+          manualTestingResults: reviewData.manualTestingResults,
         }),
-        ...(reviewData.performanceAssessment && {
-          performanceAssessment: reviewData.performanceAssessment,
+        ...(reviewData.requiredChanges && {
+          requiredChanges: reviewData.requiredChanges,
         }),
-        ...(reviewData.codeQualityIssues && {
-          codeQualityIssues: reviewData.codeQualityIssues,
-        }),
-        ...(reviewData.recommendations && {
-          recommendations: reviewData.recommendations,
-        }),
-        ...(reviewData.reviewedBy && { reviewedBy: reviewData.reviewedBy }),
       },
     });
 
@@ -183,7 +188,7 @@ Code review and completion report management.
   private async getReview(input: ReviewOperationsInput): Promise<any> {
     const { taskId, includeDetails } = input;
 
-    const review = await this.prisma.codeReviewReport.findUnique({
+    const review = await this.prisma.codeReview.findFirst({
       where: { taskId },
     });
 
@@ -196,9 +201,7 @@ Code review and completion report management.
       return {
         taskId: review.taskId,
         status: review.status,
-        qualityRating: review.qualityRating,
-        reviewedBy: review.reviewedBy,
-        reviewDate: review.reviewDate,
+        summary: review.summary,
       };
     }
 
@@ -220,8 +223,6 @@ Code review and completion report management.
         acceptanceCriteriaVerification:
           completionData.acceptanceCriteriaVerification || {},
         delegationSummary: completionData.delegationSummary || '',
-        qualityValidation: completionData.qualityValidation || '',
-        completionDate: new Date(),
       },
     });
 
@@ -231,7 +232,7 @@ Code review and completion report management.
   private async getCompletion(input: ReviewOperationsInput): Promise<any> {
     const { taskId, includeDetails } = input;
 
-    const completion = await this.prisma.completionReport.findUnique({
+    const completion = await this.prisma.completionReport.findFirst({
       where: { taskId },
     });
 
@@ -244,7 +245,7 @@ Code review and completion report management.
       return {
         taskId: completion.taskId,
         summary: completion.summary,
-        completionDate: completion.completionDate,
+        createdAt: completion.createdAt,
       };
     }
 

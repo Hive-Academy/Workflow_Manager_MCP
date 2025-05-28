@@ -71,7 +71,7 @@ Role-based workflow transitions and delegation management.
           result = await this.handleTransition(input);
           break;
         default:
-          throw new Error(`Unknown operation: ${input.operation}`);
+          throw new Error(`Unknown operation: ${String(input.operation)}`);
       }
 
       const responseTime = performance.now() - startTime;

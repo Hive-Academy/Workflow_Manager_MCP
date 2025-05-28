@@ -47,7 +47,7 @@ Task lifecycle management with clear, focused operations.
 
     try {
       this.logger.debug(`Task Operation: ${input.operation}`, {
-        taskId: input.taskId,
+        taskId: input.taskId ?? 'unknown',
         operation: input.operation,
       });
 
@@ -67,7 +67,10 @@ Task lifecycle management with clear, focused operations.
           result = await this.listTasks(input);
           break;
         default:
-          throw new Error(`Unknown operation: ${input.operation}`);
+          // This should never happen due to Zod validation, but TypeScript needs exhaustive checking
+          throw new Error(
+            `Unknown operation: ${String((input as any).operation)}`,
+          );
       }
 
       const responseTime = performance.now() - startTime;
@@ -76,7 +79,7 @@ Task lifecycle management with clear, focused operations.
         `Task operation completed in ${responseTime.toFixed(2)}ms`,
         {
           operation: input.operation,
-          taskId: input.taskId,
+          taskId: input.taskId ?? 'unknown',
           responseTime,
         },
       );
@@ -91,7 +94,7 @@ Task lifecycle management with clear, focused operations.
                 data: result,
                 metadata: {
                   operation: input.operation,
-                  taskId: input.taskId,
+                  taskId: input.taskId ?? 'unknown',
                   responseTime: Math.round(responseTime),
                 },
               },
@@ -100,7 +103,7 @@ Task lifecycle management with clear, focused operations.
             ),
           },
         ],
-      };
+      } as const;
     } catch (error: any) {
       this.logger.error(`Task operation failed:`, error);
 
