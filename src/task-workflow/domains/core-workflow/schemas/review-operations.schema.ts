@@ -1,0 +1,48 @@
+import { z } from 'zod';
+
+// Review Operations Schema - Code review and completion management
+export const ReviewOperationsSchema = z.object({
+  operation: z.enum([
+    'create_review',
+    'update_review',
+    'get_review',
+    'create_completion',
+    'get_completion',
+  ]),
+
+  taskId: z.string(),
+
+  // For code review operations
+  reviewData: z
+    .object({
+      status: z.enum([
+        'APPROVED',
+        'APPROVED_WITH_RESERVATIONS',
+        'NEEDS_CHANGES',
+      ]),
+      summary: z.string(),
+      qualityRating: z.number().min(1).max(10).optional(),
+      securityValidation: z.string().optional(),
+      performanceAssessment: z.string().optional(),
+      codeQualityIssues: z.array(z.string()).optional(),
+      recommendations: z.array(z.string()).optional(),
+      reviewedBy: z.string(),
+    })
+    .optional(),
+
+  // For completion report operations
+  completionData: z
+    .object({
+      summary: z.string(),
+      filesModified: z.array(z.string()).optional(),
+      acceptanceCriteriaVerification: z.record(z.any()).optional(),
+      delegationSummary: z.string().optional(),
+      qualityValidation: z.string().optional(),
+    })
+    .optional(),
+
+  // For querying
+  includeDetails: z.boolean().default(true),
+});
+
+export type ReviewOperationsInput = z.infer<typeof ReviewOperationsSchema>;
