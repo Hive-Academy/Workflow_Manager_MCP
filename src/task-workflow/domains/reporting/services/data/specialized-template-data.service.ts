@@ -13,6 +13,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import { ReportFilters } from '../../interfaces/report-data.interface';
 import {
   CodeReviewInsightsDataService,
   CodeReviewInsightsTemplateData,
@@ -25,13 +26,15 @@ import {
   DelegationFlowAnalysisDataService,
   DelegationFlowAnalysisTemplateData,
 } from '../../interfaces/templates/delegation-flow-analysis-template.interface';
-import {
-  ImplementationPlanAnalyticsDataService,
-  ImplementationPlanAnalyticsTemplateData,
-} from '../../interfaces/templates/implementation-plan-analytics-template.interface';
+import { ImplementationPlanAnalyticsDataService } from '../../interfaces/templates/implementation-plan-analytics-template.interface';
+import { AdvancedAnalyticsService } from '../analytics/advanced-analytics.service';
+import { PerformanceBenchmarkService } from '../analytics/performance-benchmark.service';
+import { TimeSeriesAnalysisService } from '../analytics/time-series-analysis.service';
 import { CodeReviewDelegationTemplateDataService } from './code-review-delegation-template-data.service';
 import { ComprehensiveTemplateDataService } from './comprehensive-template-data.service';
 import { ImplementationPlanTemplateDataService } from './implementation-plan-template-data.service';
+import { IndividualTaskTemplateDataService } from './individual-task-template-data.service';
+import { ReportDataAccessService } from './report-data-access.service';
 
 @Injectable()
 export class SpecializedTemplateDataService
@@ -47,6 +50,11 @@ export class SpecializedTemplateDataService
     private readonly comprehensiveService: ComprehensiveTemplateDataService,
     private readonly implementationPlanService: ImplementationPlanTemplateDataService,
     private readonly codeReviewDelegationService: CodeReviewDelegationTemplateDataService,
+    private readonly individualTaskService: IndividualTaskTemplateDataService,
+    private readonly advancedAnalytics: AdvancedAnalyticsService,
+    private readonly timeSeriesAnalysis: TimeSeriesAnalysisService,
+    private readonly performanceBenchmark: PerformanceBenchmarkService,
+    private readonly reportDataAccess: ReportDataAccessService,
   ) {}
 
   /**
@@ -67,22 +75,71 @@ export class SpecializedTemplateDataService
   }
 
   /**
-   * Get implementation plan analytics data
-   * Delegates to ImplementationPlanTemplateDataService
+   * Get implementation plan analytics with rich insights
+   * Combines advanced analytics with implementation-specific metrics
    */
   async getImplementationPlanAnalyticsData(
     startDate: Date,
     endDate: Date,
-    filters?: Record<string, string>,
-  ): Promise<ImplementationPlanAnalyticsTemplateData> {
+    filters: Record<string, string>,
+  ): Promise<any> {
     this.logger.debug(
-      'Delegating implementation plan analytics data generation',
+      'Generating implementation plan analytics with rich insights',
     );
-    return this.implementationPlanService.getImplementationPlanAnalyticsData(
+
+    const whereClause = this.reportDataAccess.buildWhereClause(
       startDate,
       endDate,
-      filters,
+      filters as ReportFilters,
     );
+
+    // GET RICH ANALYTICS DATA
+    const [
+      implementationPlanData,
+      advancedMetrics,
+      timeSeriesData,
+      benchmarkData,
+    ] = await Promise.all([
+      this.implementationPlanService.getImplementationPlanAnalyticsData(
+        startDate,
+        endDate,
+        filters,
+      ),
+      this.advancedAnalytics.getImplementationPlanMetrics(whereClause),
+      this.timeSeriesAnalysis.getTimeSeriesMetrics(
+        whereClause,
+        startDate,
+        endDate,
+      ),
+      this.performanceBenchmark.getPerformanceBenchmarks(
+        whereClause,
+        startDate,
+        endDate,
+      ),
+    ]);
+
+    // ENHANCE with rich analytics
+    return {
+      ...implementationPlanData,
+      // Add rich analytics insights
+      advancedInsights: {
+        planEfficiency: advancedMetrics.planEfficiencyScore || 0,
+        estimationAccuracy: advancedMetrics.estimationAccuracy || 0,
+        batchCompletionRate: advancedMetrics.batchCompletionRate || 0,
+        avgBatchesPerPlan: advancedMetrics.avgBatchesPerPlan || 0,
+      },
+      trends: {
+        weeklyTrends: timeSeriesData.weeklyTrends || [],
+        performanceTrends: timeSeriesData.performanceTrends || [],
+        historicalPatterns: timeSeriesData.historicalPatterns || [],
+      },
+      benchmarks: {
+        teamBenchmarks: benchmarkData.teamBenchmarks || [],
+        performanceRankings: benchmarkData.performanceRankings || [],
+        benchmarkInsights: benchmarkData.benchmarkInsights || [],
+      },
+      generatedAt: new Date(),
+    };
   }
 
   /**
