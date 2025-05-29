@@ -5,13 +5,7 @@ import { BatchStatusUpdatesService } from './batch-status-updates.service';
 
 @Module({
   imports: [PrismaModule],
-  providers: [
-    BatchSubtaskOperationsService,
-    BatchStatusUpdatesService,
-  ],
-  exports: [
-    BatchSubtaskOperationsService,
-    BatchStatusUpdatesService,
-  ],
+  providers: [BatchSubtaskOperationsService, BatchStatusUpdatesService],
+  exports: [BatchSubtaskOperationsService, BatchStatusUpdatesService],
 })
 export class BatchOperationsModule {}

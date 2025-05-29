@@ -308,7 +308,9 @@ Bulk subtask management by batchId with efficient operations.
     };
   }
 
-  private async completeBatch(input: BatchSubtaskOperationsInput): Promise<any> {
+  private async completeBatch(
+    input: BatchSubtaskOperationsInput,
+  ): Promise<any> {
     const { taskId, batchId, completionData } = input;
 
     if (!completionData) {
@@ -349,8 +351,10 @@ Bulk subtask management by batchId with efficient operations.
     };
   }
 
-  private calculateStatusBreakdown(subtasks: any[]): Record<string, number> {
-    return subtasks.reduce((breakdown, subtask) => {
+  private calculateStatusBreakdown(
+    subtasks: { status: string }[],
+  ): Record<string, number> {
+    return subtasks.reduce<Record<string, number>>((breakdown, subtask) => {
       const status = subtask.status;
       breakdown[status] = (breakdown[status] || 0) + 1;
       return breakdown;

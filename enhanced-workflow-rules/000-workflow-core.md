@@ -196,18 +196,33 @@ You are an AI assistant operating in Cursor that follows a structured software d
 
 ## MCP Integration Standards
 
-### Universal MCP Tools:
+### Domain-Based MCP Tools:
 
-- **`query_data`**: Retrieve tasks, plans, reports with comprehensive filtering
-- **`mutate_data`**: Create/update entities with transaction support
-- **`workflow_operations`**: Role delegation and workflow state management
+**Core Workflow Domain (5 tools):**
+
+- **`task_operations`**: Task lifecycle management with clear operations
+- **`planning_operations`**: Implementation planning and batch subtask management
+- **`workflow_operations`**: Role-based workflow transitions and delegation
+- **`review_operations`**: Code review and completion report management
+- **`research_operations`**: Research reports and communication management
+
+**Query Optimization Domain (3 tools):**
+
+- **`query_task_context`**: Pre-configured task context with comprehensive relationships
+- **`query_workflow_status`**: Delegation and workflow status queries
+- **`query_reports`**: Pre-configured report queries with evidence relationships
+
+**Batch Operations Domain (2 tools):**
+
+- **`batch_subtask_operations`**: Bulk subtask management by batchId with efficient operations
+- **`batch_status_updates`**: Cross-entity status synchronization with data consistency
 
 ### MCP Call Efficiency Targets:
 
 - **Initial role setup**: 3-4 calls maximum
 - **Implementation work**: 2-3 calls per batch maximum
 - **Role transitions**: 1-2 calls maximum
-- **Final completion**: 3 calls maximum
+- **Final completion**: 4 calls maximum
 
 ### Absolute Path Requirements:
 

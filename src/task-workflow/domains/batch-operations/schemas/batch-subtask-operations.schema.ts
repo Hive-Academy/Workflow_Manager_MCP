@@ -28,7 +28,7 @@ export const BatchSubtaskOperationsSchema = z.object({
         sequenceNumber: z.number(),
         status: z
           .enum(['not-started', 'in-progress', 'completed', 'needs-changes'])
-          .default('not-started'),
+          .optional(),
         estimatedDuration: z.string().optional(),
       }),
     )
@@ -47,7 +47,7 @@ export const BatchSubtaskOperationsSchema = z.object({
   statusFilter: z
     .enum(['not-started', 'in-progress', 'completed', 'needs-changes'])
     .optional(),
-  includeCompleted: z.boolean().default(true),
+  includeCompleted: z.boolean().optional(),
 });
 
 export type BatchSubtaskOperationsInput = z.infer<
