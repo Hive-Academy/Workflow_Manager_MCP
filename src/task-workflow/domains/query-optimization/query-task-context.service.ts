@@ -86,8 +86,8 @@ Pre-configured task context retrieval with comprehensive relationships.
         if (includeAnalysis) include.codebaseAnalysis = true;
         if (includeComments)
           include.comments = { orderBy: { createdAt: 'desc' } };
-        include.researchReports = { include: { comments: includeComments } };
-        include.codeReviewReports = true;
+        include.researchReports = true;
+        include.codeReviews = true;
         include.completionReports = true;
         include.delegationRecords = {
           orderBy: { delegationTimestamp: 'desc' },
