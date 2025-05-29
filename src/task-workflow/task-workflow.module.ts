@@ -8,14 +8,20 @@ import { PrismaErrorHandlerService } from './utils/prisma-error.handler';
 // Reporting Module - Contains all reporting services and chart generation
 import { ReportingModule } from './domains/reporting/reporting.module';
 
-// Universal Operations Module - Consolidates 40+ MCP tools into 3 powerful tools
-import { UniversalModule } from './domains/universal/universal.module';
+// Domain-Based Tool Modules - Replace universal tools with focused domain modules
+import { CoreWorkflowModule } from './domains/core-workflow/core-workflow.module';
+import { QueryOptimizationModule } from './domains/query-optimization/query-optimization.module';
+import { BatchOperationsModule } from './domains/batch-operations/batch-operations.module';
 
 @Module({
   imports: [
     PrismaModule,
     ReportingModule, // All reporting services are now contained here
-    UniversalModule,
+
+    // Domain-based tool architecture - replaces universal tools
+    CoreWorkflowModule, // Task, Planning, Workflow, Review, Research operations
+    QueryOptimizationModule, // Pre-configured task context, workflow status, and report queries
+    BatchOperationsModule, // Bulk subtask management and cross-entity status synchronization
   ],
   providers: [
     // Utils
@@ -24,7 +30,9 @@ import { UniversalModule } from './domains/universal/universal.module';
   exports: [
     // Export modules for potential external use
     ReportingModule,
-    UniversalModule,
+    CoreWorkflowModule,
+    QueryOptimizationModule,
+    BatchOperationsModule,
   ],
 })
 export class TaskWorkflowModule {}

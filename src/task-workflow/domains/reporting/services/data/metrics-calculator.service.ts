@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 // src/task-workflow/domains/reporting/services/metrics-calculator.service.ts
 
 import { Injectable, Logger } from '@nestjs/common';

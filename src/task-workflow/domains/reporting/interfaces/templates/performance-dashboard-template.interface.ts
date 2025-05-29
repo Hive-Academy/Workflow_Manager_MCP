@@ -145,16 +145,19 @@ export interface PerformanceBottleneck {
  * Real-time system health data
  */
 export interface SystemHealthData {
-  /** Overall system status */
-  status: 'healthy' | 'warning' | 'critical';
-  /** Status message */
-  message: string;
-  /** CPU usage percentage */
-  cpuUsage: number;
-  /** Memory usage percentage */
-  memoryUsage: number;
-  /** Response time in milliseconds */
-  responseTime: number;
+  /** Overall system status (template expects 'overall') */
+  overall: string;
+  /** System uptime percentage (template expects 'uptime') */
+  uptime: number;
+  /** System performance percentage (template expects 'performance') */
+  performance: number;
+
+  /** Additional system health properties */
+  status?: 'healthy' | 'warning' | 'critical';
+  message?: string;
+  cpuUsage?: number;
+  memoryUsage?: number;
+  responseTime?: number;
 }
 
 /**

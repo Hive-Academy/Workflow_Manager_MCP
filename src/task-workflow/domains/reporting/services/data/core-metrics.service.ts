@@ -30,6 +30,32 @@ export class CoreMetricsService {
 
   async getTaskMetrics(whereClause: WhereClause): Promise<TaskMetrics> {
     try {
+      // DEBUG: Log the whereClause and basic counts
+      this.logger.debug('=== CORE METRICS DEBUG ===');
+      this.logger.debug(
+        `Where Clause: ${JSON.stringify(whereClause, null, 2)}`,
+      );
+
+      const allTasksCount = await this.prisma.task.count();
+      const filteredTasksCount = await this.prisma.task.count({
+        where: whereClause,
+      });
+
+      this.logger.debug(
+        `Total tasks in database (no filters): ${allTasksCount}`,
+      );
+      this.logger.debug(`Tasks matching whereClause: ${filteredTasksCount}`);
+
+      // Get sample tasks for debugging
+      const sampleTasks = await this.prisma.task.findMany({
+        take: 3,
+        select: { taskId: true, name: true, creationDate: true, status: true },
+      });
+      this.logger.debug(
+        `Sample tasks: ${JSON.stringify(sampleTasks, null, 2)}`,
+      );
+      this.logger.debug('=== END CORE METRICS DEBUG ===');
+
       const [
         totalTasks,
         completedTasks,
@@ -40,8 +66,12 @@ export class CoreMetricsService {
         completedTasksWithDates,
       ] = await Promise.all([
         this.prisma.task.count({ where: whereClause }),
+        // FIX: Handle case-insensitive status matching for 'completed' vs 'Completed'
         this.prisma.task.count({
-          where: { ...whereClause, status: 'completed' },
+          where: {
+            ...whereClause,
+            OR: [{ status: 'completed' }, { status: 'Completed' }],
+          },
         }),
         this.prisma.task.count({
           where: { ...whereClause, status: 'in-progress' },
@@ -62,7 +92,8 @@ export class CoreMetricsService {
         this.prisma.task.findMany({
           where: {
             ...whereClause,
-            status: 'completed',
+            // FIX: Handle case-insensitive status matching for completed tasks
+            OR: [{ status: 'completed' }, { status: 'Completed' }],
             completionDate: { not: null },
           },
           select: {

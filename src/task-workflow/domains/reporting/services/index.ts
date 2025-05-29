@@ -27,19 +27,7 @@
  */
 
 // Core Services
-export * from './core/report-template.service';
-export * from './core/content-generator.service';
 export * from './infrastructure/global-file-logger.service';
-
-// Rendering Services
-export * from './rendering/template-rendering.service';
-export * from './rendering/template-factory.service';
-export * from './rendering/chart-generation.service';
-export * from './rendering/chart-calculation.service';
-export * from './rendering/chart-factory.service';
-export * from './rendering/advanced-chart.generator';
-export * from './rendering/base-chart.generator';
-export * from './rendering/specialized-chart.generator';
 
 // Data Services
 export * from './data/metrics-calculator.service';
@@ -58,7 +46,6 @@ export * from './analytics/schema-driven-intelligence.service';
 
 // Infrastructure Services
 export * from './infrastructure/reporting-config.service';
-export * from './infrastructure/report-path-generator.service';
 export * from './infrastructure/file-logger.service';
 export * from './infrastructure/global-file-logger.service';
 
