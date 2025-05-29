@@ -1,302 +1,353 @@
-{{> layouts/base title="Task Summary Report"}}
-
-{{#*inline "content"}}
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <!-- Header Section -->
-        <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-8 mb-8">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h1 class="text-3xl font-bold text-slate-900 mb-2">Task Summary Report</h1>
-                    <p class="text-slate-600">Generated on {{formatDate generatedAt "MMMM Do, YYYY [at] h:mm A"}}</p>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="bg-primary-100 text-primary-800 px-4 py-2 rounded-lg font-medium">
-                        {{dateRange.start}} - {{dateRange.end}}
-                    </div>
-                    {{#if filters}}
-                    <div class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg text-sm">
-                        {{#each filters}}{{@key}}: {{this}}{{#unless @last}}, {{/unless}}{{/each}}
-                    </div>
-                    {{/if}}
-                </div>
-            </div>
-        </div>
-
-        <!-- Key Metrics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-slate-600 mb-1">Total Tasks</p>
-                        <p class="text-3xl font-bold text-slate-900">{{metrics.totalTasks}}</p>
-                    </div>
-                    <div class="bg-blue-100 p-3 rounded-lg">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                    </div>
-                </div>
-                {{#if metrics.totalTasksChange}}
-                <div class="mt-4 flex items-center">
-                    <span class="text-sm {{#if (gt metrics.totalTasksChange 0)}}text-green-600{{else}}text-red-600{{/if}}">
-                        {{#if (gt metrics.totalTasksChange 0)}}↗{{else}}↘{{/if}} {{abs metrics.totalTasksChange}}%
-                    </span>
-                    <span class="text-xs text-slate-500 ml-2">vs last period</span>
-                </div>
-                {{/if}}
-            </div>
-
-            <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-slate-600 mb-1">Completed</p>
-                        <p class="text-3xl font-bold text-green-600">{{metrics.completedTasks}}</p>
-                    </div>
-                    <div class="bg-green-100 p-3 rounded-lg">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-600">Completion Rate</span>
-                        <span class="font-medium text-slate-900">{{metrics.completionRate}}%</span>
-                    </div>
-                    <div class="w-full bg-slate-200 rounded-full h-2 mt-2">
-                        <div class="bg-green-500 h-2 rounded-full transition-all duration-300" style="width: {{metrics.completionRate}}%"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-slate-600 mb-1">In Progress</p>
-                        <p class="text-3xl font-bold text-blue-600">{{metrics.inProgressTasks}}</p>
-                    </div>
-                    <div class="bg-blue-100 p-3 rounded-lg">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                </div>
-                {{#if metrics.avgTimeInProgress}}
-                <div class="mt-4">
-                    <span class="text-sm text-slate-600">Avg. Duration: </span>
-                    <span class="text-sm font-medium text-slate-900">{{metrics.avgTimeInProgress}}</span>
-                </div>
-                {{/if}}
-            </div>
-
-            <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-slate-600 mb-1">High Priority</p>
-                        <p class="text-3xl font-bold text-red-600">{{metrics.highPriorityTasks}}</p>
-                    </div>
-                    <div class="bg-red-100 p-3 rounded-lg">
-                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                        </svg>
-                    </div>
-                </div>
-                {{#if metrics.overdueHighPriority}}
-                <div class="mt-4">
-                    <span class="text-sm text-red-600 font-medium">{{metrics.overdueHighPriority}} overdue</span>
-                </div>
-                {{/if}}
-            </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Status Distribution Chart -->
-            <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <h3 class="text-lg font-semibold text-slate-900 mb-4">Task Status Distribution</h3>
-                <div class="relative h-64">
-                    <canvas id="statusChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Priority Breakdown Chart -->
-            <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <h3 class="text-lg font-semibold text-slate-900 mb-4">Priority Breakdown</h3>
-                <div class="relative h-64">
-                    <canvas id="priorityChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Task List -->
-        {{#if tasks}}
-        <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-slate-900">Recent Tasks</h3>
-                <div class="flex space-x-2">
-                    <button class="px-3 py-1 text-sm bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors">
-                        All
-                    </button>
-                    <button class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
-                        In Progress
-                    </button>
-                    <button class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors">
-                        Completed
-                    </button>
-                </div>
-            </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Summary Report - Workflow Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .chart-container { position: relative; height: 400px; margin: 1rem 0; }
+        .metric-card { @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200; }
+        .status-badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border; }
+        .priority-badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
+        .print-hidden { @media print { display: none !important; } }
+        @media print { body { @apply text-sm; } .chart-container { height: 300px; } }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="border-b border-slate-200">
-                            <th class="text-left py-3 px-4 font-medium text-slate-600">Task</th>
-                            <th class="text-left py-3 px-4 font-medium text-slate-600">Status</th>
-                            <th class="text-left py-3 px-4 font-medium text-slate-600">Priority</th>
-                            <th class="text-left py-3 px-4 font-medium text-slate-600">Owner</th>
-                            <th class="text-left py-3 px-4 font-medium text-slate-600">Created</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{#each tasks}}
-                        <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                            <td class="py-4 px-4">
-                                <div>
-                                    <p class="font-medium text-slate-900">{{name}}</p>
-                                    <p class="text-sm text-slate-600">{{taskId}}</p>
+            <!-- Enhanced Header -->
+            <div class="relative bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-2xl shadow-xl p-8 mb-8 overflow-hidden">
+                <!-- Background Pattern -->
+                <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+                <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-48 translate-x-48"></div>
+                <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-32 -translate-x-32"></div>
+                
+                <!-- Content -->
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
                                 </div>
-                            </td>
-                            <td class="py-4 px-4">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    {{#eq status 'completed'}}bg-green-100 text-green-800{{/eq}}
-                                    {{#eq status 'in-progress'}}bg-blue-100 text-blue-800{{/eq}}
-                                    {{#eq status 'not-started'}}bg-slate-100 text-slate-800{{/eq}}
-                                    {{#eq status 'needs-review'}}bg-yellow-100 text-yellow-800{{/eq}}
-                                    {{#eq status 'needs-changes'}}bg-red-100 text-red-800{{/eq}}">
-                                    {{status}}
-                                </span>
-                            </td>
-                            <td class="py-4 px-4">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    {{#eq priority 'Critical'}}bg-red-100 text-red-800{{/eq}}
-                                    {{#eq priority 'High'}}bg-orange-100 text-orange-800{{/eq}}
-                                    {{#eq priority 'Medium'}}bg-yellow-100 text-yellow-800{{/eq}}
-                                    {{#eq priority 'Low'}}bg-green-100 text-green-800{{/eq}}">
-                                    {{priority}}
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-slate-900">{{owner}}</td>
-                            <td class="py-4 px-4 text-slate-600">{{formatDate creationDate "MMM D, YYYY"}}</td>
-                        </tr>
-                        {{/each}}
-                    </tbody>
-                </table>
+                                <div>
+                                    <h1 class="text-4xl font-bold text-white mb-1">Task Summary Report</h1>
+                                    <p class="text-blue-100 text-lg">Comprehensive task analytics and insights</p>
+                                </div>
+                            </div>
+                            <p class="text-blue-200">Generated on {{formatDate generatedAt "MMMM Do, YYYY [at] h:mm A"}}</p>
+                        </div>
+                        <div class="flex flex-col items-end space-y-3">
+                            <div class="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-medium border border-white/30">
+                                <div class="text-sm text-blue-100 mb-1">Report Period</div>
+                                <div class="text-lg font-semibold">{{dateRange.start}} - {{dateRange.end}}</div>
+                            </div>
+                            {{#if filters}}
+                            <div class="bg-white/15 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm border border-white/20">
+                                <div class="text-xs text-blue-100 mb-1">Active Filters</div>
+                                <div>{{#each filters}}{{@key}}: {{this}}{{#unless @last}}, {{/unless}}{{/each}}</div>
+                            </div>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        {{/if}}
 
-        <!-- Insights Section -->
-        {{#if insights}}
-        <div class="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
-            <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center">
-                <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                </svg>
-                Key Insights
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {{#each insights}}
-                <div class="bg-white rounded-lg p-4 border border-blue-100">
-                    <h4 class="font-medium text-slate-900 mb-2">{{title}}</h4>
-                    <p class="text-sm text-slate-600">{{description}}</p>
-                    {{#if recommendation}}
-                    <p class="text-sm text-blue-700 mt-2 font-medium">💡 {{recommendation}}</p>
+            <!-- Key Metrics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-600 mb-1">Total Tasks</p>
+                            <p class="text-3xl font-bold text-slate-900">{{defaultValue metrics.totalTasks 0}}</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-lg">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    {{#if metrics.totalTasksChange}}
+                    <div class="mt-4 flex items-center">
+                        <span class="text-sm {{#if (gt metrics.totalTasksChange 0)}}text-green-600{{else}}text-red-600{{/if}}">
+                            {{#if (gt metrics.totalTasksChange 0)}}↗{{else}}↘{{/if}} {{abs metrics.totalTasksChange}}%
+                        </span>
+                        <span class="text-xs text-slate-500 ml-2">vs last period</span>
+                    </div>
                     {{/if}}
                 </div>
-                {{/each}}
+
+                <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-600 mb-1">Completed</p>
+                            <p class="text-3xl font-bold text-green-600">{{defaultValue metrics.completedTasks 0}}</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-lg">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-600">Completion Rate</span>
+                            <span class="font-medium text-slate-900">{{defaultValue metrics.completionRate 0}}%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2 mt-2">
+                            <div class="bg-green-500 h-2 rounded-full transition-all duration-300" style="width: {{defaultValue metrics.completionRate 0}}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-600 mb-1">In Progress</p>
+                            <p class="text-3xl font-bold text-blue-600">{{defaultValue metrics.inProgressTasks 0}}</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-lg">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    {{#if metrics.avgTimeInProgress}}
+                    <div class="mt-4">
+                        <span class="text-sm text-slate-600">Avg. Duration: </span>
+                        <span class="text-sm font-medium text-slate-900">{{metrics.avgTimeInProgress}}</span>
+                    </div>
+                    {{/if}}
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-600 mb-1">High Priority</p>
+                            <p class="text-3xl font-bold text-red-600">{{defaultValue metrics.highPriorityTasks 0}}</p>
+                        </div>
+                        <div class="bg-red-100 p-3 rounded-lg">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    {{#if metrics.overdueHighPriority}}
+                    <div class="mt-4">
+                        <span class="text-sm text-red-600 font-medium">{{metrics.overdueHighPriority}} overdue</span>
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Status Distribution Chart -->
+                <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                    <h3 class="text-lg font-semibold text-slate-900 mb-4">Task Status Distribution</h3>
+                    <div class="relative h-64">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Priority Breakdown Chart -->
+                <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                    <h3 class="text-lg font-semibold text-slate-900 mb-4">Priority Breakdown</h3>
+                    <div class="relative h-64">
+                        <canvas id="priorityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task List -->
+            {{#if tasks}}
+            <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-slate-900">Recent Tasks</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 text-sm bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors">
+                            All
+                        </button>
+                        <button class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
+                            In Progress
+                        </button>
+                        <button class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors">
+                            Completed
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-slate-200">
+                                <th class="text-left py-3 px-4 font-medium text-slate-600">Task</th>
+                                <th class="text-left py-3 px-4 font-medium text-slate-600">Status</th>
+                                <th class="text-left py-3 px-4 font-medium text-slate-600">Priority</th>
+                                <th class="text-left py-3 px-4 font-medium text-slate-600">Owner</th>
+                                <th class="text-left py-3 px-4 font-medium text-slate-600">Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each tasks}}
+                            <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                <td class="py-4 px-4">
+                                    <div>
+                                        <p class="font-medium text-slate-900">{{name}}</p>
+                                        <p class="text-sm text-slate-600">{{taskId}}</p>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {{#eq status 'completed'}}bg-green-100 text-green-800{{/eq}}
+                                        {{#eq status 'in-progress'}}bg-blue-100 text-blue-800{{/eq}}
+                                        {{#eq status 'not-started'}}bg-slate-100 text-slate-800{{/eq}}
+                                        {{#eq status 'needs-review'}}bg-yellow-100 text-yellow-800{{/eq}}
+                                        {{#eq status 'needs-changes'}}bg-red-100 text-red-800{{/eq}}">
+                                        {{status}}
+                                    </span>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {{#eq priority 'Critical'}}bg-red-100 text-red-800{{/eq}}
+                                        {{#eq priority 'High'}}bg-orange-100 text-orange-800{{/eq}}
+                                        {{#eq priority 'Medium'}}bg-yellow-100 text-yellow-800{{/eq}}
+                                        {{#eq priority 'Low'}}bg-green-100 text-green-800{{/eq}}">
+                                        {{priority}}
+                                    </span>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <span class="text-sm text-slate-900">{{owner}}</span>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <span class="text-sm text-slate-600">{{formatDate creationDate}}</span>
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {{/if}}
+
+            <!-- Summary Insights -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100 mt-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <span class="text-2xl mr-3">💡</span>
+                    Key Insights & Recommendations
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-3">Performance Highlights</h4>
+                        <ul class="space-y-2">
+                            {{#each insights}}
+                            <li class="flex items-start">
+                                <span class="text-blue-500 mr-2 mt-1">•</span>
+                                <span class="text-gray-700">{{this}}</span>
+                            </li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-3">Recommended Actions</h4>
+                        <ul class="space-y-2">
+                            {{#each recommendations}}
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2 mt-1">✓</span>
+                                <span class="text-gray-700">{{this}}</span>
+                            </li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
-        {{/if}}
     </div>
-</div>
 
-<script>
-// Status Distribution Chart
-const statusCtx = document.getElementById('statusChart').getContext('2d');
-new Chart(statusCtx, {
-    type: 'doughnut',
-    data: {
-        labels: {{{json chartData.statusLabels}}},
-        datasets: [{
-            data: {{{json chartData.statusData}}},
-            backgroundColor: [
-                '#10b981', // completed - green
-                '#3b82f6', // in-progress - blue  
-                '#6b7280', // not-started - gray
-                '#f59e0b', // needs-review - yellow
-                '#ef4444'  // needs-changes - red
-            ],
-            borderWidth: 0
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    padding: 20,
-                    usePointStyle: true
+    <script>
+    // Status Distribution Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{{json statusDistribution.labels}}},
+            datasets: [{
+                data: {{{json statusDistribution.data}}},
+                backgroundColor: [
+                    'rgb(34, 197, 94)',   // completed - green
+                    'rgb(59, 130, 246)',  // in-progress - blue
+                    'rgb(156, 163, 175)', // not-started - gray
+                    'rgb(234, 179, 8)',   // needs-review - yellow
+                    'rgb(239, 68, 68)'    // needs-changes - red
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
                 }
             }
         }
-    }
-});
+    });
 
-// Priority Breakdown Chart
-const priorityCtx = document.getElementById('priorityChart').getContext('2d');
-new Chart(priorityCtx, {
-    type: 'bar',
-    data: {
-        labels: {{{json chartData.priorityLabels}}},
-        datasets: [{
-            label: 'Tasks',
-            data: {{{json chartData.priorityData}}},
-            backgroundColor: [
-                '#ef4444', // Critical - red
-                '#f97316', // High - orange
-                '#eab308', // Medium - yellow
-                '#22c55e'  // Low - green
-            ],
-            borderRadius: 6,
-            borderSkipped: false
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
+    // Priority Breakdown Chart
+    const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+    new Chart(priorityCtx, {
+        type: 'bar',
+        data: {
+            labels: {{{json priorityDistribution.labels}}},
+            datasets: [{
+                label: 'Tasks',
+                data: {{{json priorityDistribution.data}}},
+                backgroundColor: [
+                    'rgb(239, 68, 68)',   // Critical - red
+                    'rgb(245, 101, 101)', // High - orange-red
+                    'rgb(234, 179, 8)',   // Medium - yellow
+                    'rgb(34, 197, 94)'    // Low - green
+                ],
+                borderWidth: 0,
+                borderRadius: 4
+            }]
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: {
-                    color: '#f1f5f9'
-                }
-            },
-            x: {
-                grid: {
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
                     display: false
                 }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
             }
         }
-    }
-});
-</script>
-{{/inline}} 
+    });
+    </script>
+</body>
+</html> 

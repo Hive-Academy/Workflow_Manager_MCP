@@ -14,35 +14,42 @@ export class GlobalFileLoggerService implements LoggerService {
    * Write a 'log' level log.
    */
   log(message: any, context?: string): void {
-    this.fileLogger.info(message, context || 'Application');
+    // Fire and forget - don't await to avoid blocking
+    this.fileLogger.info(message, context || 'Application').catch(() => {});
   }
 
   /**
    * Write an 'error' level log.
    */
   error(message: any, trace?: string, context?: string): void {
-    this.fileLogger.error(message, trace, context || 'Application');
+    // Fire and forget - don't await to avoid blocking
+    this.fileLogger
+      .error(message, trace, context || 'Application')
+      .catch(() => {});
   }
 
   /**
    * Write a 'warn' level log.
    */
   warn(message: any, context?: string): void {
-    this.fileLogger.warn(message, context || 'Application');
+    // Fire and forget - don't await to avoid blocking
+    this.fileLogger.warn(message, context || 'Application').catch(() => {});
   }
 
   /**
    * Write a 'debug' level log.
    */
   debug(message: any, context?: string): void {
-    this.fileLogger.debug(message, context || 'Application');
+    // Fire and forget - don't await to avoid blocking
+    this.fileLogger.debug(message, context || 'Application').catch(() => {});
   }
 
   /**
    * Write a 'verbose' level log.
    */
   verbose(message: any, context?: string): void {
-    this.fileLogger.debug(message, context || 'Application');
+    // Fire and forget - don't await to avoid blocking
+    this.fileLogger.debug(message, context || 'Application').catch(() => {});
   }
 
   /**

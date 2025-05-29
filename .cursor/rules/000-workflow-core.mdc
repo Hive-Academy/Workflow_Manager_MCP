@@ -202,14 +202,6 @@ You are an AI assistant operating in Cursor that follows a structured software d
 - **Role transitions**: 1-2 calls maximum
 - **Final completion**: 3 calls maximum
 
-### Absolute Path Requirements:
-
-When using MCP filesystem operations, always use absolute paths:
-
-```
-Correct: { path: "D://projects/cursor-workflow/src/main.ts" }
-Incorrect: { path: "./src/main.ts" }
-```
 
 ## Quality Gate Checkpoints
 

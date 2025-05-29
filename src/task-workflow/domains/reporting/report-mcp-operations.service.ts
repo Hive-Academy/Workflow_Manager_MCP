@@ -3,7 +3,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Tool } from '@rekog/mcp-nest';
 import { promises as fs } from 'fs';
 import { ZodSchema, z } from 'zod';
-import { ReportGeneratorService } from './report-generator.service';
+import { ReportGeneratorFactoryService } from './services/generators/report-generator-factory.service';
 import {
   RenderOptions,
   ReportRenderingService,
@@ -159,7 +159,7 @@ export class ReportMcpOperationsService {
   private readonly reportJobs = new Map<string, ReportJobStatus>();
 
   constructor(
-    private readonly reportGenerator: ReportGeneratorService,
+    private readonly reportGeneratorFactory: ReportGeneratorFactoryService,
     private readonly reportRenderer: ReportRenderingService,
   ) {}
 
@@ -261,21 +261,23 @@ Reports are automatically organized in 'workflow-manager-mcp-reports' with meani
         this.logger.log(`Using organized report structure: ${folderPath}`);
       }
 
-      // Generate report data
-      this.logger.log(`Generating report data for ${input.reportType}`);
-      const reportData = await this.reportGenerator.generateReportData(
-        input.reportType,
+      // Generate complete report using our new focused generator architecture
+      this.logger.log(`Generating complete report for ${input.reportType}`);
+      const reportFilters = {
         startDate,
         endDate,
-        Object.keys(filters).length > 0 ? filters : undefined,
+        taskId: filters.taskId,
+        owner: filters.owner,
+        mode: filters.mode,
+        priority: filters.priority,
+      };
+
+      const reportResult = await this.reportGeneratorFactory.generateReport(
+        input.reportType as any, // TODO: Fix type mapping
+        reportFilters,
       );
 
-      // Generate HTML content
-      this.logger.log(`Rendering report template for ${input.reportType}`);
-      const htmlContent = await this.reportGenerator.renderReportTemplate(
-        input.reportType,
-        reportData,
-      );
+      const { htmlContent, reportData } = reportResult;
 
       let result: {
         filename: string;
@@ -571,24 +573,38 @@ Reports are automatically organized in 'workflow-manager-mcp-reports' with meani
     };
   }
 
-  // Helper method to get report as base64
-  private generateReportSummary(reportData: any, _reportType: string): any {
-    // Handle individual task reports differently
-    if (reportData.metrics.taskSpecific) {
+  // Helper method to get report summary from new simplified data structure
+  private generateReportSummary(reportData: any, reportType: string): any {
+    // Handle individual task reports
+    if (
+      reportType === 'task_progress_health' ||
+      reportType === 'implementation_execution' ||
+      reportType === 'code_review_quality' ||
+      reportType === 'delegation_flow_analysis_task' ||
+      reportType === 'research_documentation' ||
+      reportType === 'communication_collaboration'
+    ) {
       return {
         reportType: 'individual_task',
-        taskId: reportData.taskId,
-        taskName: reportData.metrics.taskSpecific.taskName || 'Unknown Task',
+        taskId: reportData.taskId || 'Unknown',
+        taskName: reportData.taskName || 'Unknown Task',
         recommendationsCount: reportData.recommendations?.length || 0,
       };
     }
 
-    // Handle aggregate reports
+    // Handle aggregate reports (performance dashboard, task summary, delegation analytics, etc.)
     return {
-      totalTasks: reportData.metrics.tasks?.totalTasks || 0,
-      completionRate: `${(reportData.metrics.tasks?.completionRate || 0).toFixed(1)}%`,
-      totalDelegations: reportData.metrics.delegations?.totalDelegations || 0,
-      codeReviews: reportData.metrics.codeReviews?.totalReviews || 0,
+      totalTasks:
+        reportData.taskMetrics?.totalTasks || reportData.totalTasks || 0,
+      completionRate: `${((reportData.taskMetrics?.completionRate || reportData.completionRate || 0) * 100).toFixed(1)}%`,
+      totalDelegations:
+        reportData.delegationMetrics?.totalDelegations ||
+        reportData.totalDelegations ||
+        0,
+      codeReviews:
+        reportData.codeReviewMetrics?.totalReviews ||
+        reportData.totalReviews ||
+        0,
       recommendationsCount: reportData.recommendations?.length || 0,
     };
   }

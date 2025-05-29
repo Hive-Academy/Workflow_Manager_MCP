@@ -32,10 +32,10 @@ export class ReportDataAccessService {
   constructor(private readonly metricsCalculator: MetricsCalculatorService) {}
 
   /**
-   * Get task summary report data
+   * Get task summary report data (Legacy method - maintained for backward compatibility)
    * Transforms nested metrics into flat structure expected by task-summary template
    */
-  async getTaskSummaryData(
+  async getTaskSummaryDataLegacy(
     startDate?: Date,
     endDate?: Date,
     filters?: ReportFilters,
@@ -198,14 +198,43 @@ export class ReportDataAccessService {
    * Extracted from report-generator.service.ts
    */
   isIndividualTaskReport(reportType: ReportType): boolean {
-    return [
+    const individualTaskReports: ReportType[] = [
       'task_progress_health',
       'implementation_execution',
       'code_review_quality',
       'delegation_flow_analysis_task',
       'research_documentation',
       'communication_collaboration',
-    ].includes(reportType);
+    ];
+
+    return individualTaskReports.includes(reportType);
+  }
+
+  /**
+   * Get research report data for a specific task
+   * Used by CodeReviewResearchService
+   */
+  async getResearchReport(taskId: string): Promise<any> {
+    this.logger.debug(`Fetching research report for task: ${taskId}`);
+
+    // Get research report from database via MetricsCalculatorService
+    return await this.metricsCalculator.getResearchDocumentationMetrics(taskId);
+  }
+
+  /**
+   * Get workflow transitions for a specific task
+   * Used by CommunicationCollaborationService
+   */
+  async getWorkflowTransitions(taskId: string): Promise<any[]> {
+    this.logger.debug(`Fetching workflow transitions for task: ${taskId}`);
+
+    // Get workflow transitions from database via MetricsCalculatorService
+    const delegationMetrics = await this.metricsCalculator.getDelegationMetrics(
+      { taskId },
+    );
+
+    // Return the mode transitions as workflow transitions
+    return delegationMetrics.modeTransitions || [];
   }
 
   /**
