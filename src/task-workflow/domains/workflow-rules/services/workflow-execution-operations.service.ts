@@ -12,7 +12,6 @@ import {
   CompletionSummary,
   ProgressOverview,
 } from './execution-analytics.service';
-import { CoreServiceOrchestrator } from './core-service-orchestrator.service';
 
 // Configuration interfaces to eliminate hardcoding
 export interface ExecutionOperationsConfig {
@@ -53,7 +52,7 @@ export interface ExecutionsSummary {
 }
 
 export interface WorkflowExecutionInput {
-  taskId: number;
+  taskId?: number;
   executionId?: string;
   roleName?: string;
   executionMode?: 'GUIDED' | 'AUTOMATED' | 'HYBRID';
@@ -105,7 +104,6 @@ export class WorkflowExecutionOperationsService {
     private readonly workflowExecution: WorkflowExecutionService,
     private readonly dataEnricher: ExecutionDataEnricherService,
     private readonly analytics: ExecutionAnalyticsService,
-    private readonly coreServiceOrchestrator: CoreServiceOrchestrator,
   ) {}
 
   /**
@@ -142,8 +140,13 @@ export class WorkflowExecutionOperationsService {
     input: WorkflowExecutionInput,
     operation: string,
   ): void {
-    if (!input.taskId) {
-      throw new Error(`taskId is required for ${operation}`);
+    // Special handling for operations that can work without taskId
+
+    // get_execution can work with either taskId OR executionId
+    if (operation === 'get_execution') {
+      if (!input.taskId && !input.executionId) {
+        throw new Error(`get_execution requires either taskId or executionId`);
+      }
     }
 
     if (
@@ -208,6 +211,11 @@ export class WorkflowExecutionOperationsService {
     let execution: any;
 
     if (!input.executionId) {
+      if (!input.taskId) {
+        throw new Error(
+          `Either taskId or executionId is required for get operation`,
+        );
+      }
       execution = await this.workflowExecution.getExecutionByTaskId(
         input.taskId,
       );
@@ -365,35 +373,6 @@ export class WorkflowExecutionOperationsService {
         byRole: this.analytics.groupExecutionsByRole(executions),
         progressOverview: this.analytics.calculateOverallProgress(executions),
       },
-    };
-  }
-
-  /**
-   * Execute step with services orchestration
-   */
-  async executeStepWithServices(
-    input: WorkflowExecutionInput,
-  ): Promise<Record<string, unknown>> {
-    if (!input.stepId || !input.orchestrationConfig?.serviceCalls) {
-      throw new Error(
-        'stepId and orchestrationConfig.serviceCalls are required for executing a step with services',
-      );
-    }
-
-    const result = await this.coreServiceOrchestrator.executeStepWithServices(
-      input.stepId,
-      input.orchestrationConfig.serviceCalls,
-      input.orchestrationConfig.executionMode ||
-        this.config.defaults.orchestrationMode,
-      input.orchestrationConfig.continueOnFailure ??
-        this.config.defaults.continueOnFailure,
-    );
-
-    return {
-      executionResult: result,
-      taskId: input.taskId,
-      stepId: input.stepId,
-      timestamp: new Date().toISOString(),
     };
   }
 

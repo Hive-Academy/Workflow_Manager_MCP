@@ -15,11 +15,10 @@ const WorkflowExecutionSchema = z.object({
     'update_execution',
     'complete_execution',
     'get_active_executions',
-    'execute_step_with_services',
     'get_execution_context',
     'update_execution_context',
   ]),
-  taskId: z.number(),
+  taskId: z.number().optional(),
   executionId: z.string().optional(),
   roleName: z
     .enum([
@@ -77,15 +76,18 @@ export class WorkflowExecutionMcpService {
 **⚙️ WORKFLOW STATE MANAGEMENT - Query and manage execution state only**
 
 **FOCUSED OPERATIONS:**
-- get_active_executions: List all active executions (taskId, executionId, currentRole)
-- get_execution: Get current execution state without guidance
-- update_execution: Update execution state and progress
-- complete_execution: Mark execution as completed
+- get_active_executions: List all active executions (no taskId required)
+- get_execution: Get current execution state (requires taskId OR executionId) 
+- update_execution: Update execution state and progress (requires executionId)
+- complete_execution: Mark execution as completed (requires executionId)
+- get_execution_context: Get execution context data (requires executionId)
+- update_execution_context: Update execution context (requires executionId)
 
 **Does NOT provide:**
 ❌ Workflow guidance (use get_workflow_guidance)
 ❌ Step guidance (use get_step_guidance)  
 ❌ Role recommendations (use role transition tools)
+❌ MCP operations (use execute_mcp_operation)
 ❌ Complex envelopes (minimal state data only)
 
 **Usage:**
@@ -93,11 +95,19 @@ export class WorkflowExecutionMcpService {
 - Get current execution state for resuming work
 - Update execution progress
 - Mark workflows complete
+- Manage execution context data
 
 **Examples:**
-- List active: { operation: "get_active_executions", taskId: 0 }
-- Get state: { operation: "get_execution", taskId: 123 }
+- List active: { operation: "get_active_executions" }
+- Get by taskId: { operation: "get_execution", taskId: 123 }
+- Get by executionId: { operation: "get_execution", executionId: "exec-123" }
 - Update: { operation: "update_execution", executionId: "exec-123", updateData: {...} }
+- Get context: { operation: "get_execution_context", executionId: "exec-123", dataKey: "taskCreationData" }
+
+**Parameter Notes:**
+- taskId is OPTIONAL for most operations (executions can exist without tasks initially)
+- executionId is REQUIRED for context operations and updates
+- Either taskId OR executionId is required for get_execution
 `,
     parameters: WorkflowExecutionSchema,
   })
@@ -141,10 +151,7 @@ export class WorkflowExecutionMcpService {
         case 'get_active_executions':
           result = await this.executionOps.getActiveExecutions();
           break;
-        case 'execute_step_with_services':
-          result =
-            await this.executionOps.executeStepWithServices(workflowInput);
-          break;
+
         case 'get_execution_context':
           if (!input.executionId) {
             throw new Error(
