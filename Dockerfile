@@ -4,7 +4,7 @@ FROM node:22-alpine AS builder
 # Add metadata labels for Docker Hub
 LABEL org.opencontainers.image.title="MCP Workflow Manager"
 LABEL org.opencontainers.image.description="A comprehensive Model Context Protocol server for AI workflow automation and task management"
-LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.version="1.0.15"
 LABEL org.opencontainers.image.authors="Hive Academy <abdallah@nghive.tech>"
 LABEL org.opencontainers.image.source="https://github.com/Hive-Academy/Workflow_Manager_MCP"
 LABEL org.opencontainers.image.documentation="https://github.com/Hive-Academy/Workflow_Manager_MCP/blob/main/README.md"
@@ -28,8 +28,8 @@ RUN npm run build
 RUN mkdir -p temp/reports temp/rendered-reports templates/reports
 
 # ================================================================================================
-# BUILD-TIME MIGRATION DEPLOYMENT STAGE - Strategic UX Enhancement
-# Deploy migrations during image build for instant container startup (following Prisma generate pattern)
+# BUILD-TIME MIGRATION AND SEEDING DEPLOYMENT STAGE - Strategic UX Enhancement
+# Deploy migrations and seed data during image build for instant container startup
 # ================================================================================================
 FROM builder AS migration-deployer
 
@@ -39,14 +39,16 @@ ENV DATABASE_URL="file:./build-time-migration-db.db"
 # Create build-time database directory
 RUN mkdir -p ./build-time-db
 
-# STRATEGIC BUILD-TIME MIGRATION DEPLOYMENT
-# Deploy all migrations during build following npx prisma generate pattern
-RUN echo "🔧 DEPLOYING MIGRATIONS AT BUILD-TIME for instant startup UX..." && \
+# STRATEGIC BUILD-TIME MIGRATION AND SEEDING DEPLOYMENT
+# Deploy all migrations and seed essential workflow data during build
+RUN echo "🔧 DEPLOYING MIGRATIONS AND SEEDING DATA AT BUILD-TIME for instant startup UX..." && \
     npx prisma migrate deploy --schema=./prisma/schema.prisma && \
     echo "✅ BUILD-TIME MIGRATION DEPLOYMENT SUCCESSFUL" && \
+    npx prisma db seed && \
+    echo "✅ BUILD-TIME DATABASE SEEDING SUCCESSFUL" && \
     ls -la ./build-time-db/ && \
     npx prisma db pull --schema=./prisma/schema.prisma --print && \
-    echo "📊 Migration deployment verification complete"
+    echo "📊 Migration deployment and seeding verification complete"
 
 # ================================================================================================
 # Production stage with PRE-DEPLOYED migrations for INSTANT STARTUP
@@ -56,7 +58,7 @@ FROM node:22-alpine AS production
 # Add same metadata to final image
 LABEL org.opencontainers.image.title="MCP Workflow Manager"
 LABEL org.opencontainers.image.description="A comprehensive Model Context Protocol server for AI workflow automation and task management"
-LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.version="1.0.15"
 LABEL org.opencontainers.image.authors="Hive Academy <abdallah@nghive.tech>"
 LABEL org.opencontainers.image.source="https://github.com/Hive-Academy/Workflow_Manager_MCP"
 LABEL org.opencontainers.image.documentation="https://github.com/Hive-Academy/Workflow_Manager_MCP/blob/main/README.md"
@@ -83,12 +85,20 @@ RUN npm ci --only=production --ignore-scripts && npm cache clean --force
 RUN chown -R nestjs:nodejs /app/node_modules
 
 # Copy built application and generated Prisma client from builder stage
+# NOTE: Unlike npm package, Docker includes full generated client for immediate runtime availability
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/prisma/schema.prisma ./prisma/schema.prisma
+COPY --from=builder --chown=nestjs:nodejs /app/prisma/onboarding-models.prisma ./prisma/onboarding-models.prisma
+COPY --from=builder --chown=nestjs:nodejs /app/prisma/rule-models.prisma ./prisma/rule-models.prisma
+COPY --from=builder --chown=nestjs:nodejs /app/prisma/task-models.prisma ./prisma/task-models.prisma
+COPY --from=builder --chown=nestjs:nodejs /app/prisma/workflow-enums.prisma ./prisma/workflow-enums.prisma
 # STRATEGIC: Migrations folder REQUIRED for verification commands (migrate status, etc.)
 # Even with build-time deployment, runtime verification compares deployed vs migration files
 COPY --from=builder --chown=nestjs:nodejs /app/prisma/migrations ./prisma/migrations
 COPY --from=builder --chown=nestjs:nodejs /app/generated ./generated
+
+# Copy essential workflow rules data for seeding
+COPY --from=builder --chown=nestjs:nodejs /app/enhanced-workflow-rules ./enhanced-workflow-rules
 
 # STRATEGIC ENHANCEMENT: Copy pre-deployed migration validation data from migration-deployer stage
 # This enables instant startup verification without migration deployment delay
@@ -118,14 +128,16 @@ RUN chown -R nestjs:nodejs /app/temp /app/templates
 # Set default environment variables with unified database configuration
 ENV RUNNING_IN_DOCKER="true"
 ENV MCP_SERVER_NAME="MCP-Workflow-Manager"
-ENV MCP_SERVER_VERSION="1.0.0"
+ENV MCP_SERVER_VERSION="1.0.15"
 ENV MCP_TRANSPORT_TYPE="STDIO"
 ENV NODE_ENV="production"
 ENV PORT="3000"
+ENV DATABASE_URL="file:/app/data/workflow.db"
 
 # STRATEGIC UX ENHANCEMENT: Mark image as having pre-deployed migrations
 ENV MIGRATIONS_PRE_DEPLOYED="true"
 ENV BUILD_TIME_MIGRATION_DEPLOYED="true"
+ENV BUILD_TIME_SEEDING_DEPLOYED="true"
 
 # Switch to non-root user
 USER nestjs

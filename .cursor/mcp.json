@@ -1,10 +1,11 @@
 {
   "mcpServers": {
     "workflow-manager": {
-      "command": "node",
-      "args": ["D:/projects/cursor-workflow/dist/main.js"],      
+      "command": "npx",
+      "args": ["--yes", "@hive-academy/mcp-workflow-manager@latest"],
       "env": {
-        "PROJECT_ROOT": "D:/projects/cursor-workflow"
+        "PROJECT_ROOT": "D:/projects/cursor-workflow",
+        "NODE_ENV": "production"
       }
     }
   }
