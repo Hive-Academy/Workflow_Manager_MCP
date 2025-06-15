@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../prisma/prisma.service';
 import {
-  safeJsonCast,
-  getErrorMessage,
   isDefined,
-} from '../utils/type-safety.utils';
+  safeJsonCast,
+  StepProgressError,
+} from '../utils/step-service-shared.utils';
+import { getErrorMessage } from '../utils/type-safety.utils';
 
 // ===================================================================
 // 🔥 STEP PROGRESS TRACKER SERVICE - COMPLETE REVAMP FOR MCP-ONLY
@@ -18,7 +19,8 @@ import {
 export interface StepProgressRecord {
   id: string;
   stepId: string;
-  taskId: string;
+  executionId: string; // 🔧 FIXED: Added required executionId
+  taskId?: string; // 🔧 FIXED: Made optional (can be null for bootstrap)
   roleId: string;
   status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'SKIPPED' | 'FAILED';
   startedAt?: Date;
@@ -78,16 +80,7 @@ export interface RoleProgressSummary {
   successRate: number;
 }
 
-// Custom Error Classes
-export class StepProgressError extends Error {
-  constructor(
-    message: string,
-    public stepId: string,
-  ) {
-    super(message);
-    this.name = 'StepProgressError';
-  }
-}
+// Custom Error Classes - Using shared utilities
 
 /**
  * 🚀 REVAMPED: StepProgressTrackerService
@@ -111,15 +104,30 @@ export class StepProgressTrackerService {
    */
   async startStep(
     stepId: string,
-    taskId: string,
-    roleId: string,
+    executionId: string,
+    taskId?: string,
+    roleId?: string,
   ): Promise<StepProgressRecord> {
     try {
+      // Get roleId from execution if not provided
+      let actualRoleId = roleId;
+      if (!actualRoleId) {
+        const execution = await this.prisma.workflowExecution.findUnique({
+          where: { id: executionId },
+          select: { currentRoleId: true },
+        });
+        if (!execution) {
+          throw new Error(`Execution not found: ${executionId}`);
+        }
+        actualRoleId = execution.currentRoleId;
+      }
+
       const progressRecord = await this.prisma.workflowStepProgress.create({
         data: {
           stepId,
-          taskId,
-          roleId,
+          executionId, // 🔧 FIXED: Include required executionId
+          taskId: taskId || null, // Optional - may be null for bootstrap executions
+          roleId: actualRoleId,
           status: 'IN_PROGRESS',
           startedAt: new Date(),
           executionData: {
@@ -138,7 +146,9 @@ export class StepProgressTrackerService {
       this.logger.error(`Failed to start step progress tracking:`, error);
       throw new StepProgressError(
         `Failed to start progress tracking: ${getErrorMessage(error)}`,
-        stepId,
+        'StepProgressTrackerService',
+        'startStep',
+        { stepId },
       );
     }
   }
@@ -162,11 +172,10 @@ export class StepProgressTrackerService {
 
       const currentData = safeJsonCast<McpExecutionData>(
         existing.executionData,
-        {
-          executionType: 'MCP_ONLY',
-          phase: 'EXECUTING',
-        },
-      );
+      ) || {
+        executionType: 'MCP_ONLY',
+        phase: 'EXECUTING',
+      };
 
       const progressRecord = await this.prisma.workflowStepProgress.update({
         where: { id: existing.id },
@@ -192,7 +201,9 @@ export class StepProgressTrackerService {
       this.logger.error(`Failed to update step progress:`, error);
       throw new StepProgressError(
         `Failed to update progress: ${getErrorMessage(error)}`,
-        stepId,
+        'StepProgressTrackerService',
+        'updateProgress',
+        { stepId },
       );
     }
   }
@@ -216,11 +227,10 @@ export class StepProgressTrackerService {
 
       const currentData = safeJsonCast<McpExecutionData>(
         existing.executionData,
-        {
-          executionType: 'MCP_ONLY',
-          phase: 'COMPLETED',
-        },
-      );
+      ) || {
+        executionType: 'MCP_ONLY',
+        phase: 'COMPLETED',
+      };
 
       const progressRecord = await this.prisma.workflowStepProgress.update({
         where: { id: existing.id },
@@ -249,7 +259,9 @@ export class StepProgressTrackerService {
       this.logger.error(`Failed to complete step:`, error);
       throw new StepProgressError(
         `Failed to complete step: ${getErrorMessage(error)}`,
-        stepId,
+        'StepProgressTrackerService',
+        'completeStep',
+        { stepId },
       );
     }
   }
@@ -294,7 +306,9 @@ export class StepProgressTrackerService {
       this.logger.error(`Failed to mark step as failed:`, error);
       throw new StepProgressError(
         `Failed to mark step as failed: ${getErrorMessage(error)}`,
-        stepId,
+        'StepProgressTrackerService',
+        'failStep',
+        { stepId },
       );
     }
   }
@@ -365,7 +379,9 @@ export class StepProgressTrackerService {
       this.logger.error(`Failed to get role progress summary:`, error);
       throw new StepProgressError(
         `Failed to get role progress summary: ${getErrorMessage(error)}`,
-        roleId,
+        'StepProgressTrackerService',
+        'getRoleProgressSummary',
+        { roleId },
       );
     }
   }
@@ -377,7 +393,8 @@ export class StepProgressTrackerService {
     const typedRecord = record as {
       id: string;
       stepId: string;
-      taskId: string;
+      executionId: string; // 🔧 FIXED: Added executionId
+      taskId: string | null; // 🔧 FIXED: Can be null now
       roleId: string;
       status: string;
       startedAt: Date | null;
@@ -393,17 +410,20 @@ export class StepProgressTrackerService {
     return {
       id: typedRecord.id,
       stepId: typedRecord.stepId,
-      taskId: typedRecord.taskId,
+      executionId: typedRecord.executionId, // 🔧 FIXED: Include executionId
+      taskId: typedRecord.taskId || undefined, // 🔧 FIXED: Convert null to undefined
       roleId: typedRecord.roleId,
       status: typedRecord.status as StepProgressRecord['status'],
       startedAt: typedRecord.startedAt || undefined,
       completedAt: typedRecord.completedAt || undefined,
       failedAt: typedRecord.failedAt || undefined,
       duration: typedRecord.duration || undefined,
-      executionData: safeJsonCast<McpExecutionData>(typedRecord.executionData, {
+      executionData: safeJsonCast<McpExecutionData>(
+        typedRecord.executionData,
+      ) || {
         executionType: 'MCP_ONLY',
         phase: 'GUIDANCE_PREPARED',
-      }),
+      },
       validationResults: typedRecord.validationResults,
       errorDetails: typedRecord.errorDetails,
       result: (typedRecord.result as 'SUCCESS' | 'FAILURE') || undefined,
@@ -455,7 +475,9 @@ export class StepProgressTrackerService {
       this.logger.error(`Failed to complete step with tracking:`, error);
       throw new StepProgressError(
         `Failed to complete step with tracking: ${getErrorMessage(error)}`,
-        stepId,
+        'StepProgressTrackerService',
+        'completeStepWithTracking',
+        { stepId },
       );
     }
   }

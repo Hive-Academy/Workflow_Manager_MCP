@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ZodSchema } from 'zod';
 import { PrismaService } from '../../../../prisma/prisma.service';
-import { WorkflowGuidance } from './workflow-guidance.service';
+import { SchemaDefinitionGeneratorService } from './schema-definition-generator.service';
 
 // 🎯 PHASE 4.1: Enhanced schema imports with comprehensive core-workflow coverage
-import { ZodSchema } from 'zod';
 import { IndividualSubtaskOperationsSchema } from '../../core-workflow/schemas/individual-subtask-operations.schema';
 import { PlanningOperationsSchema } from '../../core-workflow/schemas/planning-operations.schema';
 import { ResearchOperationsSchema } from '../../core-workflow/schemas/research-operations.schema';
@@ -12,93 +12,109 @@ import { TaskOperationsSchema } from '../../core-workflow/schemas/task-operation
 import { WorkflowOperationsSchema } from '../../core-workflow/schemas/workflow-operations.schema';
 
 /**
- * 🎯 PHASE 4.1: ENHANCED SCHEMA-BASED REQUIRED INPUT EXTRACTOR
+ * 🎯 REQUIRED INPUT EXTRACTOR SERVICE - FOCUSED ON EXTRACTION LOGIC
  *
- * IMPROVEMENTS:
- * ✅ Comprehensive core-service parameter mapping
- * ✅ Enhanced schema validation for MCP_CALL operations
- * ✅ Improved error messages for missing parameters
- * ✅ Better parameter mapping between workflow JSON and service schemas
- * ✅ Enhanced debugging information for schema extraction
+ * Dedicated service for extracting required inputs from workflow steps and MCP operations.
+ * Now focused solely on extraction logic, delegating schema definition generation
+ * to the SchemaDefinitionGeneratorService.
+ *
+ * RESPONSIBILITIES:
+ * - Extract required inputs from step actions
+ * - Map operation-specific parameters
+ * - Coordinate with SchemaDefinitionGeneratorService for schema definitions
+ * - Handle workflow-specific input requirements
  */
 @Injectable()
 export class RequiredInputExtractorService {
   private readonly logger = new Logger(RequiredInputExtractorService.name);
 
-  // 🎯 PHASE 4.1: Enhanced schema mapping with comprehensive service coverage
+  // Schema registry - maps service names to their Zod schemas
   private readonly serviceSchemas: Record<string, ZodSchema> = {
     TaskOperations: TaskOperationsSchema,
     PlanningOperations: PlanningOperationsSchema,
-    IndividualSubtaskOperations: IndividualSubtaskOperationsSchema,
-    SubtaskOperations: IndividualSubtaskOperationsSchema, // Alias for compatibility
     WorkflowOperations: WorkflowOperationsSchema,
     ResearchOperations: ResearchOperationsSchema,
     ReviewOperations: ReviewOperationsSchema,
+    IndividualSubtaskOperations: IndividualSubtaskOperationsSchema,
+    SubtaskOperations: IndividualSubtaskOperationsSchema, // Alias
   };
 
-  // 🎯 PHASE 4.1: Operation-specific parameter requirements mapping
+  // Operation-specific parameter mapping for fallback scenarios
   private readonly operationParameterMap: Record<
     string,
     Record<string, string[]>
   > = {
     TaskOperations: {
       create: ['operation', 'taskData', 'description', 'codebaseAnalysis'],
-      update: ['operation', 'id', 'taskData', 'description'],
+      update: [
+        'operation',
+        'id',
+        'taskData',
+        'description',
+        'codebaseAnalysis',
+      ],
       get: ['operation', 'id', 'slug', 'includeDescription', 'includeAnalysis'],
-      list: ['operation', 'filters'],
+      list: [
+        'operation',
+        'status',
+        'priority',
+        'includeDescription',
+        'includeAnalysis',
+      ],
     },
     PlanningOperations: {
       create_plan: ['operation', 'taskId', 'planData'],
-      update_plan: ['operation', 'taskId', 'planData'],
-      get_plan: ['operation', 'taskId', 'includeBatches'],
+      update_plan: ['operation', 'taskId', 'planId', 'planData'],
+      get_plan: ['operation', 'taskId', 'planId', 'includeBatches'],
       create_subtasks: ['operation', 'taskId', 'batchData'],
-      update_batch: ['operation', 'taskId', 'batchId', 'batchData'],
+      update_batch: ['operation', 'taskId', 'batchId', 'newStatus'],
       get_batch: ['operation', 'taskId', 'batchId'],
     },
     WorkflowOperations: {
       delegate: ['operation', 'taskId', 'fromRole', 'toRole', 'message'],
-      complete: ['operation', 'taskId', 'completionData'],
-      escalate: ['operation', 'taskId', 'escalationReason'],
-      transition: ['operation', 'taskId', 'transitionData'],
+      complete: ['operation', 'taskId', 'fromRole', 'completionData'],
+      escalate: ['operation', 'taskId', 'fromRole', 'escalationData'],
+      transition: ['operation', 'taskId', 'fromRole', 'toRole', 'newStatus'],
     },
     ResearchOperations: {
       create_research: ['operation', 'taskId', 'researchData'],
-      update_research: ['operation', 'researchId', 'researchData'],
-      get_research: ['operation', 'researchId', 'taskId'],
-      add_comment: ['operation', 'researchId', 'commentData'],
-      get_comments: ['operation', 'researchId'],
+      update_research: ['operation', 'taskId', 'researchData'],
+      get_research: ['operation', 'taskId', 'includeComments'],
+      add_comment: ['operation', 'taskId', 'commentData'],
+      get_comments: ['operation', 'taskId', 'commentType'],
     },
     ReviewOperations: {
       create_review: ['operation', 'taskId', 'reviewData'],
-      update_review: ['operation', 'reviewId', 'reviewData'],
-      get_review: ['operation', 'reviewId', 'taskId'],
+      update_review: ['operation', 'taskId', 'reviewData'],
+      get_review: ['operation', 'taskId', 'includeDetails'],
       create_completion: ['operation', 'taskId', 'completionData'],
-      get_completion: ['operation', 'taskId'],
+      get_completion: ['operation', 'taskId', 'includeDetails'],
     },
-    SubtaskOperations: {
+    IndividualSubtaskOperations: {
       create_subtask: ['operation', 'taskId', 'subtaskData'],
-      update_subtask: ['operation', 'subtaskId', 'subtaskData'],
-      get_subtask: ['operation', 'subtaskId'],
-      get_next_subtask: ['operation', 'taskId'],
+      update_subtask: ['operation', 'taskId', 'subtaskId', 'updateData'],
+      get_subtask: ['operation', 'taskId', 'subtaskId', 'includeEvidence'],
+      get_next_subtask: ['operation', 'taskId', 'currentSubtaskId', 'status'],
     },
   };
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly schemaDefinitionGenerator: SchemaDefinitionGeneratorService,
+  ) {}
 
   /**
-   * 🎯 PHASE 4.1: Enhanced public method for direct schema extraction
-   *
-   * This is the key method that enables schema-based parameter extraction
-   * for MCP_CALL operations in workflow JSON files
+   * 🎯 MAIN: Extract schema definition and examples using the dedicated generator service
    */
   extractFromServiceSchema(
     serviceName: string,
     operation?: string,
   ): {
+    schemaDefinition: string;
     requiredParameters: string[];
     optionalParameters: string[];
-    parameterDetails: Record<string, any>;
     validationSchema: ZodSchema | null;
+    schemaStructure?: Record<string, any>;
     extractionMetadata: {
       serviceName: string;
       operation: string | undefined;
@@ -108,208 +124,101 @@ export class RequiredInputExtractorService {
     };
   } {
     this.logger.debug(
-      `🎯 PHASE 4.1: Extracting schema parameters for ${serviceName}.${operation}`,
+      `🎯 Extracting schema definition for ${serviceName}.${operation}`,
     );
 
     try {
       const schema = this.serviceSchemas[serviceName];
       if (!schema) {
         this.logger.warn(`❌ No schema found for service: ${serviceName}`);
-        return this.createFallbackExtraction(serviceName, operation);
+        return this.createFallbackSchemaDefinition(serviceName, operation);
       }
 
-      // 🎯 Enhanced schema introspection
-      const extractionResult = this.performEnhancedSchemaExtraction(
-        schema,
+      // 🎯 Use the dedicated schema definition generator
+      const { schemaDefinition } =
+        this.schemaDefinitionGenerator.generateSchemaDefinition(
+          schema,
+          serviceName,
+          operation,
+        );
+
+      // 🎯 Get the schema structure from the generator service
+      const schemaStructure =
+        this.schemaDefinitionGenerator.parseZodSchemaToStructure(schema);
+
+      const basicParams = this.getOperationSpecificParameters(
         serviceName,
         operation,
       );
 
       this.logger.debug(
-        `✅ Schema extraction completed for ${serviceName}.${operation}: ${extractionResult.requiredParameters.length} required, ${extractionResult.optionalParameters.length} optional`,
+        `✅ Schema definition extraction completed for ${serviceName}.${operation}`,
       );
-
-      return extractionResult;
-    } catch (error) {
-      this.logger.error(
-        `💥 Schema extraction failed for ${serviceName}.${operation}:`,
-        error,
-      );
-      return this.createErrorExtraction(serviceName, operation, error);
-    }
-  }
-
-  /**
-   * 🎯 PHASE 4.1: Enhanced schema introspection with comprehensive parameter detection
-   */
-  private performEnhancedSchemaExtraction(
-    schema: ZodSchema,
-    serviceName: string,
-    operation?: string,
-  ): {
-    requiredParameters: string[];
-    optionalParameters: string[];
-    parameterDetails: Record<string, any>;
-    validationSchema: ZodSchema;
-    extractionMetadata: any;
-  } {
-    const requiredParameters: string[] = [];
-    const optionalParameters: string[] = [];
-    const parameterDetails: Record<string, any> = {};
-
-    try {
-      // 🎯 Zod schema introspection
-      const schemaShape = (schema as any)._def?.shape;
-      if (schemaShape) {
-        Object.entries(schemaShape).forEach(([key, value]: [string, any]) => {
-          const fieldInfo = this.analyzeSchemaField(
-            key,
-            value,
-            serviceName,
-            operation,
-          );
-
-          if (fieldInfo.isRequired) {
-            requiredParameters.push(key);
-          } else {
-            optionalParameters.push(key);
-          }
-
-          parameterDetails[key] = fieldInfo;
-        });
-      }
-
-      // 🎯 Add operation-specific parameters from mapping
-      const operationSpecific = this.getOperationSpecificParameters(
-        serviceName,
-        operation,
-      );
-      operationSpecific.forEach((param) => {
-        if (
-          !requiredParameters.includes(param) &&
-          !optionalParameters.includes(param)
-        ) {
-          requiredParameters.push(param);
-          parameterDetails[param] = {
-            type: 'operation-specific',
-            description: `Required parameter for ${serviceName}.${operation}`,
-            isRequired: true,
-          };
-        }
-      });
 
       return {
-        requiredParameters,
-        optionalParameters,
-        parameterDetails,
+        schemaDefinition,
+        requiredParameters: basicParams,
+        optionalParameters: [],
         validationSchema: schema,
+        schemaStructure,
         extractionMetadata: {
           serviceName,
           operation: operation || 'unknown',
           schemaFound: true,
-          extractionMethod: 'enhanced-zod-introspection',
-          parametersFound:
-            requiredParameters.length + optionalParameters.length,
-          requiredCount: requiredParameters.length,
-          optionalCount: optionalParameters.length,
+          extractionMethod: 'dedicated-schema-generator',
+          parametersFound: basicParams.length,
         },
       };
-    } catch (_error) {
-      this.logger.warn(
-        `⚠️ Enhanced extraction failed, falling back to operation mapping for ${serviceName}.${operation}`,
+    } catch (error) {
+      this.logger.error(
+        `💥 Schema definition extraction failed for ${serviceName}.${operation}:`,
+        error,
       );
-      return this.fallbackToOperationMapping(serviceName, operation, schema);
+      return this.createErrorSchemaDefinition(serviceName, operation, error);
     }
   }
 
   /**
-   * 🎯 PHASE 4.1: Analyze individual schema fields with comprehensive type detection
+   * 🎯 CORE: Extract required inputs from step actions (workflow-specific logic)
    */
-  private analyzeSchemaField(
-    fieldName: string,
-    fieldValue: any,
-    serviceName: string,
-    operation?: string,
-  ): {
-    type: string;
-    description: string;
-    isRequired: boolean;
-    defaultValue?: any;
-    enum?: string[];
-  } {
-    const typeName = fieldValue._def?.typeName;
-    let isRequired = true;
-    let defaultValue = undefined;
-    let description = `Parameter for ${serviceName}.${operation}`;
+  extractRequiredInputFromStepActions(
+    stepId: string | null,
+    stepActions: any[],
+  ): string[] {
+    const requiredInputs = new Set<string>();
 
-    // 🎯 Check for optional/default values
-    if (typeName === 'ZodOptional') {
-      isRequired = false;
-      const innerType = fieldValue._def?.innerType;
-      if (innerType) {
-        description = this.getFieldDescription(
-          fieldName,
-          innerType._def?.typeName,
+    // Add essential workflow inputs
+    this.addEssentialWorkflowInputs(requiredInputs);
+
+    // Process each step action
+    stepActions.forEach((action) => {
+      if (action.type === 'MCP_CALL' && action.data?.serviceName) {
+        const serviceParams = this.getOperationSpecificParameters(
+          action.data.serviceName,
+          action.data.operation,
         );
+        serviceParams.forEach((param) => requiredInputs.add(param));
       }
-    } else if (typeName === 'ZodDefault') {
-      isRequired = false;
-      defaultValue = fieldValue._def?.defaultValue;
-      description = this.getFieldDescription(
-        fieldName,
-        fieldValue._def?.innerType?._def?.typeName,
-      );
-    } else {
-      description = this.getFieldDescription(fieldName, typeName);
-    }
+    });
 
-    // 🎯 Extract enum values if present
-    let enumValues = undefined;
-    if (typeName === 'ZodEnum') {
-      enumValues = fieldValue._def?.values;
-    }
+    this.logger.debug(
+      `Extracted ${requiredInputs.size} required inputs for step ${stepId}`,
+    );
 
-    return {
-      type: typeName || 'unknown',
-      description,
-      isRequired,
-      defaultValue,
-      enum: enumValues,
-    };
+    return Array.from(requiredInputs);
   }
 
   /**
-   * 🎯 PHASE 4.1: Generate meaningful field descriptions
+   * 🎯 LEGACY: Maintain compatibility with existing workflow guidance extraction
    */
-  private getFieldDescription(fieldName: string, typeName?: string): string {
-    const descriptions: Record<string, string> = {
-      operation: 'The operation to perform on the service',
-      taskId: 'Unique identifier for the task',
-      id: 'Unique identifier for the resource',
-      taskData: 'Task data object containing task details',
-      planData: 'Planning data object with plan specifications',
-      researchData: 'Research data object with research parameters',
-      reviewData: 'Review data object with review criteria',
-      subtaskData: 'Subtask data object with subtask details',
-      description: 'Detailed description of the operation or resource',
-      codebaseAnalysis: 'Analysis data for codebase understanding',
-      includeDescription: 'Whether to include description in response',
-      includeAnalysis: 'Whether to include analysis data in response',
-      includeBatches: 'Whether to include batch data in response',
-      fromRole: 'Source role for delegation',
-      toRole: 'Target role for delegation',
-      message: 'Message or instructions for the operation',
-      filters: 'Filter criteria for list operations',
-    };
-
-    const baseDescription = descriptions[fieldName] || `${fieldName} parameter`;
-    const typeDescription = typeName ? ` (${typeName})` : '';
-
-    return baseDescription + typeDescription;
+  extractRequiredInput(_stepId: string | null, _guidance: any): string[] {
+    // Legacy method - now delegates to step actions extraction
+    this.logger.debug('Using legacy extractRequiredInput method');
+    return ['taskId', 'roleId', 'projectPath'];
   }
 
   /**
-   * 🎯 PHASE 4.1: Get operation-specific parameters from mapping
+   * 🎯 HELPER: Get operation-specific parameters from mapping
    */
   private getOperationSpecificParameters(
     serviceName: string,
@@ -323,61 +232,26 @@ export class RequiredInputExtractorService {
   }
 
   /**
-   * 🎯 PHASE 4.1: Fallback to operation mapping when schema introspection fails
+   * 🎯 HELPER: Add essential workflow inputs that are always needed
    */
-  private fallbackToOperationMapping(
-    serviceName: string,
-    operation: string | undefined,
-    schema: ZodSchema,
-  ): {
-    requiredParameters: string[];
-    optionalParameters: string[];
-    parameterDetails: Record<string, any>;
-    validationSchema: ZodSchema;
-    extractionMetadata: any;
-  } {
-    const operationParams = this.getOperationSpecificParameters(
-      serviceName,
-      operation,
-    );
-    const parameterDetails: Record<string, any> = {};
-
-    operationParams.forEach((param) => {
-      parameterDetails[param] = {
-        type: 'mapped-parameter',
-        description: this.getFieldDescription(param),
-        isRequired: true,
-      };
-    });
-
-    return {
-      requiredParameters: operationParams,
-      optionalParameters: [],
-      parameterDetails,
-      validationSchema: schema,
-      extractionMetadata: {
-        serviceName,
-        operation: operation || 'unknown',
-        schemaFound: true,
-        extractionMethod: 'operation-mapping-fallback',
-        parametersFound: operationParams.length,
-        requiredCount: operationParams.length,
-        optionalCount: 0,
-      },
-    };
+  private addEssentialWorkflowInputs(requiredInputs: Set<string>): void {
+    requiredInputs.add('taskId');
+    requiredInputs.add('roleId');
+    requiredInputs.add('projectPath');
   }
 
   /**
-   * 🎯 PHASE 4.1: Create fallback extraction when no schema is found
+   * 🎯 FALLBACK: Create fallback schema definition when no schema is found
    */
-  private createFallbackExtraction(
+  private createFallbackSchemaDefinition(
     serviceName: string,
     operation?: string,
   ): {
+    schemaDefinition: string;
     requiredParameters: string[];
     optionalParameters: string[];
-    parameterDetails: Record<string, any>;
     validationSchema: null;
+    schemaStructure?: Record<string, any>;
     extractionMetadata: any;
   } {
     const operationParams = this.getOperationSpecificParameters(
@@ -389,25 +263,17 @@ export class RequiredInputExtractorService {
         ? operationParams
         : ['operation', 'executionData'];
 
-    const parameterDetails: Record<string, any> = {};
-    fallbackParams.forEach((param) => {
-      parameterDetails[param] = {
-        type: 'fallback-parameter',
-        description: this.getFieldDescription(param),
-        isRequired: true,
-      };
-    });
-
     return {
+      schemaDefinition: `No schema found for ${serviceName}.${operation}. Use basic parameters: ${fallbackParams.join(', ')}`,
       requiredParameters: fallbackParams,
       optionalParameters: [],
-      parameterDetails,
       validationSchema: null,
+      schemaStructure: undefined,
       extractionMetadata: {
         serviceName,
         operation: operation || 'unknown',
         schemaFound: false,
-        extractionMethod: 'fallback-parameters',
+        extractionMethod: 'fallback-definition',
         parametersFound: fallbackParams.length,
         warning: `No schema found for ${serviceName}, using fallback parameters`,
       },
@@ -415,35 +281,26 @@ export class RequiredInputExtractorService {
   }
 
   /**
-   * 🎯 PHASE 4.1: Create error extraction when extraction fails
+   * 🎯 ERROR: Create error schema definition when extraction fails
    */
-  private createErrorExtraction(
+  private createErrorSchemaDefinition(
     serviceName: string,
     operation: string | undefined,
     error: any,
   ): {
+    schemaDefinition: string;
     requiredParameters: string[];
     optionalParameters: string[];
-    parameterDetails: Record<string, any>;
     validationSchema: null;
+    schemaStructure?: Record<string, any>;
     extractionMetadata: any;
   } {
     return {
+      schemaDefinition: `Error extracting schema for ${serviceName}.${operation}: ${error.message}`,
       requiredParameters: ['operation', 'executionData'],
       optionalParameters: [],
-      parameterDetails: {
-        operation: {
-          type: 'error-fallback',
-          description: 'Operation name (required due to extraction error)',
-          isRequired: true,
-        },
-        executionData: {
-          type: 'error-fallback',
-          description: 'Execution data (fallback due to extraction error)',
-          isRequired: true,
-        },
-      },
       validationSchema: null,
+      schemaStructure: undefined,
       extractionMetadata: {
         serviceName,
         operation: operation || 'unknown',
@@ -454,67 +311,5 @@ export class RequiredInputExtractorService {
         warning: 'Schema extraction failed, using minimal fallback parameters',
       },
     };
-  }
-
-  /**
-   * 🎯 NEW: Extract required inputs from step actions
-   * Analyzes step actions to determine MCP operation parameter requirements
-   */
-  extractRequiredInputFromStepActions(
-    stepId: string | null,
-    stepActions: any[],
-  ): string[] {
-    const requiredInputs = new Set<string>();
-
-    // 🎯 PRIMARY: Extract from schemas for MCP service parameters
-    stepActions?.forEach((action: any) => {
-      if (action.actionType === 'MCP_CALL' && action.actionData?.serviceName) {
-        const extraction = this.extractFromServiceSchema(
-          action.actionData.serviceName,
-          action.actionData.operation,
-        );
-        extraction.requiredParameters.forEach((input: string) =>
-          requiredInputs.add(input),
-        );
-        // Add a few important optional parameters
-        extraction.optionalParameters
-          .slice(0, 2)
-          .forEach((input: string) => requiredInputs.add(input));
-      }
-    });
-
-    // 🎯 SECONDARY: Add essential workflow inputs
-    this.addEssentialWorkflowInputs(requiredInputs);
-
-    // 🎯 OPTIMIZATION: Cap at reasonable limit but don't artificially restrict schema params
-    const result = Array.from(requiredInputs);
-
-    this.logger.debug(
-      `Extracted ${result.length} schema-based inputs for step ${stepId}: ${result.join(', ')}`,
-    );
-    return result;
-  }
-
-  /**
-   * 🎯 LEGACY: Extract required inputs with proper schema introspection
-   * @deprecated Use extractRequiredInputFromStepActions instead
-   */
-  extractRequiredInput(
-    _stepId: string | null,
-    _guidance: WorkflowGuidance,
-  ): string[] {
-    // Return basic inputs since WorkflowGuidance doesn't contain step actions
-    const requiredInputs = new Set<string>();
-    this.addEssentialWorkflowInputs(requiredInputs);
-    return Array.from(requiredInputs);
-  }
-
-  /**
-   * 🎯 ESSENTIAL: Add core workflow inputs that are always needed
-   */
-  private addEssentialWorkflowInputs(requiredInputs: Set<string>): void {
-    requiredInputs.add('taskId');
-    requiredInputs.add('roleId');
-    requiredInputs.add('projectPath');
   }
 }

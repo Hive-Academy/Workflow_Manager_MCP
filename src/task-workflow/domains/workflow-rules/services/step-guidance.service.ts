@@ -1,15 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../prisma/prisma.service';
+import { RequiredInputExtractorService } from './required-input-extractor.service';
 import { WorkflowStep, StepAction } from 'generated/prisma';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { StepDataUtils } from '../utils/step-data.utils';
+import {
+  StepNotFoundError,
+  buildGuidanceFromDatabase,
+} from '../utils/step-service-shared.utils';
 
 // ===================================================================
-// 🔥 STEP GUIDANCE SERVICE - COMPLETE REVAMP FOR MCP-ONLY MODEL
+// 🔥 STEP GUIDANCE SERVICE - DATABASE-ONLY MODEL + DYNAMIC PARAMETERS
 // ===================================================================
-// Purpose: Provide MCP actions and enhanced guidance for AI execution
-// Scope: MCP_CALL action processing, enhanced guidance from workflow-steps.json
-// ZERO Legacy Support: Complete removal of all non-MCP logic
+// Purpose: Provide MCP actions and step guidance from database only
+// Scope: MCP_CALL action processing, step guidance from database
+// ZERO JSON File Dependencies: Complete database-driven approach
+// ✅ FIXED: Integrated RequiredInputExtractorService for dynamic parameter extraction
 
 // 🎯 STRICT TYPE DEFINITIONS - ZERO ANY USAGE
 
@@ -45,6 +50,10 @@ export interface McpCallAction {
   operation: string;
   parameters: ServiceParameters;
   sequenceOrder: number;
+  // ✅ NEW: Dynamic parameter information
+  requiredParameters?: string[];
+  optionalParameters?: string[];
+  schemaStructure?: Record<string, any>;
 }
 
 export interface ServiceParameters {
@@ -82,33 +91,15 @@ export interface WorkflowStepWithActions extends WorkflowStep {
   actions: StepAction[];
 }
 
-export interface WorkflowStepsConfig {
-  workflowSteps: Array<{
-    name: string;
-    behavioralContext: BehavioralGuidance;
-    approachGuidance: ApproachGuidance;
-    qualityChecklist?: string[];
-    successCriteria?: string[];
-    failureCriteria?: string[];
-    troubleshooting?: string[];
-  }>;
-}
-
 export interface McpActionData {
   serviceName: string;
   operation: string;
-  parameters: ServiceParameters;
+  // ✅ FIXED: Parameters are now optional since they're generated dynamically
+  parameters?: ServiceParameters;
   sequenceOrder?: number;
 }
 
-// Custom Error Classes
-export class StepNotFoundError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'StepNotFoundError';
-  }
-}
-
+// Custom Error Classes - Using shared utilities
 export class StepConfigNotFoundError extends Error {
   constructor(message: string) {
     super(message);
@@ -120,34 +111,39 @@ export class StepConfigNotFoundError extends Error {
 export class StepGuidanceService {
   private readonly logger = new Logger(StepGuidanceService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    // ✅ NEW: Inject RequiredInputExtractorService for dynamic parameter extraction
+    private readonly requiredInputExtractorService: RequiredInputExtractorService,
+  ) {}
 
   /**
-   * 🔥 COMPLETE REVAMP: Get MCP actions and enhanced guidance for AI execution
-   * ONLY processes MCP_CALL actions - zero legacy support
+   * 🔥 DATABASE-ONLY: Get MCP actions and step guidance from database
+   * ✅ FIXED: Now uses dynamic parameter extraction
    */
   async getStepGuidance(
     context: StepGuidanceContext,
   ): Promise<StepGuidanceResult> {
     const step = await this.getStepWithMcpActions(context.stepId);
     if (!step) {
-      throw new StepNotFoundError(`Step not found: ${context.stepId}`);
+      throw new StepNotFoundError(
+        context.stepId,
+        'StepGuidanceService',
+        'getStepGuidance',
+      );
     }
 
-    // Extract MCP actions for AI execution
-    const mcpActions = this.extractMcpActions(step);
+    // ✅ FIXED: Extract MCP actions with dynamic parameter information
+    const mcpActions = this.extractMcpActionsWithDynamicParameters(
+      step,
+      context,
+    );
 
-    // Load enhanced guidance from workflow-steps.json
-    const enhancedGuidance = await this.loadEnhancedGuidance(step);
+    // Get guidance from database step data
+    const enhancedGuidance = buildGuidanceFromDatabase(step);
 
     return {
-      step: {
-        id: step.id,
-        name: step.name,
-        description: enhancedGuidance.behavioralContext.approach,
-        stepType: step.stepType,
-        estimatedTime: step.estimatedTime || '5-10 minutes',
-      },
+      step: StepDataUtils.extractStepInfo(step),
       mcpActions,
       behavioralGuidance: enhancedGuidance.behavioralContext,
       approachGuidance: enhancedGuidance.approachGuidance,
@@ -159,7 +155,7 @@ export class StepGuidanceService {
   }
 
   /**
-   * Get step validation criteria for AI execution validation
+   * Get step validation criteria from database
    */
   async getStepValidationCriteria(stepId: string): Promise<{
     successCriteria: string[];
@@ -171,15 +167,19 @@ export class StepGuidanceService {
     });
 
     if (!step) {
-      throw new StepNotFoundError(`Step not found: ${stepId}`);
+      throw new StepNotFoundError(
+        stepId,
+        'StepGuidanceService',
+        'getStepValidationCriteria',
+      );
     }
 
-    const enhancedGuidance = await this.loadEnhancedGuidance(step);
+    const guidance = buildGuidanceFromDatabase(step);
 
     return {
-      successCriteria: enhancedGuidance.successCriteria,
-      failureCriteria: enhancedGuidance.failureCriteria,
-      qualityChecklist: enhancedGuidance.qualityChecklist,
+      successCriteria: guidance.successCriteria,
+      failureCriteria: guidance.failureCriteria,
+      qualityChecklist: guidance.qualityChecklist,
     };
   }
 
@@ -201,92 +201,163 @@ export class StepGuidanceService {
     });
   }
 
-  private extractMcpActions(step: WorkflowStepWithActions): McpCallAction[] {
+  // ✅ NEW: Extract MCP actions with dynamic parameter information
+  private extractMcpActionsWithDynamicParameters(
+    step: WorkflowStepWithActions,
+    context: StepGuidanceContext,
+  ): McpCallAction[] {
     return step.actions.map((action) => {
       const actionData = this.parseMcpActionData(action.actionData);
+
+      // ✅ NEW: Generate dynamic parameters using RequiredInputExtractorService
+      const dynamicParameterInfo = this.generateDynamicParameterInfo(
+        actionData.serviceName,
+        actionData.operation,
+        context,
+      );
+
       return {
         id: action.id,
         name: action.name,
         serviceName: actionData.serviceName,
         operation: actionData.operation,
-        parameters: actionData.parameters,
+        parameters: dynamicParameterInfo.parameters,
         sequenceOrder: actionData.sequenceOrder || 1,
+        // ✅ NEW: Include dynamic parameter schema information
+        requiredParameters: dynamicParameterInfo.requiredParameters,
+        optionalParameters: dynamicParameterInfo.optionalParameters,
+        schemaStructure: dynamicParameterInfo.schemaStructure,
       };
     });
   }
 
+  // ✅ FIXED: Remove hardcoded parameter validation - using shared utilities
   private parseMcpActionData(actionData: unknown): McpActionData {
-    if (!actionData || typeof actionData !== 'object') {
-      throw new Error('Invalid MCP action data: not an object');
+    const validation = StepDataUtils.validateMcpActionData(actionData);
+
+    if (!validation.isValid) {
+      throw new Error(
+        `Invalid MCP action data: ${validation.errors.join(', ')}`,
+      );
     }
 
     const data = actionData as Record<string, unknown>;
 
-    if (typeof data.serviceName !== 'string') {
-      throw new Error('Invalid MCP action data: serviceName must be string');
-    }
-
-    if (typeof data.operation !== 'string') {
-      throw new Error('Invalid MCP action data: operation must be string');
-    }
-
-    if (!data.parameters || typeof data.parameters !== 'object') {
-      throw new Error('Invalid MCP action data: parameters must be object');
-    }
-
+    // ✅ FIXED: Parameters are no longer required - they're generated dynamically
     return {
-      serviceName: data.serviceName,
-      operation: data.operation,
-      parameters: data.parameters as ServiceParameters,
+      serviceName: validation.serviceName!,
+      operation: validation.operation!,
+      parameters: data.parameters as ServiceParameters, // Optional now
       sequenceOrder:
         typeof data.sequenceOrder === 'number' ? data.sequenceOrder : undefined,
     };
   }
 
-  private async loadEnhancedGuidance(
-    step: WorkflowStep,
-  ): Promise<EnhancedStepGuidance> {
-    const workflowStepsPath = path.join(
-      process.cwd(),
-      'enhanced-workflow-rules/json',
-      step.roleId,
-      'workflow-steps.json',
-    );
-
+  // ✅ NEW: Generate dynamic parameter information using RequiredInputExtractorService
+  private generateDynamicParameterInfo(
+    serviceName: string,
+    operation: string,
+    context: StepGuidanceContext,
+  ): {
+    parameters: ServiceParameters;
+    requiredParameters: string[];
+    optionalParameters: string[];
+    schemaStructure: Record<string, any>;
+  } {
     try {
-      const workflowStepsData = JSON.parse(
-        await fs.readFile(workflowStepsPath, 'utf-8'),
-      ) as WorkflowStepsConfig;
-
-      const stepConfig = workflowStepsData.workflowSteps.find(
-        (s) => s.name === step.name,
-      );
-      if (!stepConfig) {
-        throw new StepConfigNotFoundError(
-          `Step config not found: ${step.name} in role ${step.roleId}`,
+      // Use RequiredInputExtractorService for dynamic parameter extraction
+      const extraction =
+        this.requiredInputExtractorService.extractFromServiceSchema(
+          serviceName,
+          operation,
         );
-      }
+
+      // Generate basic parameters with context
+      const parameters: ServiceParameters = {
+        taskId: context.taskId,
+        stepId: context.stepId,
+        roleId: context.roleId,
+      };
+
+      this.logger.debug(
+        `Generated dynamic parameters for ${serviceName}.${operation}: ${extraction.requiredParameters.length} required, ${extraction.optionalParameters.length} optional`,
+      );
 
       return {
-        behavioralContext: stepConfig.behavioralContext,
-        approachGuidance: stepConfig.approachGuidance,
-        qualityChecklist: stepConfig.qualityChecklist || [],
-        successCriteria: stepConfig.successCriteria || [],
-        failureCriteria: stepConfig.failureCriteria || [],
-        troubleshooting: stepConfig.troubleshooting || [],
+        parameters,
+        requiredParameters: extraction.requiredParameters,
+        optionalParameters: extraction.optionalParameters,
+        schemaStructure: extraction.schemaStructure || {},
       };
     } catch (error) {
-      if (error instanceof StepConfigNotFoundError) {
-        throw error;
-      }
+      this.logger.warn(
+        `Failed to extract dynamic parameters for ${serviceName}.${operation}: ${error}`,
+      );
 
-      this.logger.error(
-        `Failed to load enhanced guidance for step ${step.name}:`,
-        error,
-      );
-      throw new Error(
-        `Failed to load enhanced guidance: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      // Fallback to basic parameters
+      return {
+        parameters: {
+          taskId: context.taskId,
+          stepId: context.stepId,
+          roleId: context.roleId,
+        },
+        requiredParameters: ['operation', 'executionData'],
+        optionalParameters: [],
+        schemaStructure: {
+          operation: {
+            type: 'string',
+            required: true,
+            description: 'Operation name',
+          },
+          executionData: {
+            type: 'any',
+            required: true,
+            description: 'Operation data',
+          },
+        },
+      };
     }
+  }
+
+  /**
+   * 🆕 DATABASE-ONLY: Build guidance from database step data
+   * Replaces JSON file reading with database-driven approach
+   * Uses shared utilities for data extraction
+   */
+  private buildGuidanceFromDatabase(step: WorkflowStep): EnhancedStepGuidance {
+    return {
+      behavioralContext: this.extractBehavioralContext(step.behavioralContext),
+      approachGuidance: this.extractApproachGuidance(step.approachGuidance),
+      qualityChecklist: this.extractQualityChecklist(step.qualityChecklist),
+      successCriteria: this.extractSuccessCriteria(step.actionData),
+      failureCriteria: this.extractFailureCriteria(step.actionData),
+      troubleshooting: this.extractTroubleshooting(step.actionData),
+    };
+  }
+
+  private extractBehavioralContext(
+    behavioralContext: unknown,
+  ): BehavioralGuidance {
+    return StepDataUtils.extractBehavioralContext(behavioralContext);
+  }
+
+  private extractApproachGuidance(approachGuidance: unknown): ApproachGuidance {
+    return StepDataUtils.extractApproachGuidance(approachGuidance);
+  }
+
+  private extractQualityChecklist(qualityChecklist: unknown): string[] {
+    return StepDataUtils.extractQualityChecklist(qualityChecklist);
+  }
+
+  private extractSuccessCriteria(actionData: unknown): string[] {
+    return StepDataUtils.extractSuccessCriteria(actionData);
+  }
+
+  private extractFailureCriteria(actionData: unknown): string[] {
+    return StepDataUtils.extractFailureCriteria(actionData);
+  }
+
+  private extractTroubleshooting(actionData: unknown): string[] {
+    return StepDataUtils.extractTroubleshooting(actionData);
   }
 }

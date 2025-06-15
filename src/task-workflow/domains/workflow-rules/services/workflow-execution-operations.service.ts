@@ -12,10 +12,13 @@ import {
   CompletionSummary,
   ProgressOverview,
 } from './execution-analytics.service';
-import { CoreServiceOrchestrator } from './core-service-orchestrator.service';
+import {
+  ConfigurableService,
+  BaseServiceConfig,
+} from '../utils/configurable-service.base';
 
 // Configuration interfaces to eliminate hardcoding
-export interface ExecutionOperationsConfig {
+export interface ExecutionOperationsConfig extends BaseServiceConfig {
   defaults: {
     executionMode: 'GUIDED' | 'AUTOMATED' | 'HYBRID';
     orchestrationMode: 'sequential' | 'parallel';
@@ -53,7 +56,7 @@ export interface ExecutionsSummary {
 }
 
 export interface WorkflowExecutionInput {
-  taskId: number;
+  taskId?: number;
   executionId?: string;
   roleName?: string;
   executionMode?: 'GUIDED' | 'AUTOMATED' | 'HYBRID';
@@ -79,11 +82,11 @@ export interface WorkflowExecutionInput {
  * Delegates to specialized services following Single Responsibility Principle.
  */
 @Injectable()
-export class WorkflowExecutionOperationsService {
+export class WorkflowExecutionOperationsService extends ConfigurableService<ExecutionOperationsConfig> {
   private readonly logger = new Logger(WorkflowExecutionOperationsService.name);
 
   // Configuration with sensible defaults
-  private readonly config: ExecutionOperationsConfig = {
+  protected readonly defaultConfig: ExecutionOperationsConfig = {
     defaults: {
       executionMode: 'GUIDED',
       orchestrationMode: 'sequential',
@@ -105,34 +108,14 @@ export class WorkflowExecutionOperationsService {
     private readonly workflowExecution: WorkflowExecutionService,
     private readonly dataEnricher: ExecutionDataEnricherService,
     private readonly analytics: ExecutionAnalyticsService,
-    private readonly coreServiceOrchestrator: CoreServiceOrchestrator,
-  ) {}
-
-  /**
-   * Update execution operations configuration
-   */
-  updateConfig(config: Partial<ExecutionOperationsConfig>): void {
-    if (config.defaults) {
-      Object.assign(this.config.defaults, config.defaults);
-    }
-    if (config.validation) {
-      Object.assign(this.config.validation, config.validation);
-    }
-    if (config.performance) {
-      Object.assign(this.config.performance, config.performance);
-    }
-    this.logger.log('Execution operations configuration updated');
+  ) {
+    super();
+    this.initializeConfig();
   }
 
-  /**
-   * Get current configuration
-   */
-  getConfig(): ExecutionOperationsConfig {
-    return {
-      defaults: { ...this.config.defaults },
-      validation: { ...this.config.validation },
-      performance: { ...this.config.performance },
-    };
+  // Optional: Override configuration change hook
+  protected onConfigUpdate(): void {
+    this.logger.log('Execution operations configuration updated');
   }
 
   /**
@@ -142,13 +125,18 @@ export class WorkflowExecutionOperationsService {
     input: WorkflowExecutionInput,
     operation: string,
   ): void {
-    if (!input.taskId) {
-      throw new Error(`taskId is required for ${operation}`);
+    // Special handling for operations that can work without taskId
+
+    // get_execution can work with either taskId OR executionId
+    if (operation === 'get_execution') {
+      if (!input.taskId && !input.executionId) {
+        throw new Error(`get_execution requires either taskId or executionId`);
+      }
     }
 
     if (
       operation === 'create' &&
-      this.config.validation.requireRoleName &&
+      this.getConfigValue('validation').requireRoleName &&
       !input.roleName
     ) {
       throw new Error(`roleName is required for ${operation}`);
@@ -156,7 +144,7 @@ export class WorkflowExecutionOperationsService {
 
     if (
       ['update', 'complete'].includes(operation) &&
-      this.config.validation.requireExecutionId &&
+      this.getConfigValue('validation').requireExecutionId &&
       !input.executionId
     ) {
       throw new Error(`executionId is required for ${operation}`);
@@ -164,9 +152,10 @@ export class WorkflowExecutionOperationsService {
 
     if (input.orchestrationConfig?.serviceCalls) {
       const serviceCallCount = input.orchestrationConfig.serviceCalls.length;
-      if (serviceCallCount > this.config.validation.maxServiceCalls) {
+      const maxServiceCalls = this.getConfigValue('validation').maxServiceCalls;
+      if (serviceCallCount > maxServiceCalls) {
         throw new Error(
-          `Too many service calls: ${serviceCallCount}. Maximum allowed: ${this.config.validation.maxServiceCalls}`,
+          `Too many service calls: ${serviceCallCount}. Maximum allowed: ${maxServiceCalls}`,
         );
       }
     }
@@ -183,7 +172,8 @@ export class WorkflowExecutionOperationsService {
     const createInput: CreateWorkflowExecutionInput = {
       taskId: input.taskId,
       currentRoleId: input.roleName!, // Safe after validation
-      executionMode: input.executionMode || this.config.defaults.executionMode,
+      executionMode:
+        input.executionMode || this.getConfigValue('defaults').executionMode,
       autoCreatedTask: input.autoCreatedTask,
       executionContext: input.executionContext,
     };
@@ -208,6 +198,11 @@ export class WorkflowExecutionOperationsService {
     let execution: any;
 
     if (!input.executionId) {
+      if (!input.taskId) {
+        throw new Error(
+          `Either taskId or executionId is required for get operation`,
+        );
+      }
       execution = await this.workflowExecution.getExecutionByTaskId(
         input.taskId,
       );
@@ -365,35 +360,6 @@ export class WorkflowExecutionOperationsService {
         byRole: this.analytics.groupExecutionsByRole(executions),
         progressOverview: this.analytics.calculateOverallProgress(executions),
       },
-    };
-  }
-
-  /**
-   * Execute step with services orchestration
-   */
-  async executeStepWithServices(
-    input: WorkflowExecutionInput,
-  ): Promise<Record<string, unknown>> {
-    if (!input.stepId || !input.orchestrationConfig?.serviceCalls) {
-      throw new Error(
-        'stepId and orchestrationConfig.serviceCalls are required for executing a step with services',
-      );
-    }
-
-    const result = await this.coreServiceOrchestrator.executeStepWithServices(
-      input.stepId,
-      input.orchestrationConfig.serviceCalls,
-      input.orchestrationConfig.executionMode ||
-        this.config.defaults.orchestrationMode,
-      input.orchestrationConfig.continueOnFailure ??
-        this.config.defaults.continueOnFailure,
-    );
-
-    return {
-      executionResult: result,
-      taskId: input.taskId,
-      stepId: input.stepId,
-      timestamp: new Date().toISOString(),
     };
   }
 

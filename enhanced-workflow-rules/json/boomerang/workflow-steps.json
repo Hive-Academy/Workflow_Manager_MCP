@@ -6,76 +6,60 @@
       "description": "CRITICAL: Complete Git operations before task creation. STOP workflow if any step fails.",
       "sequenceNumber": 1,
       "isRequired": true,
-      "estimatedTime": "2-4 minutes",
+      "estimatedTime": "3-5 minutes",
       "stepType": "ACTION",
       "behavioralContext": {
-        "approach": "Mandatory git state verification and feature branch creation",
+        "approach": "Complete git operations verification and setup before task creation",
         "principles": [
-          "NEVER proceed with dirty git state, always commit or stash changes before proceeding based on user input",
-          "Always create feature branch for new work, if user wants to continue working on existing task, use the same branch",
-          "Follow strict git workflow protocols",
-          "STOP workflow immediately if git operations fail"
+          "Verify git repository status and configuration",
+          "Ensure clean working directory or proper handling of existing changes",
+          "Create feature branch with descriptive naming",
+          "Verify all git operations work before proceeding"
         ],
-        "methodology": "Git-first workflow with mandatory verification and branch creation",
-        "gitOperations": {
-          "stateVerification": "Verify clean working directory using 'git status --porcelain' (should return empty)",
-          "repositoryValidation": "Verify git repository and remote configuration using 'git rev-parse --git-dir' and 'git remote -v'",
-          "updateProcess": "Fetch latest changes from origin using 'git fetch origin'",
-          "branchCreation": "Create feature branch with naming convention: feature/TSK-XXX-description",
-          "verification": "Verify branch creation using 'git branch --show-current'"
-        },
-        "errorHandling": {
-          "dirtyState": "CRITICAL: Git state is not clean. Commit or stash changes before proceeding.",
-          "noRepository": "CRITICAL: Not a valid git repository.",
-          "noRemotes": "CRITICAL: No git remotes configured.",
-          "fetchFailure": "CRITICAL: Failed to fetch from origin.",
-          "branchFailure": "CRITICAL: Failed to create feature branch.",
-          "verificationFailure": "CRITICAL: Branch creation verification failed."
+        "methodology": "Git-first approach with comprehensive verification",
+        "setupPhases": {
+          "statusVerification": "Check git status and verify repository state",
+          "branchManagement": "Create appropriate feature branch for task work",
+          "configurationCheck": "Verify git configuration and repository setup",
+          "operationValidation": "Test basic git operations work correctly"
         }
       },
       "approachGuidance": {
         "stepByStep": [
-          "Verify clean working directory using git status --porcelain",
-          "Handle uncommitted changes if present (stash, commit, or clean based on user input)",
-          "Verify repository and remote configuration using git commands",
-          "Fetch latest changes from origin with timeout handling",
-          "Create feature branch with naming convention: feature/TSK-XXX-description",
-          "Verify branch creation and document branch name for task context"
+          "Check git repository status and configuration",
+          "Verify working directory state (clean or with expected changes)",
+          "Create feature branch using descriptive naming convention",
+          "Verify git operations work correctly",
+          "Document any git-related setup or configuration issues"
         ],
-        "commandSequence": [
-          "git status --porcelain (expect empty output)",
-          "git rev-parse --git-dir (verify repository)",
-          "git remote -v (verify remotes configured)",
-          "git fetch origin (update from remote)",
-          "git checkout -b feature/TSK-{{task_id}}-{{task_slug}}",
-          "git branch --show-current (verify branch creation)"
+        "gitOperations": [
+          "Execute 'git status --porcelain' to check working directory",
+          "Create feature branch with format 'feature/TSK-{ID}-{short-description}'",
+          "Verify branch creation and checkout operations work",
+          "Test basic git commands to ensure repository is functional"
         ],
-        "validationSteps": [
-          "Confirm git status returns empty (clean state)",
-          "Confirm repository directory exists and is valid",
-          "Confirm at least one remote is configured",
-          "Confirm fetch completes without errors",
-          "Confirm branch creation succeeds",
-          "Confirm current branch matches expected feature branch name"
+        "errorHandling": [
+          "Handle working directory changes appropriately",
+          "Address any git configuration issues",
+          "Resolve branch naming conflicts if they exist",
+          "Ensure git operations are functional before proceeding"
         ]
       },
       "qualityChecklist": [
-        "Git status is completely clean (no uncommitted changes)",
-        "Repository and remote configuration validated",
-        "Latest changes fetched successfully",
+        "Git repository status verified and documented",
+        "Working directory state handled appropriately",
         "Feature branch created with proper naming convention",
-        "Branch creation verified and documented",
-        "All git operations completed without errors"
+        "Git operations verified to work correctly",
+        "Any git issues identified and resolved"
       ],
       "conditions": [
         {
-          "name": "git_available",
-          "conditionType": "COMMAND_AVAILABLE",
+          "name": "git_repository_exists",
+          "conditionType": "DIRECTORY_EXISTS",
           "logic": {
-            "check": "command_exists",
+            "check": "directory_exists",
             "parameters": {
-              "command": "git",
-              "requiredVersion": "2.0.0"
+              "directories": [".git"]
             }
           },
           "isRequired": true
@@ -87,178 +71,65 @@
       "reportTemplate": "git_integration_setup"
     },
     {
-      "name": "mandatory_source_code_analysis_with_functional_verification",
-      "displayName": "MANDATORY: Source Code Analysis with Functional Verification",
-      "description": "Systematic codebase examination WITH functional testing to verify actual behavior",
+      "name": "mandatory_codebase_analysis_and_task_creation",
+      "displayName": "Task Creation and Codebase Analysis",
+      "description": "Analyze codebase systematically, then create comprehensive task with analysis results",
       "sequenceNumber": 2,
       "isRequired": true,
-      "estimatedTime": "8-12 minutes",
-      "stepType": "ANALYSIS",
-      "behavioralContext": {
-        "approach": "Comprehensive codebase analysis combined with functional verification testing",
-        "principles": [
-          "Never make assumptions about current system state",
-          "Always test actual functionality before decisions",
-          "Document evidence-based findings",
-          "Verify capabilities through hands-on investigation"
-        ],
-        "methodology": "Multi-phase analysis: structural, functional verification, and quality assessment",
-        "analysisPhases": {
-          "structuralAnalysis": "Identify implementation patterns, technology stack, integration patterns, and component interactions",
-          "functionalVerification": "Test current functionality, existing features, validate capabilities, and test assumptions",
-          "qualityAssessment": "Review error handling, testing patterns, performance considerations, and security implementations",
-          "evidenceDocumentation": "Document file locations, testing results, current capabilities, and identified gaps"
-        },
-        "verificationMethods": {
-          "patternIdentification": "Study similar feature implementations with concrete examples",
-          "technologyMapping": "Document technology stack components and versions",
-          "functionalTesting": "Execute existing features to understand actual capabilities",
-          "assumptionValidation": "Test assumptions through actual code execution and testing",
-          "capabilityVerification": "Verify system capabilities through hands-on investigation"
-        }
-      },
-      "approachGuidance": {
-        "stepByStep": [
-          "Identify implementation patterns relevant to current task",
-          "Document technology stack components and versions",
-          "Study similar feature implementations with examples",
-          "Test current functionality using available tools",
-          "Execute existing features to understand capabilities",
-          "Validate assumptions through actual testing",
-          "Review error handling and validation approaches",
-          "Document comprehensive findings with evidence"
-        ],
-        "analysisSteps": [
-          "Examine project structure and identify key directories and files",
-          "Map technology stack including frameworks, libraries, and versions",
-          "Find and analyze similar implementations for patterns and approaches",
-          "Test existing functionality to understand current system behavior"
-        ],
-        "verificationSteps": [
-          "Execute existing features to verify actual capabilities",
-          "Test edge cases and error conditions to understand system limits",
-          "Validate technical assumptions through direct testing",
-          "Document evidence from testing and verification activities"
-        ],
-        "documentationSteps": [
-          "Record file locations and implementation patterns discovered",
-          "Document testing results and verification evidence",
-          "Catalog current capabilities and system limitations",
-          "Identify gaps between requirements and current capabilities"
-        ]
-      },
-      "qualityChecklist": [
-        "Implementation patterns identified and documented",
-        "Technology stack components and versions recorded",
-        "Similar feature implementations analyzed with examples",
-        "Current functionality tested with evidence collected",
-        "Assumptions validated through actual testing",
-        "Error handling and validation approaches reviewed",
-        "Comprehensive findings documented with evidence",
-        "Functional verification results documented"
-      ],
-      "conditions": [
-        {
-          "name": "codebase_accessible",
-          "conditionType": "DIRECTORY_EXISTS",
-          "logic": {
-            "check": "directory_exists",
-            "parameters": {
-              "directories": ["src", "lib", "app"]
-            }
-          },
-          "isRequired": true
-        }
-      ],
-      "actions": [],
-      "triggerReport": true,
-      "reportType": "functional_verification",
-      "reportTemplate": "source_code_analysis_with_verification"
-    },
-    {
-      "name": "mandatory_comprehensive_task_update",
-      "displayName": "MANDATORY: Update Task with Comprehensive Data",
-      "description": "Update the minimal real task with comprehensive data using execution context and codebase analysis",
-      "sequenceNumber": 3,
-      "isRequired": true,
-      "estimatedTime": "5-8 minutes",
+      "estimatedTime": "10-15 minutes",
       "stepType": "ACTION",
       "behavioralContext": {
-        "approach": "Update existing minimal task with comprehensive data using stored execution context and codebase analysis",
+        "approach": "Combined analysis and task creation for efficiency and context preservation",
         "principles": [
-          "Read additional task data from workflow execution context (stored by bootstrap)",
-          "Update existing task with comprehensive description, requirements, and codebase analysis",
-          "Store comprehensive codebase analysis for downstream roles",
-          "Document functional verification results",
-          "Keep existing task ID and slug for continuity"
+          "Perform systematic codebase analysis with functional verification",
+          "Create task immediately with analysis results to preserve context",
+          "Link task to current workflow execution via executionId",
+          "Structure analysis data for downstream role consumption"
         ],
-        "methodology": "Task update with MCP-driven comprehensive data integration and analysis storage",
-        "updateStrategy": {
-          "contextRetrieval": "Retrieve additional task data from workflow execution taskCreationData",
-          "taskUpdate": "Update existing task with comprehensive description and requirements from context",
-          "analysisIntegration": "Structure codebase analysis findings for downstream consumption",
-          "verificationStorage": "Include functional verification results and evidence",
-          "contextUpdate": "Update execution context to mark task as comprehensive"
-        }
+        "methodology": "Analysis → Task Creation → Context Linking"
       },
       "approachGuidance": {
         "stepByStep": [
-          "Retrieve additional task data from workflow execution taskCreationData",
-          "Get current task ID and slug from execution context",
-          "Update existing task with comprehensive description and requirements",
-          "Structure codebase analysis findings for downstream consumption",
-          "Include functional verification results and evidence",
-          "Store git branch information and context",
-          "Update execution context to mark task as comprehensive"
+          "Analyze project structure and identify key patterns",
+          "Document technology stack and architecture findings",
+          "Test current functionality to verify capabilities",
+          "Extract task requirements from user input",
+          "Create comprehensive task with analysis data",
+          "CRITICAL: Include executionId to link task to workflow"
         ],
-        "dataRetrievalSteps": [
-          "Call WorkflowOperations.get_execution_context to get taskCreationData",
-          "Extract task description, requirements, and acceptance criteria",
-          "Get current task ID and slug for update operations",
-          "Prepare comprehensive update data structure"
+        "analysisPhase": [
+          "Map technology stack and versions",
+          "Identify architectural patterns and design principles",
+          "Test functionality to validate current capabilities",
+          "Document findings with evidence"
         ],
-        "updateSteps": [
-          "Call TaskOperations.update with comprehensive data",
-          "Include codebase analysis results in structured format",
-          "Add functional verification evidence and results",
-          "Update git branch information and metadata"
-        ],
-        "contextUpdateSteps": [
-          "Call WorkflowOperations.update_execution_context",
-          "Mark task update as completed",
-          "Update timestamps and completion flags",
-          "Ensure workflow continuity for next steps"
+        "taskCreationPhase": [
+          "Extract requirements from user request",
+          "Structure analysis findings for downstream consumption",
+          "Call TaskOperations.create with ALL required parameters",
+          "Immediately update task status to 'in-progress' using TaskOperations.update",
+          "Verify task creation and execution linking"
         ]
       },
       "qualityChecklist": [
-        "Additional task data successfully retrieved from execution context",
-        "Existing task updated with comprehensive description and requirements",
-        "Codebase analysis structured and complete",
-        "Functional verification results included",
-        "Git branch information recorded",
-        "Execution context updated to reflect comprehensive task",
-        "Task continuity maintained (same ID and slug)"
+        "Architecture patterns and technology stack documented",
+        "Current functionality tested and verified",
+        "Task created with comprehensive description and requirements",
+        "Task status updated to 'in-progress' immediately after creation",
+        "Codebase analysis properly structured in task",
+        "CRITICAL: executionId included in TaskOperations.create call",
+        "Task successfully linked to current workflow execution",
+        "Git branch information recorded in task",
+        "All acceptance criteria clearly defined"
       ],
       "conditions": [
         {
-          "name": "analysis_completed",
+          "name": "git_setup_completed",
           "conditionType": "PREVIOUS_STEP_COMPLETED",
           "logic": {
             "check": "step_completed",
             "parameters": {
-              "stepName": "mandatory_source_code_analysis_with_functional_verification"
-            }
-          },
-          "isRequired": true
-        },
-        {
-          "name": "minimal_task_exists",
-          "conditionType": "EXECUTION_CONTEXT_CHECK",
-          "logic": {
-            "check": "execution_context_contains",
-            "parameters": {
-              "key": "taskUpdatePending",
-              "expectedValue": true
+              "stepName": "mandatory_git_integration_setup"
             }
           },
           "isRequired": true
@@ -266,82 +137,45 @@
       ],
       "actions": [
         {
-          "name": "retrieve_task_update_data",
+          "name": "create_task_with_codebase_analysis",
           "actionType": "MCP_CALL",
           "actionData": {
-            "serviceName": "WorkflowOperations",
-            "operation": "get_execution_context",
-            "parameters": {
-              "executionId": "{{current_execution_id}}",
-              "dataKey": "taskCreationData"
-            }
+            "serviceName": "TaskOperations",
+            "operation": "create",
+            "requiredParameters": [
+              "operation",
+              "executionId",
+              "taskData",
+              "description",
+              "codebaseAnalysis"
+            ]
           },
           "sequenceOrder": 1
         },
         {
-          "name": "update_task_with_comprehensive_data",
+          "name": "update_task_status_to_in_progress",
           "actionType": "MCP_CALL",
           "actionData": {
             "serviceName": "TaskOperations",
             "operation": "update",
-            "parameters": {
-              "id": "{{task_id_from_context}}",
-              "updates": {
-                "description": "{{task_description_from_context}}",
-                "businessRequirements": "{{business_requirements_from_context}}",
-                "technicalRequirements": "{{technical_requirements_from_context}}",
-                "acceptanceCriteria": "{{acceptance_criteria_from_context}}",
-                "gitBranch": "{{created_feature_branch}}",
-                "codebaseAnalysis": {
-                  "architectureFindings": "{{architecture_analysis_results}}",
-                  "problemsIdentified": "{{identified_issues_and_debt}}",
-                  "implementationContext": "{{patterns_and_standards}}",
-                  "integrationPoints": "{{api_and_service_interfaces}}",
-                  "qualityAssessment": "{{testing_and_performance_baseline}}",
-                  "functionalVerification": "{{verification_evidence_and_results}}",
-                  "gitBranch": "{{created_feature_branch}}",
-                  "analyzedBy": "boomerang",
-                  "analysisTimestamp": "{{current_timestamp}}"
-                },
-                "metadata": {
-                  "updatedFromMinimal": true,
-                  "originalTaskId": "{{task_id_from_context}}",
-                  "taskSlug": "{{task_slug_from_context}}",
-                  "comprehensiveUpdateTimestamp": "{{current_timestamp}}"
-                }
-              }
+            "requiredParameters": ["operation", "taskId", "taskData"],
+            "parameterGuidance": {
+              "taskId": "Use the task ID returned from the create operation",
+              "taskData": "Set status to 'in-progress' to indicate work has begun"
             }
           },
           "sequenceOrder": 2
-        },
-        {
-          "name": "update_execution_context",
-          "actionType": "MCP_CALL",
-          "actionData": {
-            "serviceName": "WorkflowOperations",
-            "operation": "update_execution_context",
-            "parameters": {
-              "executionId": "{{current_execution_id}}",
-              "contextUpdates": {
-                "taskUpdatePending": false,
-                "taskComprehensiveUpdate": true,
-                "comprehensiveTaskCompleted": true,
-                "taskUpdateTimestamp": "{{current_timestamp}}"
-              }
-            }
-          },
-          "sequenceOrder": 3
         }
       ],
       "triggerReport": true,
-      "reportType": "comprehensive_task_update",
-      "reportTemplate": "task_comprehensive_update_completion"
+      "reportType": "task_creation_with_analysis",
+      "reportTemplate": "task_creation_completion"
     },
     {
       "name": "research_decision_framework_with_validation",
       "displayName": "Research Decision Framework with Current State Validation",
       "description": "Evaluate research necessity using verified decision criteria and evidence",
-      "sequenceNumber": 4,
+      "sequenceNumber": 3,
       "isRequired": true,
       "estimatedTime": "3-5 minutes",
       "stepType": "ACTION",
@@ -409,12 +243,12 @@
       ],
       "conditions": [
         {
-          "name": "functional_verification_completed",
+          "name": "analysis_and_task_creation_completed",
           "conditionType": "PREVIOUS_STEP_COMPLETED",
           "logic": {
             "check": "step_completed",
             "parameters": {
-              "stepName": "mandatory_source_code_analysis_with_functional_verification"
+              "stepName": "mandatory_codebase_analysis_and_task_creation"
             }
           },
           "isRequired": true
@@ -429,7 +263,7 @@
       "name": "role_delegation_with_task_slug",
       "displayName": "Role Delegation with Task-Slug",
       "description": "Delegate to appropriate role with comprehensive context and human-readable references",
-      "sequenceNumber": 5,
+      "sequenceNumber": 4,
       "isRequired": true,
       "estimatedTime": "2-3 minutes",
       "stepType": "ACTION",
@@ -495,14 +329,7 @@
           "actionType": "MCP_CALL",
           "actionData": {
             "serviceName": "WorkflowOperations",
-            "operation": "delegate",
-            "parameters": {
-              "taskId": "{{task_id}}",
-              "taskSlug": "{{task_slug}}",
-              "fromRole": "boomerang",
-              "toRole": "{{target_role_based_on_research_decision}}",
-              "message": "{{focused_delegation_message_with_context}}"
-            }
+            "operation": "delegate"
           },
           "sequenceOrder": 1
         }
